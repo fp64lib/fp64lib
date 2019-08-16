@@ -1,0 +1,99 @@
+#######################################
+# Syntax coloring for fp64lib
+#######################################
+
+# new data type
+float64_t		KEYWORD1
+
+# some constants
+FP_INFINITE		LITERAL1
+FP_NAN			LITERAL1
+FP_NORMAL		LITERAL1
+FP_SUBNORMAL    LITERAL1
+FP_ZERO			LITERAL1
+
+# basic mathematic functions
+fp64_add        KEYWORD2
+fp64_sub        KEYWORD2
+fp64_mul		KEYWORD2
+fp64_div        KEYWORD2
+fp64_fmod       KEYWORD2
+
+# isXXX  & compare functions
+fp64_classify   KEYWORD2
+fp64_isinf      KEYWORD2
+fp64_isnan      KEYWORD2
+fp64_isfinite   KEYWORD2
+fp64_compare	KEYWORD2
+fp64_signbit    KEYWORD2
+fp64_fmin       KEYWORD2
+fp64_fmax       KEYWORD2
+
+# basic functions with 1 argument
+fp64_neg        KEYWORD2
+fp64_abs        KEYWORD2
+fp64_inverse    KEYWORD2
+fp64_sqrt		KEYWORD2
+fp64_square     KEYWORD2
+fp64_trunc      KEYWORD2
+fp64_cut_noninteger_fraction	KEYWORD2
+fp64_ceil       KEYWORD2
+fp64_floor      KEYWORD2
+fp64_round      KEYWORD2
+fp64_lround     KEYWORD2
+fp64_lrint		KEYWORD2
+fp64_cbrt       KEYWORD2
+
+# trigonometric functions
+fp64_sin        KEYWORD2
+fp64_cos        KEYWORD2
+fp64_tan        KEYWORD2
+fp64_atan       KEYWORD2
+fp64_asin       KEYWORD2
+fp64_acos       KEYWORD2
+fp64_log        KEYWORD2
+fp64_exp        KEYWORD2
+fp64_log10      KEYWORD2
+fp64_sinh       KEYWORD2
+fp64_cosh       KEYWORD2
+fp64_tanh       KEYWORD2
+
+# functions with 2 arguments
+fp64_ldexp      KEYWORD2
+fp64_frexp      KEYWORD2
+fp64_fdim       KEYWORD2
+fp64_pow        KEYWORD2
+fp64_hypot      KEYWORD2
+fp64_atan2      KEYWORD2
+fp64_modf       KEYWORD2
+
+# functions with 3 arguments
+fp64_fma        KEYWORD2
+
+# conversion functions
+fp64_int64_to_float64	KEYWORD2
+fp64_int32_to_float64   KEYWORD2
+fp64_long_to_float64    KEYWORD2
+
+fp64_uint64_to_float64  KEYWORD2
+fp64_uint32_to_float64  KEYWORD2
+
+fp64_to_int64           KEYWORD2
+fp64_to_int32           KEYWORD2
+fp64_to_int16           KEYWORD2
+fp64_to_int8            KEYWORD2
+fp64_float64_to_long    KEYWORD2
+
+fp64_to_uint64          KEYWORD2
+fp64_to_uint32          KEYWORD2
+fp64_to_uint16          KEYWORD2
+fp64_to_uint8           KEYWORD2
+
+fp64_sd                 KEYWORD2
+fp64_ds                 KEYWORD2
+
+# to and from string
+fp64_to_decimalExp      KEYWORD2
+fp64_to_string          KEYWORD2
+fp64_strtod             KEYWORD2
+ 
