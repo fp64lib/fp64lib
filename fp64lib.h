@@ -1,0 +1,264 @@
+/* Copyright (c) 2019  Uwe Bissinger
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
+   * Neither the name of the copyright holders nor the names of
+     contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE. */
+
+/* $Id$ */
+
+/* IEEE float format single
+   Bit 31: sign 0 = + / 1 = -
+   Bits 30-23: exponent -126 <= e <= 127, base 127
+   Bits 23-0: mantissa
+   31   27    23   19    15   11    7    3
+   7  4 3  0  7  4 3  0  7  4 3  0  7  4 3  0
+   SEEE EEEE  EMMM MMMM  MMMM MMMM  MMMM MMMM
+
+   IEEE float format double
+   Bit 63: sign S 0 = + / 1 = -
+   Bits 62-51: exponent E -1022 <= e <= 1023, base 1023
+   Bits 51-0: mantissa M without leading 1 bit at 52
+   63   59    55   51    47   43   ... 7    3
+   7  4 3  0  7  4 3  0  7  4 3  0 ... 7  4 3  0
+   SEEE EEEE  EEEE MMMM  MMMM MMMM ... MMMM MMMM
+   
+   Interpretations:
+   E = 0		M = 0	--> +/- 0 (zero)
+   E = 0		M > 0	--> +/- 0,M*2^(-1022)	denormalized numbers
+   0<E< 2046	M >= 0	--> +/- 1,M*2^(E-1023)	normal numbers
+   E = 2047		M = 0	--> +/- Inf				infinity
+   E = 2047		M > 0	--> NaN					not a number
+*/
+
+#ifndef fp64lib_h_included
+#define fp64lib_h_included
+
+#ifdef __cplusplus
+extern "C"{
+#endif 
+
+#include <inttypes.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef uint64_t float64_t; /* IEEE 754 double precision floating point number */
+typedef float    float32_t; /* IEEE 754 single precision floating point number */
+
+#define float64_EULER_E 							((float64_t)0x4005bf0a8b145769LLU)	// 2.7182818284590452
+#define float64_NUMBER_PI 							((float64_t)0x400921fb54442d18LLU)  // 3.1415926535897932
+#define float64_NUMBER_PIO2							((float64_t)0x3ff921fb54442d18LLU)  // 3.1415926535897932/2
+#define float64_NUMBER_2PI							((float64_t)0x401921fb54442d18LLU)  // 3.1415926535897932*2
+#define float64_NUMBER_ONE							((float64_t)0x3ff0000000000000LLU)	// 1.0
+#define float64_MINUS_NUMBER_ONE					((float64_t)0xbff0000000000000LLU)	// 1.0
+#define float64_NUMBER_PLUS_ZERO					((float64_t)0x0000000000000000LLU)	// 0.0
+#define float64_ONE_POSSIBLE_NAN_REPRESENTATION		((float64_t)0x7fffffffffffffffLLU)	// NaN
+#define float64_PLUS_INFINITY						((float64_t)0x7ff0000000000000LLU)	// +INF
+#define float64_MINUS_INFINITY						((float64_t)0xfff0000000000000LLU)	// -INF
+
+/* return values for fpclassify */
+#define FP_INFINITE		2
+#define FP_NAN			1
+#define FP_NORMAL		4
+#define FP_SUBNORMAL	3
+#define FP_ZERO			0
+
+// basic mathematic functions
+float64_t fp64_add( float64_t a, float64_t b );
+float64_t fp64_sub( float64_t a, float64_t b );
+float64_t fp64_mul( float64_t a, float64_t b );
+float64_t fp64_div( float64_t a, float64_t b );
+float64_t fp64_fmod( float64_t a, float64_t b );
+
+// isXXX  & compare functions
+int fp64_classify( float64_t x );
+int fp64_isinf( float64_t x);
+int fp64_isnan( float64_t x);
+int fp64_isfinite( float64_t x);
+int8_t fp64_compare( float64_t x, float64_t b);
+int8_t __fp64_cmpsf2(float64_t x, float64_t y);
+int fp64_signbit (float64_t x);
+float64_t fp64_fmin(float64_t x, float64_t y);
+float64_t fp64_fmax(float64_t x, float64_t y);
+
+// basic functions with 1 argument
+float64_t fp64_neg( float64_t x );
+float64_t fp64_abs( float64_t x );
+float64_t fp64_inverse( float64_t x );
+float64_t fp64_sqrt( float64_t x );
+float64_t fp64_square( float64_t x );
+float64_t fp64_trunc( float64_t x );
+float64_t fp64_cut_noninteger_fraction( float64_t x ); //alias to fp64_trunc
+float64_t fp64_ceil( float64_t x );
+float64_t fp64_floor( float64_t x );
+float64_t fp64_round( float64_t x );
+long fp64_lround( float64_t A );
+long fp64_lrint( float64_t A );
+float64_t fp64_cbrt( float64_t x );
+
+// trigonometric functions
+float64_t fp64_sin( float64_t x );
+float64_t fp64_cos( float64_t x );
+float64_t fp64_tan( float64_t x );
+float64_t fp64_atan( float64_t x );
+float64_t fp64_asin( float64_t x );
+float64_t fp64_acos( float64_t x );
+float64_t fp64_log( float64_t x );
+float64_t fp64_exp( float64_t x );
+float64_t fp64_log10( float64_t x );
+float64_t fp64_sinh( float64_t x );
+float64_t fp64_cosh( float64_t x );
+float64_t fp64_tanh( float64_t x );
+
+// functions with 2 arguments
+float64_t fp64_ldexp( float64_t x, int exp );
+float64_t fp64_frexp( float64_t x, int *pexp );
+float64_t fp64_fdim( float64_t A, float64_t B );
+float64_t fp64_pow( float64_t x, float64_t y );
+float64_t fp64_hypot( float64_t x, float64_t y );
+float64_t fp64_atan2( float64_t y, float64_t x );
+float64_t fp64_modf (float64_t x, float64_t *iptr);
+
+// functions with 3 arguments
+float64_t fp64_fma (float64_t A, float64_t B, float64_t C);
+
+// conversion functions
+float64_t fp64_int64_to_float64( long long x );	// (signed) long long to float64_t
+float64_t fp64_int32_to_float64( long x);		// (signed) long to float64_t
+float64_t fp64_long_to_float64( long x );		// alias to fp64_int32_to_float64
+
+float64_t fp64_uint64_to_float64( unsigned long long x );// unsigned long long to float64_t
+float64_t fp64_uint32_to_float64( unsigned long x );	// unsigned long to float64_t
+
+long long fp64_to_int64( float64_t A);			// float_t to int64_t
+long 	  fp64_to_int32( float64_t A);			// float_t to int32_t
+int 	  fp64_to_int16( float64_t A);			// float_t to int16_t
+char 	  fp64_to_int8( float64_t A);			// float_t to int8_t
+long 	  fp64_float64_to_long( float64_t A);	// alias to fp64_to_int32
+
+unsigned long long fp64_to_uint64( float64_t A);// float_t to uint64_t
+unsigned long 	   fp64_to_uint32( float64_t A);// float_t to uint32_t
+unsigned int 	   fp64_to_uint16( float64_t A);// float_t to uint16_t
+unsigned char 	   fp64_to_uint8( float64_t A);	// float_t to uint8_t
+
+float64_t fp64_sd( float x );					// float to float64_t
+float fp64_ds( float64_t x );					// float64_t to float
+
+// to and from string
+char *fp64_to_decimalExp( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 );
+char *fp64_to_string( float64_t x, uint8_t max_nr_chars, uint8_t max_leading_mantisse_zeros );
+float64_t fp64_strtod( char *str, char **endptr );
+
+// debugging structure
+typedef struct fp64_debug_t {
+  uint8_t sreg;		// SREG of AVR
+  uint8_t count;	// # of times one of the debug routines was called
+  uint8_t sign;		// sign of mantissa
+  uint16_t exp;		// exponent, 1023 based
+  uint8_t m[7];		// mantissa
+  uint8_t r7;		// content of rA7 or rB7
+  uint8_t r0;		// content of r0 or r1
+} fp64_debug_t;
+#define fp64_debug_isC(ptr)	(ptr->sreg & 0x01)
+#define fp64_debug_isZ(ptr)	(ptr->sreg & 0x02)
+#define fp64_debug_isT(ptr)	(ptr->sreg & 0x40)
+
+// debugging functions
+struct fp64_debug_t* __fp64_debugA(void);
+struct fp64_debug_t* __fp64_debugAB(void);
+uint8_t* __fp64_debugCordic(void);
+uint8_t* __fp64_debugCordicTable(void);
+void      __fp64_splitA( float64_t a );
+void      __fp64_split3( float64_t a, float64_t b );
+extern uint8_t __scratch[55];
+extern uint8_t __scratchXYZ[55][3][8];
+
+// internal functions to return special values
+float64_t __fp64_one( void );
+float64_t __fp64_zero( void );
+float64_t __fp64_szero( void );
+float64_t __fp64_inf( void );
+float64_t __fp64_nan( void );
+float64_t __fp64_negsd2 (float64_t A);
+int __fp64_unordsd2( float64_t x);
+void __fp64_cordic( void );
+uint64_t __fp64_domul64AB( uint64_t a, uint64_t b );
+uint64_t fp64_10pown( int16_t n, int16_t *exp2 );
+float64_t __fp64_check_powser1( float64_t x );
+float64_t __fp64_check_powser2( float64_t x );
+float64_t __fp64_check_powser3( float64_t x );
+float64_t __fp64_check_powsodd3( float64_t x );
+float64_t __fp64_check_powslog( float64_t x );
+float64_t __fp64_check_powserexp( float64_t x );
+
+// internal functions that might be used for integration with gcc
+// 32-bit float used the following naming convention
+// 	si		for short integer, int16_t
+// 	unssi	for unsigned short integer, uint16_t
+// 	di		for double integer, int64_t, long long
+// 	unsdi	for unsigned double integer, uint32_t, unsigned long
+// 	sf		for signed float, 32-bit IEEE float (identical to double)
+// for fp64lib, this naming convention was extended by
+//	sd		for signed double, 64-bit IEEE float
+//  li		for long integer, int32_t, long
+//  sc		for short character, int8_t, char
+float64_t __fp64_addsd3x( float64_t a, float64_t b );
+float64_t __fp64_addsd3( float64_t a, float64_t b );
+float64_t __fp64_subsd3( float64_t a, float64_t b );
+float64_t __fp64_mulsd3x( float64_t a, float64_t b );
+float64_t __fp64_mulsd3( float64_t a, float64_t b );
+float64_t __fp64_divsd3x( float64_t a, float64_t b );
+float64_t __fp64_divsd3( float64_t a, float64_t b );
+float64_t fp64_modff (float64_t x, float64_t *iptr);
+float64_t fp64_sqrtf( float64_t x );
+float64_t __fp64disd (long long x);				// (signed) long long to float64_t
+float64_t __fp64unsdisd (unsigned long long x); // unsigned long long to float64_t
+float64_t __fp64sisd ( long x );				// (signed) long to float64
+float64_t __fp64unssisd (unsigned long x);		// unsigned long to float64_t
+long long __fp64_fixsddi( float64_t A );		// float64_t to (signed) long long
+unsigned long long __fp64_fixunssddi( float64_t A );// float64_t to unsigned long long
+long __fp64_fixsdli( float64_t A );				// float64_t to (signed) long
+unsigned long __fp64_fixunssdli( float64_t A );	// float64_t to unsigned long
+int __fp64_fixsdsi( float64_t A );				// float64_t to (signed) int
+unsigned int __fp64_fixunssdsi( float64_t A );	// float64_t to unsigned int
+char __fp64_fixsdsc( float64_t A );				// float64_t to signed char
+unsigned char __fp64_fixunssdsc( float64_t A );	// float64_t to unsigned char
+float __fp64_sdsf (float64_t A);				// float64_t to float
+char *__fp64_ftoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 );
+int __fp64_cmpsd2( float64_t a, float64_t b);	// greater than
+int __fp64_gesd2( float64_t a, float64_t b);	// greater equal
+int __fp64_gtsd2( float64_t a, float64_t b);	// greater than
+int __fp64_eqsd2( float64_t a, float64_t b);	// equal
+int __fp64_nesd2( float64_t a, float64_t b);	// not equal
+int __fp64_ltsd2( float64_t a, float64_t b);	// less than
+int __fp64_lesd2( float64_t a, float64_t b);	// less equal
+
+
+#include "fp64def.h"
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
+
+#endif

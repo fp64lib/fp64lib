@@ -1,0 +1,73 @@
+/* Copyright (c) 2019  Uwe Bissinger
+   Based on 32bit floating point arithmetic routines which are:
+/* Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
+   Copyright (c) 2006  Dmitry Xmelkov
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
+   * Neither the name of the copyright holders nor the names of
+     contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE. */
+
+/* $Id$ */
+
+#include "fp64def.h"
+#include "asmdef.h"
+
+/* float64_t fp64_log10(float64_t A);
+   The fp64_log10() function returns the base 10 logarithm of A.
+   log10(A) = log(A) / log(10)
+ */
+
+FUNCTION fp64_log10
+ENTRY fp64_log10
+	XCALL _U(fp64_log)
+	
+	push rB7				; preserve registers
+	push rB6
+	push rB5
+	push rB4
+	push rB3
+	push rB2
+	push rB1
+	push rB0
+	
+	ldi ZL, lo8(.L_log10)
+	ldi ZH, hi8(.L_log10)
+	XCALL _U(__fp64_loadB)
+	XCALL _U(fp64_mul)
+	
+	pop rB0					; restore registers
+	pop rB1	
+	pop rB2
+	pop rB3
+	pop rB4
+	pop rB5
+	pop rB6
+	pop rB7
+	ret
+
+.L_log10: ; 1/log(10) = 0x3fdbcb7b1526e50d = 0.43429448190325176
+	.byte 0x3f, 0xdb, 0xcb, 0x7b, 0x15, 0x26, 0xe5, 0x0d
+	
+ENDFUNC
