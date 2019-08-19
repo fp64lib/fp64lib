@@ -49,19 +49,23 @@
 */
 
 #define ret_lo r24
+#define ret_hi r25
 FUNCTION fp64_classify
 .L_nf:
-	ldi	ret_lo, 1
-	brne 1f
-	ldi ret_lo, 2
-	ret
+	ldi	rA7, 1			; default for NaN
+	brne 1f				; x == NaN? Yes, return default value
+	ldi rA7, 2
+	rjmp 1f				; else return 2 for INF
 ENTRY fp64_classify
 	XCALL	_U(__fp64_splitA)
-	brcc .L_nf	; NaN or Inf
-	breq 1f		; return 0 for 0
-	ldi ret_lo, 3
-	sbrc rA6, 7
-	inc ret_lo
-1:	ret
+	brcs .L_nf			; NaN or Inf
+	mov rA7, r1
+	breq 1f				; return 0 for 0
+	ldi rA7, 3
+	sbrc rA6, 7			; subnormal ? --> bit 7 is not set
+	inc rA7				; no, return 3+1=4 for normal number
+1:	mov ret_lo, rA7		; get return value
+	ldi ret_hi, 0x00	; make sure high byte is cleared
+	ret
 
 ENDFUNC
