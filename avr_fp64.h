@@ -135,7 +135,7 @@ extern "C"{
 #define f_to_decimalExp(x, maxDigits, expSep, exp10)	fp64_to_decimalExp((x), (maxDigits), (expSep), (exp10))
 #define f_to_string(x, max_chars, max_zeroes)			fp64_to_string((x), (max_chars), (max_zeroes))
 #define f_strtod(str, endptr)							fp64_strtod((str), (endptr))
-#define f_atof(str) 									(fp64_strtod((str), 0))
+#define f_atof(str) 									fp64_atof(str)
 
 #define f_sqrt(x)						fp64_sqrt(x)
 #define f_exp(x)						fp64_exp(x)
