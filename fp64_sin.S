@@ -151,7 +151,7 @@ ENTRY fp64_sin
 	rcall .L_ld_pio2			; yes: sin(x) = - sin( fmod(x,PI/2) - PI/2 )
 	ldi rB7, 0xbf				; set sign both in B
 	set							; and T
-	rcall __fp64_add_pse		; x - PI/2
+	XCALL _U(__fp64_add_pse)	; x - PI/2
 	; we can ignore the returned C flag, as neither underflow nor overflow will happen
 	
 12:	; adjust sign according to quadrant

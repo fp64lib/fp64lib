@@ -129,7 +129,7 @@ ENTRY fp64_log
 	rol rA6
 	rjmp 21b
 	
-22:	rcall __fp64_saveAB
+22:	; rcall __fp64_saveAB
 	ldi rA7, 0x3f		; normalize x to be in range 0.5 - 1.0
 	andi rA6, 0x0f		; --> exponent of x is 0x3fe
 	ori rA6, 0xe0
@@ -243,7 +243,7 @@ ENTRY fp64_log
 	sbc rA7, r1
 	
 	;rcall __fp64_saveAB
-	XCALL _U(__fp64sidf) ; as a float
+	XCALL _U(__fp64sisd) ; as a float
 	
 	ldi ZL, lo8(.L_log2) ; B = log(2)
 	ldi ZH, hi8(.L_log2)

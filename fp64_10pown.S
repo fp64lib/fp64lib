@@ -80,8 +80,8 @@ ENTRY __fp64_10pown
 	
 	sbrs XL, 0			; 	if( 0 != (n & 1) ) {
 	rjmp 2f
-	rcall __fp64_mul64AB;		res = res * pot;
-	rcall __fp64_lshift64;		// align result		
+	XCALL _U(__fp64_mul64AB);		res = res * pot;
+	XCALL _U(__fp64_lshift64);		// align result		
 	movw rA6, rC6		; move result of res * pot to res
 	movw rA4, rC4
 	movw rA2, rC2
@@ -112,8 +112,8 @@ ENTRY __fp64_10pown
 	movw rA4, rB4
 	movw rA2, rB2
 	movw rA0, rB0
-	rcall __fp64_mul64AB	; pot = pot * pot
-	rcall __fp64_lshift64
+	XCALL _U(__fp64_mul64AB)	; pot = pot * pot
+	XCALL _U(__fp64_lshift64)
 	movw rB6, rC6
 	movw rB4, rC4
 	movw rB2, rC2
