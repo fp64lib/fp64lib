@@ -79,6 +79,20 @@
 #define rPoint				XH
 
 FUNCTION fp64_strtod
+ 90:
+	rjmp .L_RetZero
+
+/* float64_t fp64_atof( char *str )
+	converts a string to a number, handles also NaN, +INF, -INF
+	a valid number (non NaN or INF) can be expressed by the
+	following regex: [+-]?[0-9]+\.?[0-9]*([eE][+-]?[0-9]+)?
+	
+	input:	rA7.rA6:	pointer to string
+ */
+ENTRY fp64_atof
+	mov rA4, r1
+	mov rA5, r1			; use fp64_strod with end_ptr = NULL
+ 
 /* float64_t fp64_strtod( char *str, char **endptr )
 	converts a string to a number, handles also NaN, +INF, -INF
 	a valid number (non NaN or INF) can be expressed by the
@@ -88,11 +102,8 @@ FUNCTION fp64_strtod
 			rA5.rA4:	return last parsed position in string into that char*
  */
  
- 90:
-	rjmp .L_RetZero
- 
 ENTRY   fp64_strtod
-	sts .L_endpL, rA4
+	sts .L_endpL, rA4	; save pointer to pointer to last parsed position
 	sts .L_endpH, rA5
 	sts .L_sign, r1		; per default sign = 0 (positive number)
 	push YH				; Y is used for pointing to actual position in str
@@ -166,14 +177,14 @@ ENTRY   fp64_strtod
 	rcall .L_savePtr		; save current position
 	pop YL					; restore used register and return NaN
 	pop YH
-	rjmp __fp64_nan
+	XJMP _U(__fp64_nan)
 	
 13:	; INF, +INF or -INF successfull detected, adjust pointer position and return INF with sign
 	adiw YL, 3			; s point to first character after INF
 	rcall .L_savePtr	; save current position and restore sign
 	pop YL
 	pop YH
-	rjmp __fp64_inf
+	XJMP _U(__fp64_inf)
 
 .L_noInf:
 	; up to now, we only had an optional sign
@@ -595,14 +606,14 @@ ENTRY   fp64_strtod
 	pop YL					; restore Y
 	pop YH
 	; pack and return number
-	rjmp __fp64_rpretA
+	XJMP _U(__fp64_rpretA)
 	
 	; exponent to big, return +/-INF
 .L_RetInf:
 	call .L_savePtr			; save last parsed position and restore sign
 	pop YL					; restore Y
 	pop YH
-	rjmp __fp64_inf			; and return +/- INF
+	XJMP _U(__fp64_inf)		; and return +/- INF
 
 .L_subn:	; handle subnormal number / underflow
 	cpi rAE0, lo8(-51)
@@ -637,7 +648,7 @@ ENTRY   fp64_strtod
 	rcall .L_savePtr
 	pop YL
 	pop YH
-	rjmp __fp64_szero
+	XJMP _U(__fp64_szero)
 
 	ENDFUNC
 
