@@ -1,3 +1,9 @@
+/* 
+ * Example program for using fp64lib.
+ * Leibniz formular to approximate PI using a small C++ wrapper class
+ *
+ */
+
 #include <fp64lib.h>
 
 class Double {
