@@ -365,6 +365,7 @@ ENTRY __fp64_ftoa_pse
 	ldi rA7, '.'
 	sts __fp64_ftoabuf+2, rA7	; store the decimal point
 	
+	clr r1						; restore some registers to confirm to libc conventions
 	lds r0, .L_sepExp			; do we have to seperate significand and exponent
 	tst r0
 	breq 13f
@@ -384,7 +385,6 @@ ENTRY __fp64_ftoa_pse
 14:	ldi r20, 0x0a				; use existing itoa function to convert exponent
 	movw r22, YL
 	movw r24, rExp10L
-	clr r1						; restore some registers to confirm to libc conventions
 	pop YL
 	pop YH
 
