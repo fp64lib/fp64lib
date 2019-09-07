@@ -169,7 +169,7 @@ ENTRY __fp64_ftoa_pse
 	adc rB6, r1
 
 	sts .L_maxDigits, rB6		; save precision as counter
-	sts .L_maxDigits, rB6		; and original value
+	sts .L_maxDigits2, rB6		; and original value
 	sts .L_bufp, XH				; and current pointer
 	sts .L_bufp+1, XL
 	sts .L_sepExp, rB4			; save flag for seperating significand and mantissa
@@ -330,7 +330,6 @@ ENTRY __fp64_ftoa_pse
 	
 	push YH					; save pointer to last digit
 	push YL
-	; ToDO: add rounding code here
 	lds ZH, .L_maxDigits2
 9:	ld ZL, -Y				; get previous digit
 	cpi ZL, '9'				
@@ -346,6 +345,7 @@ ENTRY __fp64_ftoa_pse
 
 	; all previous digits where 9 (e.g. 999999)
 	; we have to round to 10 and increase the exponent
+	; rcall __fp64_saveAB
 	adiw rExp10L, 1
 	lds ZH, .L_maxDigits2
 	inc ZL					; TemporaryMemory[++i]='1';
