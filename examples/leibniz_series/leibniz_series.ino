@@ -1,5 +1,7 @@
-/*  Example program for using fp64lib.
- *  Leibniz formular to approximate PI
+/* 
+ * Example program for using fp64lib.
+ * Leibniz formular to approximate PI
+ *
  */
 
 #include <fp64lib.h>
