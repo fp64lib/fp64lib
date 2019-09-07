@@ -32,10 +32,6 @@
 /* $Id$ */
 
 /*
-	ToDo: Fix bug for division with subnormals
-*/
-
-/*
 float64_t __fp64_divsd3( float64_t A, float64_t B )
 Subtracts two 64 bit floating point numbers 
 and rounds result to a 64bit floating point number
