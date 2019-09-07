@@ -107,7 +107,6 @@ int fp64_isinf( float64_t x) __ATTR_CONST__;
 int fp64_isnan( float64_t x) __ATTR_CONST__;
 int fp64_isfinite( float64_t x) __ATTR_CONST__;
 int8_t fp64_compare( float64_t x, float64_t b) __ATTR_CONST__;
-int8_t __fp64_cmpsf2(float64_t x, float64_t y) __ATTR_CONST__;
 int fp64_signbit (float64_t x) __ATTR_CONST__;
 float64_t fp64_fmin(float64_t x, float64_t y) __ATTR_CONST__;
 float64_t fp64_fmax(float64_t x, float64_t y) __ATTR_CONST__;
@@ -264,7 +263,6 @@ int __fp64_eqsd2( float64_t a, float64_t b) __ATTR_CONST__;	// equal
 int __fp64_nesd2( float64_t a, float64_t b) __ATTR_CONST__;	// not equal
 int __fp64_ltsd2( float64_t a, float64_t b) __ATTR_CONST__;	// less than
 int __fp64_lesd2( float64_t a, float64_t b) __ATTR_CONST__;	// less equal
-
 
 #include "fp64def.h"
 
