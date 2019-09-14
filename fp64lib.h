@@ -212,7 +212,6 @@ float64_t __fp64_inf( void ) __ATTR_CONST__;
 float64_t __fp64_nan( void ) __ATTR_CONST__;
 float64_t __fp64_negsd2 (float64_t A) __ATTR_CONST__;
 int __fp64_unordsd2( float64_t x) __ATTR_CONST__;
-void __fp64_cordic( void ) __ATTR_CONST__;
 uint64_t __fp64_domul64AB( uint64_t a, uint64_t b ) __ATTR_CONST__;
 uint64_t fp64_10pown( int16_t n, int16_t *exp2 ) __ATTR_CONST__;
 float64_t __fp64_check_powser1( float64_t x );
