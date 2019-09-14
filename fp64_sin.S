@@ -560,6 +560,9 @@ ENTRY fp64_sin
 	ret
 	
 __pi_o_2:	.byte 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC0, 0x03, 0xff, 0x00	; PI/2 = 1.5707963267948966
+	// byte 7 must be 0xC0 which is the correct value when PI/2 is unpacked
+	// Using the additional 3 bits "precision" in the unpacked format (i.e. changing
+	// it to 0xC2) will lead to errors in the conversion like 2*_pi_o_2 != PI
 	
 ENDFUNC
 
