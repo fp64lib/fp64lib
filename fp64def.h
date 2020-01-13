@@ -30,7 +30,7 @@
 
 /* Interprocedure convensions. In separate file: for math library
    developers.	*/
-#if !defined(__AVR_ATmega328P__) || defined(__AVR_TINY__) || !defined(__AVR_ENHANCED__)
+#if (!defined(__AVR_ATmega328P__) || defined(__AVR_TINY__) || !defined(__AVR_ENHANCED__)) && !defined(ARDUINO_AVR_MEGA2560)
 #error fp64lib is created and tested only for Atmel AVR 328p microprocessors like Arduino UNO or Nano
 #endif
    

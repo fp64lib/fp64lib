@@ -160,8 +160,16 @@ ENTRY   fp64_to_string
 	; ret
 	
 	; check for |x| < 1 --> representation "s0.mmmmmm" without exponent
-	sbrs rExp10H, 7				; if exp10 < 0 {
+	cpi rAE1, 0x3				; if( exp2 < 0 ) {
+	brlo .L_below1
+	brne 2f
+	cpi rAE0, 0xff
+	brlo .L_below1
 	rjmp 2f
+	
+.L_below1:
+	adiw rExp10L, 0
+	breq 19f
 	cpi rExp10H, 0xff			;	// if the high byte is != 0xff, then -exp10 is definitely > max_zeroes	
 	brne .L_exp					;	if( - exp10 <= max_zeroes )
 	mov r0, rExp10L
@@ -171,12 +179,17 @@ ENTRY   fp64_to_string
 	brcs .L_exp					; // C=1 if -exp10 > rZero --> we have too maxny leading 0s --> exponent form
 	
 	; yes, we can use "s0.mmmmmm" representation
-	mov rPrec, rNrd				;		prec = nrd + exp10 - 1;
+19:	mov rPrec, rNrd				;		prec = nrd + exp10 - 1;
 	add rPrec, rExp10L
 	subi rPrec, 1
+	
 	ror rFlags
 	sec
 	rol rFlags					; 		below1 = true;
+	
+	adiw rExp10L, 0				;		if( exp10 == 0 )
+	brne .L_get	
+	subi rPrec, 1				;			prec--
 	rjmp .L_get					;	}
 	
 2:	; check for log10(|x|)<max_chars --> representation "mmm.mmm" without exponent
@@ -199,7 +212,7 @@ ENTRY   fp64_to_string
 	inc rPrec					; 	else 
 	rjmp .L_get					; 		prec = nrd;		// not enough space for digit after ".", just store "mmmm"
 	
-	; default case, formant number with exponent
+	; default case, format number with exponent
 .L_exp:
 	; calculate number of digits in exponent
 	push rExp10H
@@ -222,11 +235,15 @@ ENTRY   fp64_to_string
 5:	inc r0						; 2 digits
 6:	inc r0						; 1 digit
 
+	inc r0						; uint8_t minD = expDigits + 3; // +3 for at least 1 digit, "E" and exponent sign
+	inc r0
+	inc r0
 	; rcall __fp64_saveAB
 
-	mov rPrec, rNrd				; prec = nrd - 1 - expDigits - 2; // -1 for ".", -2 for "E" and exponent sign
+	mov rPrec, rNrd				; prec = (nrd < minD) ? 0 : nrd - minD;
 	sub rPrec, r0
-	subi rPrec, 3
+	sbrc rPrec, 7
+	mov rPrec, r1
 	
 	pop rExp10L
 	pop rExp10H
@@ -293,11 +310,31 @@ ENTRY   fp64_to_string
 	
 	sbrc rFlags, fSign			; if( sign )
 	adiw ZL, 1					;		s++;
-
+	
 	sbrs rFlags, fBelow1
+	rjmp 8f
+	
+	adiw rExp10L, 0				; 	if( below1 && exp10 == 0 ) {
+	brne 69f
+	; case 0.99999 got rounded to 1.0 --> we are no longer below 1
+	ror rFlags
+	clc							;	below1 = false;
+	ror rFlags
+	sec							; 	above1 = true
+	rol rFlags
+	rol rFlags					
+	subi rPrec, 1				;	prec--;
 	rjmp 8f
 
 	; format number as 0.mmmm
+69:
+	mov rPrec, rNrd				;		prec = nrd + exp10 - 1;
+	add rPrec, rExp10L
+	subi rPrec, 1
+	cpi rPrec, MAX_SIGNIFICAND+1	; limit precision to maximal # of significand digits (17)
+	brlo 699f
+	ldi rPrec, MAX_SIGNIFICAND
+699:
 	ld r0, Z					; create continouse stream of digits
 	std Z+1, r0					; m.mmmmmm -> mmmmmmmm
 	
