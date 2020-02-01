@@ -1,4 +1,4 @@
-/* Copyright (c) 2018  Uwe Bissinger
+/* Copyright (c) 2018-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -32,12 +32,15 @@
 /* $Id$ */
 
 /*
-float64_t __fp64_divsd3( float64_t A, float64_t B )
-Subtracts two 64 bit floating point numbers 
-and rounds result to a 64bit floating point number
+	float64_t __fp64_divsd3( float64_t A, float64_t B )
+	Divides two 64 bit floating point numbers 
+	and rounds result to a 64bit floating point number
 
-Return:
-	rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A / B
+	Input:
+		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 Nominator A
+		rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0	Divisor B
+	Return:
+		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A / B
 */
 
 #if !defined(__AVR_TINY__)
@@ -98,6 +101,34 @@ ENTRY	__fp64_divsd3
 	XCALL	_U(__fp64_pscB)
 	breq	.L_inf		; finite (!=0) / 0.0 --> Inf
 	
+	XCALL _U(__fp64_divsd3_pse)
+	
+	brcs 99f				; underflow/overflow --> return already packed result
+	XJMP _U(__fp64_rpretA)	; everything ok --> round, pack result and return
+99:	ret	
+
+/*
+	float64_t_intern __fp64_divsd3( float64_t_intern A, float64_t_intern B )
+	Internal routine to divide two 64 bit floating point numbers 
+	and rounds result to a 64bit floating point number
+	Does not handle special cases NaN, +Inf, -Inf, +/-0 (neither for A or B)
+	
+	Input:
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0		significand of A
+		rAE1.rAE0						exponent of A
+		rA7								sign of A
+		rB6.rB5.rB4.rB3.rB2.rB1.rB0		significand of B
+		rBE1.rBE0						exponent of B
+		rB7								sign of B
+		T								sign(a^b)
+	Return:
+		C								indicates overflow or underflow, result is already in packed format
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0		significand of A+B, if C=0
+		rAE1.rAE0						exponent of A+B, if C=0
+		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result of A+B, if C=1
+*/
+
+
 ENTRY	__fp64_divsd3_pse	; post split entry
 	; exp(result) = exp(A) - exp(B)
 	sub	rAE0, rBE0
@@ -159,6 +190,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	lsr r0				; get result of division into C
 	rol rR5				; and add it to previous result
 	brpl 4b				; until we got a leading bit
+
 	; continue with all other digits
 5:	rcall	.L_div
 	mov	rR6, r0			; save result
@@ -193,32 +225,39 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	sbci rAE1, hi8(-1023)
 	; call __fp64_saveAB
 	brmi	13f			; denormalization is needed
+
    ; check to overflow
 	cpi rAE1, 7			; check if exponent < 0x7ff
 	brlo 15f			; everything ok, no overflow
-	brne .L_inf2			; exponent >= 0x800 -> overflow
+	brne .L_inf2		; exponent >= 0x800 -> overflow
 	cpi rAE0, 0xff		; exponent >= 0x700, check if < 0x7ff
 	brne 15f			; yes -> no overflow
-.L_inf2:				; overflow, rjmp to .L_inf does not work due to code size
-	XJMP	_U(__fp64_inf)
+
+.L_inf2:				; overflow
+	XCALL _U(__fp64_inf)
+	sec					; set carry to indicate overflow
+	ret
 	
-   ; check lowest value of exponent to avoid long operation
-12:	XJMP	_U(__fp64_szero)
+   ; return 0 for underflow
+12:	XCALL	_U(__fp64_szero)
+	sec					; set carry to indicate packed result
+	ret
+
 13:	cpi rAE0,lo8(-51)	; check if result could fit into remaining 52 bits
 	brlt 12b			; no --> return 0
 	cpi rAE1, 0xFF		; catch cases where exp(a)-exp(b)<-255
-	brne 12b			; 
+	brne 12b			; also return 0
 
 	; handle subnormal numbers
 	; shift left mantissa until exponent is 0
 14:	XCALL _U(__fp64_lsrA6)	; mantissa >>= 1
-	inc rAE0		; exponent++
-	brmi 14b		; exponent still < 0
-	inc rAE1
+	adiw rAE0, 1			; exponent++
+	brmi 14b				; exponent still < 0
+	; stops when exponent == 0 --> indicator for subnormal number
 
-15:	; exponent >0 and < 0x7ff --> return normal result	
-	XJMP _U(__fp64_rpretA)	; round, pack result and return
-
+15:	; exponent >=0 and < 0x7ff --> return normal result	
+	clc					; clear carry to signal "all ok"
+	ret
 	
 	; divide 8 times
 .L_div:
@@ -252,11 +291,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	sbc	rA7, rB7	; as A > B, C will be 0 after this operation
 2:	rol	r0			; register result of operation, move C into r0
 	brcc	.L_div1	; continue up to 8 times
-	; sbrs r0,6
-	; rjmp .L_div1
-; 3:	sec
-	; rol r0
-	; brcc 3b
+
 	com	r0			; convert result to positive logic
 	ret
 	
