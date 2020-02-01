@@ -1,4 +1,4 @@
-/* Copyright (c) 2018  Uwe Bissinger
+/* Copyright (c) 2018-2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,7 @@ ENTRY fp64_cos
 	pop rX6
 	pop rX7
 	
+	; rcall __fp64_saveAB
 	sbrs XH, 0		; sin/tan?
 	rjmp 1b			; no, for cos return 1
 	subi rAE0, lo8(-0x3ff)
@@ -111,7 +112,6 @@ ENTRY fp64_cos
 	XJMP _U(__fp64_pretA)
 
 ENTRY fp64_sin
-	; todo reduce argument to range -pi/2 < phi < pi/2
 	ldi XH, 0x01
 .L_common:
 	XCALL _U(__fp64_splitA)
@@ -134,17 +134,27 @@ ENTRY fp64_sin
 	rjmp 15f			; skip range rduction for inverse functions
 	
 	; for sin/cos/tan, reduce argument to range 0 - pi/2
-	rcall .L_ld_pio2
+	; use argument reduction with extended precision
+	push rC0
+	push rC1
+	push rC2
+	push rC3
 	push rC4
 	push rC5
 	push rC6
 	push rC7
-	XCALL _U(__fp64_fmod_pse)	; reduce argument to range 0 - pi/2
+	XCALL _U(__fp64_fmodx_pi2_pse)
 	mov r0, rC4
+	; rcall __fp64_saveAB
 	pop rC7
 	pop rC6
 	pop rC5
 	pop rC4
+	pop rC3
+	pop rC2
+	pop rC1
+	pop rC0
+
 	push r0
 	sbrs r0, 0					; was x in 2nd or 4th quadrant for
 	rjmp 12f					; no, continue
@@ -201,6 +211,7 @@ ENTRY fp64_sin
 	sbci rAE1, 0x03
 	brcc 2f				; exponent >= 0 --> number can be converted
 	cpi rAE0, lo8(-26)
+	; rcall __fp64_saveAB
 	brlo 11b				; A < 2^-26, return A
 	cpi rAE1, hi8(-26)
 	brne 11b				; A < 2^-26, return A
@@ -399,7 +410,9 @@ ENTRY fp64_sin
 	
 	; call __fp64_saveAB
 	XCALL _U(__fp64_divsd3_pse)	; res = y / g
-	cpi rA6, 0xf0
+	brcs 79f
+	XCALL _U(__fp64_pretA)
+79:	cpi rA6, 0xf0
 	brne 8f
 	cpi rA7,0x3f				; check if result == 1
 	breq 80f
@@ -411,6 +424,7 @@ ENTRY fp64_sin
 
 	; restore used registers and return
 8:	lds r0, __funcCode
+	rcall __fp64_saveAB
 	sbrc r0, 5				; check if sign has to be reversed
 	subi rA7, 0x80			; reverse it
 
@@ -558,11 +572,9 @@ ENTRY fp64_sin
 	pop ZH
 	pop ZL
 	ret
-	
-__pi_o_2:	.byte 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC0, 0x03, 0xff, 0x00	; PI/2 = 1.5707963267948966
-	// byte 7 must be 0xC0 which is the correct value when PI/2 is unpacked
-	// Using the additional 3 bits "precision" in the unpacked format (i.e. changing
-	// it to 0xC2) will lead to errors in the conversion like 2*_pi_o_2 != PI
+
+	; PI/2 with 106 bits precision, necessary as for x >> 2PI cancellation of digits occurs in fmod
+__pi_o_2:	.byte 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x03, 0xff, 0x00	; PI/2 = 1.5707963267948966
 	
 ENDFUNC
 
