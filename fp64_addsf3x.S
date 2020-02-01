@@ -1,4 +1,4 @@
-/* Copyright (c) 2018  Uwe Bissinger
+/* Copyright (c) 2018-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -157,7 +157,7 @@ ENTRY __fp64_addsd3x
 	rcall	.L_sign			; recover sign(A), as B might be -0
 	XJMP _U(__fp64_pretA)	; B is 0 --> result is A
 	
-2:	rcall __fp64_add_pse
+2:	rcall __fp64_add_pse_r0
 	XJMP _U(__fp64_rpretA)	; round, pack result and return
  
 	/*
@@ -180,7 +180,16 @@ ENTRY __fp64_addsd3x
 		
 		
 	*/
+ENTRY __fp64_sub_pse	
+	clr r0
+	sec
+	ror r0					; set mode to subtraction = 0x80
+	rjmp __fp64_add_pse_r0
+	
 ENTRY __fp64_add_pse	
+	clr r0					; set mode to addition
+	; internal entry point, r0 must be set to 0x00 for add or 0x80 for sub
+__fp64_add_pse_r0:
 	; normal case, A and B are both finite
     ; the following table shows, how the sign of the
 	; result depends on the sign of the two operands A & B
