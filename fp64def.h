@@ -1,4 +1,4 @@
-/* Copyright (c) 2019  Uwe Bissinger
+/* Copyright (c) 2019-2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@ Registers
 
 // #define DEBUG_CORDIC	1
 // #define CHECK_POWSER
+#define NEW_MULT		
 
 #define MAX_SIGNIFICAND		17
 #define	MAX_EXPONENT		3
@@ -97,6 +98,34 @@ Registers
 #define	rC2	r4
 #define	rC1	r3
 #define	rC0	r2
+
+/* register set for extended precision in fmod */
+#define	rAx11	rA7
+#define	rAx10	rA6
+#define	rAx9	rA5
+#define	rAx8	rA4
+#define	rAx7	rA3
+#define	rAx6	rA2
+#define	rAx5	rA1
+#define	rAx4	rA0
+#define	rAx3	rC3
+#define	rAx2	rC2
+#define	rAx1	rC1
+#define	rAx0	rC0
+
+#define	rBx11	rB7
+#define	rBx10	rB6
+#define	rBx9	rB5
+#define	rBx8	rB4
+#define	rBx7	rB3
+#define	rBx6	rB2
+#define	rBx5	rB1
+#define	rBx4	rB0
+#define	rBx3	rC7
+#define	rBx2	rC6
+#define	rBx1	rC5
+#define	rBx0	rC4
+
 
 // Warning: if rDx is used then rAEx, rBEx, rExp2x, rExp10x, Xx/Yx/Zx can not be used
 //			and especially r1 is no longer == 0!!!!
