@@ -36,6 +36,34 @@
      return sisgn, exponent and mantissa from internal registers
  */
  
+FUNCTION __fp64_debug
+
+ENTRY __fp64_saveC
+	sts __cr1, r0
+	push r0
+	bld r0, 0
+	sts __c_sign, r0
+	in	r0, 0x3f
+	sts __c_sreg, r0
+	;eor r0,r0
+	lds r0, __c_count
+	inc r0
+	sts __c_count, r0
+	sts __c_exp, YL
+	sts __c_exp+1, YH
+	sts __c_m+0, rC6
+	sts __c_m+1, rC5
+	sts __c_m+2, rC4
+	sts __c_m+3, rC3
+	sts __c_m+4, rC2
+	sts __c_m+5, rC1
+	sts __c_m+6, rC0
+ 	sts __c7, rC7		; only for debugging as exponent is in rBE1.rBE0
+	lds r0, __c_sreg
+	out 0x3f, r0
+	pop r0
+	ret
+
 ENTRY __fp64_saveB
 	sts __br1, r1
 	push r0
@@ -61,6 +89,9 @@ ENTRY __fp64_saveB
 	out 0x3f, r0
 	pop r0
 	ret
+
+ENTRY __fp64_saveABC
+	rcall __fp64_saveC
 	
 ENTRY __fp64_saveAB
 	rcall __fp64_saveB
@@ -207,6 +238,13 @@ __b_exp:	.skip	2
 __b_m:		.skip	7
 __b7:		.skip	1
 __br1:		.skip	1
+__c_sreg:	.skip	1
+__c_count:	.skip	1
+__c_sign:	.skip	1
+__c_exp:	.skip	2
+__c_m:		.skip	7
+__c7:		.skip	1
+__cr1:		.skip	1
 __X:		.skip	8
 __Y:		.skip	8
 __PHI:		.skip	8
