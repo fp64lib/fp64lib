@@ -1,4 +1,4 @@
-/* Copyright (c) 2018  Uwe Bissinger
+/* Copyright (c) 2018-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -63,14 +63,18 @@ ALIAS_ENTRY fp64_sqrtf
 	breq	.L_zr	; return 0 with original sign
 	brts	.L_NaN	; sqrt(negative) --> NaN
 
-	; exponent bias
-	subi rAE0, lo8(1023)
-	sbci rAE1, hi8(1023)
 	;call __fp64_saveA
 	; normalize, if A is subnormal
 	sbrs	rA6, 7
 	XCALL	_U(__fp64_norm2)
 	;call __fp64_saveA
+	
+	rcall __fp64_sqrt_pse		; call the internal worker routine
+	
+	XJMP _U(__fp64_rpretA)		; round, pack and return A
+
+	
+ENTRY __fp64_sqrt_pse
 
 #define	msk6	rA7
 #define msk5	rR5
@@ -80,6 +84,10 @@ ALIAS_ENTRY fp64_sqrtf
 #define msk1	rBE1
 #define msk0	rBE0
 #define tv		r0
+
+	; exponent bias
+	subi rAE0, lo8(1023)
+	sbci rAE1, hi8(1023)
 
 	push msk5		; save temp registers
 	push msk4
@@ -198,7 +206,7 @@ ALIAS_ENTRY fp64_sqrtf
 	subi	rAE0, lo8(-1023)	; adjust to exponent bias
 	sbci	rAE1, hi8(-1023)
 	
-	XJMP _U(__fp64_rpretA)		; round, pack and return A
+	ret
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */
