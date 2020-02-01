@@ -1,4 +1,4 @@
-/* Copyright (c) 2019  Uwe Bissinger
+/* Copyright (c) 2019-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -109,9 +109,32 @@ ENTRY   __fp64_mulsd3x
 	; rcall __fp64_saveAB
 	XCALL	_U(__fp64_split3)	; split A and B into parts for exponent and mantissa
 	brcs	0b					; A or B is NaN and/or InF --> manage special result
+	
+#ifdef NEW_MULT
+	push rR5	; save working registers
+	push rR6
+	push rR7
+	push rR8
+	push rZero
+
+	rcall __fp64_mulsd3_pse0
+
+	pop rZero
+	pop rR8			; restore used registers
+	pop rR7
+	pop rR6
+	pop rR5
+	
+	; rcall __fp64_saveAB
+	brcs 3f			; overflow?
+	XJMP _U(__fp64_rpretA)	; no, return with proper rounding, including carry
+3:	ret				; overflow, return already packed result +/-Inf
+
+	; TODO: then efficient check for 0 needed
+	; TODO: signalling of infinity needed
 
 	/*
-	fp64 __fp64mulsf3_pse( fp64_splitted_t A, fp64_splitted_t B )
+	fp64 __fp64mulsd3_pse( fp64_splitted_t A, fp64_splitted_t B )
 	Multiplies two 64 bit floating point numbers  that are splitted
 	and rounds result to a 64bit floating point integer
 	A and B must not be NaN or +/-Inf --> A and B are both finite
@@ -120,7 +143,13 @@ ENTRY   __fp64_mulsd3x
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A * B
 	*/
 ENTRY   __fp64_mulsd3_pse			; post split entry
-	; check zero (subnormal have exp == 1
+	; check zero (subnormal have exp == 1)
+	XCALL _U(__fp64_pscA)
+ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
+#else
+
+ENTRY   __fp64_mulsd3_pse			; post split entry
+#endif
 	; rcall __fp64_saveAB
 	breq	2b				; A = 0 --> A*B = 0
 	XCALL _U(__fp64_pscB)
@@ -130,13 +159,14 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 	; base adjustment will be done later
 	add		rAE0, rBE0
 	adc 	rAE1, rBE1
-	
+
+#ifndef NEW_MULT	
 	push rR5	; save working registers
 	push rR6
 	push rR7
 	push rR8
 	push rZero
-	
+#endif	
 	;call __fp64_saveAB
 	
 	; core algorithm for multiplication
@@ -405,13 +435,27 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 
 	; result exponent > min ==> normalization is possible
 	; check for overflow
-	; call __fp64_saveMul
+	; rcall __fp64_saveMul
 	cpi rAE1, 7			; check if exponent < 0x7ff
 	brlo 15f			; everything ok, no overflow
 	brne 111f			; exponent >= 0x800 -> overflow
 	cpi rAE0, 0xff		; exponent >= 0x700, check if < 0x7ff
 	brne 15f			; yes -> normalize number
 	;call __fp64_saveMul
+
+#ifdef NEW_MULT
+	; exponent >= 0x7ff --> overflow, 
+111:XCALL _U(__fp64_inf)
+	sec					; set carry as flag for error and returning of packed result
+	ret
+
+	; underflow, can not even expressed as denormilzed number --> return +/-0
+12: mov rAE1, r1
+	mov rAE0, r1
+	clc
+	XJMP	_U(__fp64_szero)
+
+#else
 	
 111:pop rZero
 	pop rR8				; no -> overflow, restore used registers and return
@@ -427,6 +471,7 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 	pop rR6
 	pop rR5
 	XJMP	_U(__fp64_szero)
+#endif
 
 131: rcall 16f	
 	rjmp 15f
@@ -454,8 +499,18 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 	mov rA2,rB0
 	mov rA1,rR8
 	mov rA0,rR7
+#ifdef NEW_MULT
+	or rR6, rR5		; are there any trailing bits set?
+	; rcall __fp64_saveAB
+	breq 151f
+	sbr rA0, 0 		; yes: set LSB to signal possible rounding
+151:
+	clc
+	ret				; return with carry clear
+#else
 	cp rR6, r1		; set carry if any trailing bits are set
 	cpc rR5, r1
+	; rcall __fp64_saveAB
 	
 	pop rZero
 	pop rR8			; restore used registers
@@ -465,6 +520,7 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 
 	; rcall __fp64_saveAB
 	XJMP _U(__fp64_rcpretA)	; return with proper rounding, including carry
+#endif
 
 16:	lsr rB4			; mantissa >>= 1
 	ror rB3
