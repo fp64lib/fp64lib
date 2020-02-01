@@ -1,4 +1,4 @@
-/* Copyright (c) 2019  Uwe Bissinger
+/* Copyright (c) 2019-2020  Uwe Bissinger
    Algorithm is based on code of avr_f64.c with:
    Original Code by Detlef_a (Nickname in the www.mikrocontroller.net forum).
    Extensions (trigonometric functions et al.) und changes by Florian Kï¿½nigstein, mail@virgusta.eu .

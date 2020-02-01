@@ -1,4 +1,4 @@
-/* Copyright (c) 2018  Uwe Bissinger
+/* Copyright (c) 2018-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2005  Anatoly Sokolov  <aesok@post.ru>
    Copyright (c) 2006  Dmitry Xmelkov

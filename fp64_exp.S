@@ -1,5 +1,4 @@
-/* Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
-   Copyright (c) 2006  Dmitry Xmelkov
+/* Copyright (c) 2019-2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without

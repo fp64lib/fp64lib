@@ -1,4 +1,4 @@
-/* Copyright (c) 2018  Uwe Bissinger
+/* Copyright (c) 2018-2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ ENTRY __fp64_rcpretA
  */
 
 ENTRY __fp64_pretA
-	;call __fp64_saveAB
+	; rcall __fp64_saveAB
 	adiw rAE0, 0	; test 1 for subnormal number: exponent == 0?
 	breq 2f			; yes, handle it
 	tst rA6			; test 2: do we have a leading 1 bit ?

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019  Uwe Bissinger
+/* Copyright (c) 2019-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -64,7 +64,7 @@ ENTRY fp64_fma
 	ldd rB5, Y+10
 	ldd rB6, Y+11
 	ldd rB7, Y+12
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	pop YH					; restore frame pointer Y
 	pop YL
 	XJMP	_U(fp64_add)	; and add c to a*b
