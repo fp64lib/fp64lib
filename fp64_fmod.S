@@ -1,4 +1,4 @@
-/* Copyright (c) 2018  Uwe Bissinger
+/* Copyright (c) 2018-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -70,6 +70,37 @@ FUNCTION fp64_fmod
 .L_nan:
 	XJMP	_U(__fp64_nan)
 
+/* float64_t fp64_fmodn (float64_t x, float64_t y, unsigned long *np);
+     The fp64_fmod() function computes the remainder of dividing x by y. The
+     return value is x - n*y, where n is the quotient of x/y, rounded
+     towards zero to an integer.
+	 n is stored in *np, if np is != NULL
+ */
+ENTRY fp64_fmodn
+	X_movw	XL, rC6			; move pointer to one of the pointer registers
+
+	; Write 0 for next cases: Zero, Inf or NaN.
+	adiw	XL, 0
+	breq	91f				; skip, if pointer is == NULL
+	st X+, r1				; n = 0
+	st X+, r1
+	st X+, r1
+	st X, r1
+	sbiw XL, 1
+
+91:	rcall fp64_fmod			; do the calculation, result will be in rA7..0, n in rB4..7
+
+	X_movw	XL, rC6			; move pointer to one of the pointer registers
+	adiw	XL, 0			; skip if pointer is == NULL
+	breq	92f
+	st X+, rB4				; save n
+	st X+, rB5
+	st X+, rB6
+	st X+, rB7
+
+92:	ret
+	
+
 /* float64_t fp64_fmod (float64_t x, float64_t y);
      The fp64_fmod() function computes the remainder of dividing x by y. The
      return value is x - n*y, where n is the quotient of x/y, rounded
@@ -89,9 +120,10 @@ ENTRY fp64_fmod
 	push rC6
 	push rC7
 	rcall __fp64_fmod_pse
-	; movw rB4, rC4		; return n
-	; movw rB6, rC6
-	pop rC7				; restore used registers, n is not needed
+	movw rB4, rC4		; return n
+	movw rB6, rC6
+	; rcall __fp64_saveAB
+	pop rC7				; restore used registers, n is saved to rB4..rB7
 	pop rC6
 	pop rC5
 	pop rC4
@@ -134,6 +166,44 @@ ENTRY fp64_fmod
 	 x and y are finite and != 0
 	 rC7.rC6.rC5.rC4 are modified and contain the lower 4 bytes of n
  */
+ /* Algorithm:
+	r0 = 1;
+	counter = 0;
+	A = x; B = y;
+	if( A < B ) {
+		// A is already the result
+		Carry = 0; 
+		return( A );
+		}
+	if( A == B )
+		return( 0 * sign(A^B) );
+	Normalize A;
+	Normalize B;
+	exp = exponent(A) - exponent(B);
+	if( exp >= 54 ) {
+		// A > 2^54 * B --> fmod cannot be determined exactly
+		return( 0 * sign(A^B) );
+		}		
+	do {
+		counter++;
+		A -= B;
+		if( A == 0 ) {
+			// A is a 2^n multiple of B
+			for( ; --exp >= 0; )
+				counter <<= 1;
+			return( 0 * sign(A^b );
+			}
+		if( A < 0 ) {
+			// A was < B --> undo
+			counter--;
+			A += B;
+			}
+		if( --exp < 0 )
+			break;
+		
+	}
+	
+*/
 ENTRY	__fp64_fmod_pse	; post split entry
 
 	clr r0
