@@ -1,4 +1,4 @@
-/* Copyright (c) 2019  Uwe Bissinger
+/* Copyright (c) 2019-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002, Reiner Patommel
    Copyright (c) 2006  Dmitry Xmelkov
@@ -187,8 +187,10 @@ ENTRY   fp64_atan2
 					; r0 = 0x00 --> add nothing
 					; r0 = 0x80 --> add PI
 					; r0 = 0x81 --> add PI/2
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	XCALL _U(__fp64_divsd3_pse)
+	brcs .L_atan
+	XCALL _U(__fp64_rpretA)
 .L_atan:
 	; rcall __fp64_saveAB
 	XCALL _U(fp64_atan)
