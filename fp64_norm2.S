@@ -1,4 +1,4 @@
-/* Copyright (c) 2018  Uwe Bissinger
+/* Copyright (c) 2018-2020  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -36,15 +36,13 @@
 
 ENTRY __fp64_norm2
 1:	sbiw rAE0, 1		; exponent--
-	; subi	rAE0, lo8(1)	; exponent--
-	; sbci	rAE1, hi8(1)
-	lsl	rA0		; mantissa <<= 1
+	lsl	rA0				; mantissa <<= 1
 	rol	rA1
 	rol	rA2
 	rol	rA3
 	rol	rA4
 	rol	rA5
 	rol	rA6
-	brpl	1b	; until mantissa starts with a leading 1 bit
+	brpl	1b			; until mantissa starts with a leading 1 bit
 	ret
 ENDFUNC
