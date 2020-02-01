@@ -1,4 +1,4 @@
-/* Copyright (c) 2019  Uwe Bissinger
+/* Copyright (c) 2019-2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,7 @@ float64_t fp64_sub( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_mul( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_div( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_fmod( float64_t a, float64_t b ) __ATTR_CONST__;
+float64_t fp64_fmodn( float64_t a, float64_t b, unsigned long *np ) __ATTR_CONST__;
 
 // isXXX  & compare functions
 int fp64_classify( float64_t x ) __ATTR_CONST__;
@@ -128,17 +129,26 @@ float64_t fp64_cbrt( float64_t x ) __ATTR_CONST__;
 
 // trigonometric functions
 float64_t fp64_sin( float64_t x ) __ATTR_CONST__;
+float64_t fp64_sinx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_cos( float64_t x ) __ATTR_CONST__;
+float64_t fp64_cosx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_tan( float64_t x ) __ATTR_CONST__;
+float64_t fp64_tanx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_atan( float64_t x ) __ATTR_CONST__;
+float64_t fp64_atanx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_asin( float64_t x ) __ATTR_CONST__;
+float64_t fp64_asinx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_acos( float64_t x ) __ATTR_CONST__;
+float64_t fp64_acosx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log( float64_t x ) __ATTR_CONST__;
+float64_t fp64_logx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_exp( float64_t x ) __ATTR_CONST__;
+float64_t fp64_expx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log10( float64_t x ) __ATTR_CONST__;
 float64_t fp64_sinh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_cosh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_tanh( float64_t x ) __ATTR_CONST__;
+float64_t fp64_fmodx_pi2( float64_t x, unsigned long *np ) __ATTR_CONST__;
 
 // functions with 2 arguments
 float64_t fp64_ldexp( float64_t x, int exp ) __ATTR_CONST__;
@@ -156,6 +166,8 @@ float64_t fp64_fma (float64_t A, float64_t B, float64_t C) __ATTR_CONST__;
 float64_t fp64_int64_to_float64( long long x ) __ATTR_CONST__;	// (signed) long long to float64_t
 float64_t fp64_int32_to_float64( long x) __ATTR_CONST__;		// (signed) long to float64_t
 float64_t fp64_long_to_float64( long x ) __ATTR_CONST__;		// alias to fp64_int32_to_float64
+float64_t fp64_uint16_to_float64( uint16_t x ) __ATTR_CONST__;	// unsigned short to float64_t
+float64_t fp64_int16_to_float64( int16_t x) __ATTR_CONST__;		// (signed) short to float64_t
 
 float64_t fp64_uint64_to_float64( unsigned long long x ) __ATTR_CONST__;// unsigned long long to float64_t
 float64_t fp64_uint32_to_float64( unsigned long x ) __ATTR_CONST__;		// unsigned long to float64_t
@@ -220,6 +232,12 @@ float64_t __fp64_check_powser3( float64_t x );
 float64_t __fp64_check_powsodd3( float64_t x );
 float64_t __fp64_check_powslog( float64_t x );
 float64_t __fp64_check_powserexp( float64_t x );
+float64_t __fp64_check_powserx1( float64_t x );
+float64_t __fp64_check_powserx2( float64_t x );
+float64_t __fp64_check_powserx3( float64_t x );
+float64_t __fp64_check_powserxexp( float64_t x );
+float64_t __fp64_check_powsoddx3( float64_t x );
+float64_t __fp64_check_powslogx( float64_t x );
 
 // internal functions that might be used for integration with gcc
 // 32-bit float used the following naming convention
@@ -245,6 +263,8 @@ float64_t __fp64disd (long long x) __ATTR_CONST__;				// (signed) long long to f
 float64_t __fp64unsdisd (unsigned long long x) __ATTR_CONST__; 	// unsigned long long to float64_t
 float64_t __fp64sisd ( long x ) __ATTR_CONST__;					// (signed) long to float64
 float64_t __fp64unssisd (unsigned long x) __ATTR_CONST__;		// unsigned long to float64_t
+float64_t __fp64sssd ( uint16_t x ) __ATTR_CONST__;				// (signed) short to float64
+float64_t __fp64unsssd (uint16_t x) __ATTR_CONST__;		        // unsigned short to float64_t
 long long __fp64_fixsddi( float64_t A ) __ATTR_CONST__;			// float64_t to (signed) long long
 unsigned long long __fp64_fixunssddi( float64_t A ) __ATTR_CONST__;// float64_t to unsigned long long
 long __fp64_fixsdli( float64_t A ) __ATTR_CONST__;				// float64_t to (signed) long
