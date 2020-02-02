@@ -72,9 +72,11 @@ FUNCTION __fp64addsf3x
 
 	brne	.L_infB			; A is not Inf --> B has to be Inf (case 5)
 	XCALL	_U(__fp64_pscB)	; A is +/-Inf, so check whether B is also +/-Inf
-	;call  __fp64_saveB
+	;call  __fp64_saveAB
 	brcc	.L_inf			; B is finite --> return A Inf (case 4)
 	brtc	.L_inf			; Both are inf, check Inf + Inf with the same sign (cases 3b/3c)
+	tst r0					; both are inf, with different sign, check for sub (case 3a)
+	brmi .L_inf				; +Inf - -Inf or -Inf - +Inf --> return Inf with sign of A
 	; case 3a/3d: Inf + Inf with different sign, return NaN
 .L_nan:
 	XJMP	_U(__fp64_nan)
@@ -117,7 +119,6 @@ FUNCTION __fp64addsf3x
 
 	/*
 	float64_t fp64_sub( float64_t A, float64_t B )
-	float64_t __fp64_subsd3( float64_t A, float64_t B )
 	Subtracts two 64 bit floating point numbers 
 	and rounds result to a 64bit floating point number
 	
@@ -134,8 +135,6 @@ ENTRY	__fp64_subsd3
 	
 	/*
 	float64_t fp64_add( float64_t A, float64_t B )
-	float64_t __fp64_addsd3( float64_t A, float64_t B )
-	float64_t __fp64_addsd3x( float64_t A, float64_t B )
 	Adds two 64 bit floating point numbers 
 	and rounds result to a 64bit floating point number
 	
@@ -232,6 +231,7 @@ __fp64_add_pse_r0:
 	cpc	rA6, rB6
 	cpc	rAE0, rBE0
 	cpc rAE1, rBE1
+	; rcall __fp64_saveAB
 	brlo	3f				; fabs(A) < fabs(B) --> swap A and B, cases 5-8
 	brne	14f				; fabs(A) > fabs(B) --> adjust, then add, cases 1-4
 
@@ -305,13 +305,12 @@ __fp64_add_pse_r0:
 	sbc	rA5, rB5
 	sbc	rA6, rB6
 7:
+	; call __fp64_saveAB
 	brmi	.L_ret	; topmost bit is still set, so in A is the final result,
 
 	sbiw rAE0, 1
-	; rcall __fp64_saveAB
+	;rcall __fp64_saveAB
 	breq 8f					; underflow --> subnormal handling
-	; subi rAE0, 1
-	; sbci rAE1, 0
 	brcs 8f
 	
 	lsl rA0
@@ -328,6 +327,13 @@ __fp64_add_pse_r0:
 	; 	significand is already in correct position
 	; so everything is fine, just return
 	; rcall __fp64_saveAB
+	lsl rA0
+	rol	rA1
+	rol	rA2
+	rol	rA3
+	rol	rA4
+	rol	rA5
+	rol	rA6
 	ret
 	
 .L_zr:	; exponent is zero, but topmost bit is still not set --> subnormal number
@@ -361,6 +367,8 @@ __fp64_add_pse_r0:
 		
 	; result is in T (sign), AE1.rAE0 (exp) and rA6.rA5.rA4.rA3.rA2.rA1.rA0 --> return it
 .L_ret:
+	tst rA6			; is topmost bit set?
+	brpl 8b			; no, subnormal number --> adjust result
 	clc				; clear carry --> no error, caller has to pack result
 	ret
 	
