@@ -34,7 +34,7 @@
 /*	float64_t fp64_sin( float64_4 phi )
 	returns the sine of phi
 */
-FUNCTION fp64_sinx
+FUNCTION fp64_sin
 
 2:	; argument = 0 --> return 1 for cos
 	ldi rA7, 0x3f	; for cos return +/-1
@@ -52,7 +52,7 @@ FUNCTION fp64_sinx
 /*	float64_t fp64_cos( float64_4 phi )
 	returns the cosine of phi
 */
-ENTRY fp64_cosx
+ENTRY fp64_cos
 	XCALL _U(__fp64_splitA)
 	brcs 0b		; NaN or +/i INF
 	breq 2b		; A = 0 --> result of sin = 0
@@ -63,7 +63,7 @@ ENTRY fp64_cosx
 /*	float64_t fp64_sin( float64_4 phi )
 	returns the sine of phi
 */
-ENTRY fp64_sinx
+ENTRY fp64_sin
 	XCALL _U(__fp64_splitA)
 	brcs 0b		; NaN or +/i INF
 	breq 1b		; A = 0 --> result of sin = 0
@@ -134,10 +134,10 @@ ENTRY fp64_sinx
 	
 15:	; approximate sin(x) by Taylor series 
 	sts __funcCode, XH
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	ldi XL, lo8(.L_tableSin)
 	ldi XH, hi8(.L_tableSin)
-	XCALL _U(__fp64_powsoddx)
+	XCALL _U(__fp64_powsodd)
 	
 	; restore used registers and return
 	lds r0, __funcCode

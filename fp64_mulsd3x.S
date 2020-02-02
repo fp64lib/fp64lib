@@ -110,7 +110,6 @@ ENTRY   __fp64_mulsd3x
 	XCALL	_U(__fp64_split3)	; split A and B into parts for exponent and mantissa
 	brcs	0b					; A or B is NaN and/or InF --> manage special result
 	
-#ifdef NEW_MULT
 	push rR5	; save working registers
 	push rR6
 	push rR7
@@ -130,9 +129,6 @@ ENTRY   __fp64_mulsd3x
 	XJMP _U(__fp64_rpretA)	; no, return with proper rounding, including carry
 3:	ret				; overflow, return already packed result +/-Inf
 
-	; TODO: then efficient check for 0 needed
-	; TODO: signalling of infinity needed
-
 	/*
 	fp64 __fp64mulsd3_pse( fp64_splitted_t A, fp64_splitted_t B )
 	Multiplies two 64 bit floating point numbers  that are splitted
@@ -146,10 +142,6 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 	; check zero (subnormal have exp == 1)
 	XCALL _U(__fp64_pscA)
 ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
-#else
-
-ENTRY   __fp64_mulsd3_pse			; post split entry
-#endif
 	; rcall __fp64_saveAB
 	breq	2b				; A = 0 --> A*B = 0
 	XCALL _U(__fp64_pscB)
@@ -160,13 +152,6 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 	add		rAE0, rBE0
 	adc 	rAE1, rBE1
 
-#ifndef NEW_MULT	
-	push rR5	; save working registers
-	push rR6
-	push rR7
-	push rR8
-	push rZero
-#endif	
 	;call __fp64_saveAB
 	
 	; core algorithm for multiplication
@@ -443,7 +428,6 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 	brne 15f			; yes -> normalize number
 	;call __fp64_saveMul
 
-#ifdef NEW_MULT
 	; exponent >= 0x7ff --> overflow, 
 111:XCALL _U(__fp64_inf)
 	sec					; set carry as flag for error and returning of packed result
@@ -454,24 +438,6 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 	mov rAE0, r1
 	clc
 	XJMP	_U(__fp64_szero)
-
-#else
-	
-111:pop rZero
-	pop rR8				; no -> overflow, restore used registers and return
-	pop rR7
-	pop rR6
-	pop rR5
-	XJMP	_U(__fp64_inf); overflow
-
-	; underflow, can not even expressed as denormilzed number --> return +/-0
-12: pop rZero
-	pop rR8			; restore used registers and return
-	pop rR7
-	pop rR6
-	pop rR5
-	XJMP	_U(__fp64_szero)
-#endif
 
 131: rcall 16f	
 	rjmp 15f
@@ -499,7 +465,7 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 	mov rA2,rB0
 	mov rA1,rR8
 	mov rA0,rR7
-#ifdef NEW_MULT
+
 	or rR6, rR5		; are there any trailing bits set?
 	; rcall __fp64_saveAB
 	breq 151f
@@ -507,20 +473,6 @@ ENTRY   __fp64_mulsd3_pse			; post split entry
 151:
 	clc
 	ret				; return with carry clear
-#else
-	cp rR6, r1		; set carry if any trailing bits are set
-	cpc rR5, r1
-	; rcall __fp64_saveAB
-	
-	pop rZero
-	pop rR8			; restore used registers
-	pop rR7
-	pop rR6
-	pop rR5
-
-	; rcall __fp64_saveAB
-	XJMP _U(__fp64_rcpretA)	; return with proper rounding, including carry
-#endif
 
 16:	lsr rB4			; mantissa >>= 1
 	ror rB3

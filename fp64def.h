@@ -52,9 +52,7 @@ Registers
 
 */
 
-// #define DEBUG_CORDIC	1
 // #define CHECK_POWSER
-#define NEW_MULT		
 
 #define MAX_SIGNIFICAND		17
 #define	MAX_EXPONENT		3
@@ -150,36 +148,6 @@ Registers
 #define rR7 r7
 #define rR6 r8
 #define rR5 r9
-
-// The following register definitions are used for the
-// cordic algorithm and the trigonometric functions
-#define rPHI7	r25
-#define rPHI6	r24
-#define rPHI5	r23
-#define rPHI4	r22
-#define rPHI3	r21
-#define rPHI2	r20
-#define rPHI1	r19
-#define rPHI0	r18
-
-#define rX7		r17
-#define rX6		r16
-#define rX5		r15
-#define rX4		r14
-#define rX3		r13
-#define rX2		r12
-#define rX1		r11
-#define rX0		r10
-
-#define rY7		r9
-#define rY6		r8
-#define rY5		r7
-#define rY4		r6
-#define rY3		r5
-#define rY2		r4
-#define rY1		r3
-#define rY0		r2
-
 
 /* Put functions at this section.	*/
 #ifdef	FUNCTION

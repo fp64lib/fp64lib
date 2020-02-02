@@ -31,8 +31,8 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-/*	float64_t fp64_sinx(float64_4 phi )
-	returns the arcus cos of phi (inverse function to fp64_sinx(x)
+/*	float64_t fp64_asin(float64_4 phi )
+	returns the arcus cos of phi (inverse function to fp64_sin(x)
 	
 	Basic algorithm:
 	fp64_asin( x ) {
@@ -56,9 +56,9 @@
 		return sign * res
 	
 */
-FUNCTION fp64_asinx
+FUNCTION fp64_asin
 
-	; case |   x   | asinx(x) | acos(x)
+	; case |   x   | asin(x)  | acos(x)
 	;------+-------+----------+--------
 	;  1a  |  NaN  |    NaN   |  NaN
 	;  1b  | +/-Inf|    NaN   |  NaN
@@ -81,17 +81,17 @@ FUNCTION fp64_asinx
 	clt							; yes: return +PI/2 for acos	
 	XJMP _U(__fp64_pi2)
 
-/*	float64_t fp64_acosx(float64_4 phi )
-	returns the arcus cosine of phi (inverse function to fp64_cosx(x)
+/*	float64_t fp64_acos(float64_4 phi )
+	returns the arcus cosine of phi (inverse function to fp64_cos(x)
 */
-ENTRY fp64_acosx
+ENTRY fp64_acos
 	inc r1
 	inc r1				; set bit 1 of r1 as flag for acos
 
-/*	float64_t fp64_asinx(float64_4 phi )
-	returns the arcus sine of phi (inverse function to fp64_sinx(x)
+/*	float64_t fp64_asin(float64_4 phi )
+	returns the arcus sine of phi (inverse function to fp64_sin(x)
 */
-ENTRY fp64_asinx
+ENTRY fp64_asin
 	sts __sinFlags, r1	; either r1 = 0 (default) or r1 = 0x02 (acos)
 	clr r1
 	XCALL _U(__fp64_splitA)
@@ -274,7 +274,7 @@ ENTRY fp64_asinx
 
 	ldi XL, lo8(.L_tableAsinDenom)	; calculate Denominator
 	ldi XH, hi8(.L_tableAsinDenom)
-	XCALL _U(__fp64_powserx)
+	XCALL _U(__fp64_powser)
 	
 	pop rBE0				; retrieve x2
 	pop rBE1
@@ -287,7 +287,7 @@ ENTRY fp64_asinx
 	pop rB6
 	pop rB7
 
-	push rA7				; save x3 = horner( x2, coeff_nenner )
+	push rA7						; save x3 = horner( x2, coeff_nenner )
 	push rA6
 	push rA5
 	push rA4
@@ -305,9 +305,9 @@ ENTRY fp64_asinx
 	X_movw  rAE0, rBE0
 	ldi XL, lo8(.L_tableAsinNom)	; calculate Nominator
 	ldi XH, hi8(.L_tableAsinNom)
-	XCALL _U(__fp64_powserx)		; res = horner( x2, coeff_zähler )
+	XCALL _U(__fp64_powser)			; res = horner( x2, coeff_zähler )
 	
-	pop rBE0				; retrieve Denominator x3 = horner( x2, coeff_nenner )
+	pop rBE0						; retrieve Denominator x3 = horner( x2, coeff_nenner )
 	pop rBE1
 	pop rB0
 	pop rB1
@@ -318,7 +318,7 @@ ENTRY fp64_asinx
 	pop rB6
 	pop rB7
 
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	
 	XCALL _U(__fp64_divsd3_pse)	; res = res / x3
 	
@@ -402,7 +402,7 @@ ENTRY fp64_asinx
 25:	
 	subi rA7, 0x80				; no, change sign of res --> -res + pi
 	bst rA7, 7
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	XCALL _U(__fp64_add_pse)	; compute res + pi/2 or -res + pi
 	rjmp 19b
 	

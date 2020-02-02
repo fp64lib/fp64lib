@@ -31,13 +31,13 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-/* float64_t fp64_tanx (float64_t x);
-     The fp64_tanx() function returns the tangent of x, which is
+/* float64_t fp64_tan (float64_t x);
+     The fp64_tan() function returns the tangent of x, which is
      defined mathematically as sin(x) / cos(x).
  */
 
-FUNCTION fp64_tanx
-ENTRY fp64_tanx
+FUNCTION fp64_tan
+ENTRY fp64_tan
 	push rB7					; save needed registers
 	push rB6
 	push rB5
@@ -56,7 +56,7 @@ ENTRY fp64_tanx
 	push rA1
 	push rA0
 
-	XCALL _U(fp64_cosx)			; calculate cos(x) 
+	XCALL _U(fp64_cos)			; calculate cos(x) 
 
 	pop rB0						; restore x
 	pop rB1	
@@ -80,7 +80,7 @@ ENTRY fp64_tanx
 	movw rA2, rB2
 	movw rA4, rB4
 	movw rA6, rB6
-	XCALL _U(fp64_sinx)			; calculate sin(x) 
+	XCALL _U(fp64_sin)			; calculate sin(x) 
 	
 	pop rB0						; restore cos(x)
 	pop rB1	

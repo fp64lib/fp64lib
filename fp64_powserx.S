@@ -36,8 +36,8 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-/* float64_t __fp_powserx (float64_t_intern x, float64_t_intern* XH.XL);
-     The __fp_powser() function calculates the polynom using the horner
+/* float64_t __fp64_powser (float64_t_intern x, float64_t_intern* XH.XL);
+     The __fp64_powser() function calculates the polynom using the horner
 	 scheme. As this function operates on internal unpacked data, it
 	 does not check for special cases like NaN or Inf. These case have
 	 to be handled properly by the caller.
@@ -56,7 +56,7 @@
 
 #define	rcntr	r0
 
-ENTRY __fp64_powserx
+ENTRY __fp64_powser
 	bld rA7, 7					; save T flag as sign
 	X_movw	rC0, rA0			; save x
 	X_movw	rC2, rA2
@@ -104,9 +104,7 @@ ENTRY __fp64_powserx
 	pop rR7
 	pop rR6
 	pop rR5
-#ifndef NEW_MULT
-	XCALL	_U(__fp64_splitA)	; workaround as __fp64_mul_pse always returns a packed result
-#endif
+
 	bld rA7, 7					; save sign of result
 	brcs .L_ret					; C is set on overflow and result is already packed
 	
@@ -159,7 +157,7 @@ ENTRY __fp64_powserx
 	XJMP	_U(__fp64_nan)
 #endif
 
-ENTRY __fp64_check_powserx3
+ENTRY __fp64_check_powser3
 #ifndef CHECK_POWSER
 	ret
 #else
@@ -191,7 +189,7 @@ ENTRY __fp64_check_powsern
 	push rB0
 	push YL
 	push YH
-	XCALL _U(__fp64_powserx)
+	XCALL _U(__fp64_powser)
 	; rcall __fp64_saveABC
 
 	pop YH
@@ -227,7 +225,7 @@ __testTablex3: ; f(x) = ((x/3-0,5)*x+1.0)*x+0 = x^3/3-x^2/2+x
 	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	; 0x0000000000000000 = 0.0
 	.byte 0x00												; byte needed for code alignment to even adresses!
 #endif	
-ENTRY __fp64_check_powserx2
+ENTRY __fp64_check_powser2
 #ifndef CHECK_POWSER
 	ret
 #else
@@ -244,7 +242,7 @@ __testTablex2: ; f(x) = (x*-0,5+1.0)*x+0 = -x^2/2 + x
 	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	; 0x0000000000000000 = 0.0
 	.byte 0x00												; byte needed for code alignment to even adresses!
 #endif	
-ENTRY __fp64_check_powserx1
+ENTRY __fp64_check_powser1
 #ifndef CHECK_POWSER
 	ret
 #else

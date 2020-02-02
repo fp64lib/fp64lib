@@ -36,18 +36,6 @@
 /* float64_t fp64_exp (float64_t x);
      The fp64_exp() function returns the value of e (the base of natural
      logarithms) raised to the power of x.
- 
-Größtes Argument:  	((float64_t)0x40862E42FEFA39EFLLU), //709.78271289338397 res
-				--> ((float64_t)0x7FEFFFFFFFFFFFFFLLU), //1.7976931348623E+308 x
-Kleinstes Argument:	((float64_t)0xC086232BDD7ABCD2LLU), //-708.39641853226408 res
-				--> ((float64_t)0x0010000000000000LLU), //2.2250738585072E-308 x
-mit subnormal:		((float64_t)0xC0874046DFEFD9D0LLU), //-744.03460681327306 res
-				--> ((float64_t)0x0000000000000001LLU), //0 x
-Mit subnormal kann nicht Ansatz mit 1/x genutzt werden, da x nicht darstellbar ist.
-Lösung1: Statt 1/x wird 1 durch 2^(exponent differenz) ersetzt und x auf 2^1023 begrenzt
-Lösung2: Es wird zuerst 1/x berechnet mit x reduziert auf 2^1023 und danach wird subnormal erzeugt
-Lösung3: keine Unetrstützung subnormals (ist keine Lösung)
-
  */
  
 #define	X2BIG		0x0408
@@ -55,7 +43,7 @@ Lösung3: keine Unetrstützung subnormals (ist keine Lösung)
 							; ((float64_t)0x40862E42FEFA39EFLLU), //709.78271289338397 res
 							; exp(x) --> ((float64_t)0x7FEFFFFFFFFFFFFFLLU), //1.7976931348623E+308 x
  
-FUNCTION fp64_expx
+FUNCTION fp64_exp
 
 	; Special cases
 	; case|	A	  |	log(A)
@@ -83,10 +71,10 @@ FUNCTION fp64_expx
 	ldi rA6, 0xf0
 	ret
 
-ENTRY fp64_expx
+ENTRY fp64_exp
 	; split and analyse A
 	XCALL	_U(__fp64_splitA)
-	rcall __fp64_saveA
+	; rcall __fp64_saveA
 	brcs .L_nf			; A is not a finite number
 	breq .L_one
 
@@ -144,7 +132,7 @@ ENTRY fp64_expx
 	push YH
 	ldi XL, lo8(.L_expxTable)
 	ldi XH, hi8(.L_expxTable)
-	XCALL	_U(__fp64_powserx)
+	XCALL	_U(__fp64_powser)
 	pop YH
 	pop YL
 	pop rBE1			; load n into B
@@ -195,7 +183,7 @@ ENTRY fp64_expx
 	
 2:	sub rAE0, rBE0		; subtract n from exponent
 	sbc rAE1, rBE1
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	; check for various underflow conditions
 	brmi 22f		; exponent < 0 --> check range for underflow
 	rjmp .L_retA
@@ -256,7 +244,7 @@ ENTRY fp64_expx
 6:	; real underflow, return 0
 	rjmp .L_zr
 
-ENTRY __fp64_check_powserxexp
+ENTRY __fp64_check_powserexp
 #ifndef CHECK_POWSER
 	ret
 #else

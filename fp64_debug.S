@@ -182,44 +182,6 @@ ENTRY __fp64_debugAB
 	ldi r25, hi8(__a_sreg)
 	ret
 
-ENTRY __fp64_saveCordic
-	sts __X+0, rX7
-	sts __X+1, rX6
-	sts __X+2, rX5
-	sts __X+3, rX4
-	sts __X+4, rX3
-	sts __X+5, rX2
-	sts __X+6, rX1
-	sts __X+7, rX0
-	sts __Y+0, rY7
-	sts __Y+1, rY6
-	sts __Y+2, rY5
-	sts __Y+3, rY4
-	sts __Y+4, rY3
-	sts __Y+5, rY2
-	sts __Y+6, rY1
-	sts __Y+7, rY0
-	sts __PHI+0, rPHI7
-	sts __PHI+1, rPHI6
-	sts __PHI+2, rPHI5
-	sts __PHI+3, rPHI4
-	sts __PHI+4, rPHI3
-	sts __PHI+5, rPHI2
-	sts __PHI+6, rPHI1
-	sts __PHI+7, rPHI0
-	sts __ZLZH+0, ZL
-	sts __ZLZH+1, ZH
-	ret
-
-ENTRY __fp64_debugCordic
-	ldi	r24, lo8(__X)
-	ldi r25, hi8(__X)
-	ret
-
-ENTRY __fp64_debugCordicTable
-	lds r24, __ZLZH+0
-	lds r25, __ZLZH+1
-	ret
 ENDFUNC
 
 	
@@ -245,7 +207,3 @@ __c_exp:	.skip	2
 __c_m:		.skip	7
 __c7:		.skip	1
 __cr1:		.skip	1
-__X:		.skip	8
-__Y:		.skip	8
-__PHI:		.skip	8
-__ZLZH:		.skip	2

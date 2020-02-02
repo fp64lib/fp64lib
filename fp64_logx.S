@@ -31,10 +31,10 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-/*	float64_t fp64_logx( float64_t x );
+/*	float64_t fp64_log( float64_t x );
 	returns the natural logarithm ln of x
 */
-FUNCTION fp64_logx
+FUNCTION fp64_log
 
 	; case|	A	  |	log(A)
 	;-----+-------+------
@@ -63,7 +63,10 @@ FUNCTION fp64_logx
 .L_zero:	; return 0.0
 	XJMP _U(__fp64_zero)
 	
-ENTRY fp64_logx
+/*	float64_t fp64_log( float64_t x );
+	returns the natural logarithm ln of x
+*/
+ENTRY fp64_log
 	XCALL _U(__fp64_splitA)
 	brcs .L_nf					; case 1-3: return NaN for x=NaN,-Inf, +Inf for +Inf
 	breq .L_inf					; case 4: return -Inf for x = 0
@@ -145,7 +148,7 @@ ENTRY fp64_logx
 
 	ldi XL, lo8(.L__tableLog)
 	ldi XH, hi8(.L__tableLog)
-	XCALL _U(__fp64_powsoddx)	; approximate log(y) = log((x-1)/(x+1)) by power series
+	XCALL _U(__fp64_powsodd)	; approximate log(y) = log((x-1)/(x+1)) by power series
 	; rcall __fp64_saveAB
 	
 	pop rBE0					; restore exponent			

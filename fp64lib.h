@@ -129,21 +129,13 @@ float64_t fp64_cbrt( float64_t x ) __ATTR_CONST__;
 
 // trigonometric functions
 float64_t fp64_sin( float64_t x ) __ATTR_CONST__;
-float64_t fp64_sinx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_cos( float64_t x ) __ATTR_CONST__;
-float64_t fp64_cosx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_tan( float64_t x ) __ATTR_CONST__;
-float64_t fp64_tanx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_atan( float64_t x ) __ATTR_CONST__;
-float64_t fp64_atanx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_asin( float64_t x ) __ATTR_CONST__;
-float64_t fp64_asinx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_acos( float64_t x ) __ATTR_CONST__;
-float64_t fp64_acosx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log( float64_t x ) __ATTR_CONST__;
-float64_t fp64_logx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_exp( float64_t x ) __ATTR_CONST__;
-float64_t fp64_expx( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log10( float64_t x ) __ATTR_CONST__;
 float64_t fp64_sinh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_cosh( float64_t x ) __ATTR_CONST__;
@@ -209,12 +201,8 @@ typedef struct fp64_debug_t {
 // debugging functions
 struct fp64_debug_t* __fp64_debugA(void);
 struct fp64_debug_t* __fp64_debugAB(void);
-uint8_t* __fp64_debugCordic(void);
-uint8_t* __fp64_debugCordicTable(void);
 void      __fp64_splitA( float64_t a );
 void      __fp64_split3( float64_t a, float64_t b );
-extern uint8_t __scratch[55];
-extern uint8_t __scratchXYZ[55][3][8];
 
 // internal functions to return special values
 float64_t __fp64_one( void ) __ATTR_CONST__;
@@ -232,12 +220,6 @@ float64_t __fp64_check_powser3( float64_t x );
 float64_t __fp64_check_powsodd3( float64_t x );
 float64_t __fp64_check_powslog( float64_t x );
 float64_t __fp64_check_powserexp( float64_t x );
-float64_t __fp64_check_powserx1( float64_t x );
-float64_t __fp64_check_powserx2( float64_t x );
-float64_t __fp64_check_powserx3( float64_t x );
-float64_t __fp64_check_powserxexp( float64_t x );
-float64_t __fp64_check_powsoddx3( float64_t x );
-float64_t __fp64_check_powslogx( float64_t x );
 
 // internal functions that might be used for integration with gcc
 // 32-bit float used the following naming convention
@@ -250,13 +232,6 @@ float64_t __fp64_check_powslogx( float64_t x );
 //	sd		for signed double, 64-bit IEEE float
 //  li		for long integer, int32_t, long
 //  sc		for short character, int8_t, char
-float64_t __fp64_addsd3x( float64_t a, float64_t b ) __ATTR_CONST__;
-float64_t __fp64_addsd3( float64_t a, float64_t b ) __ATTR_CONST__;
-float64_t __fp64_subsd3( float64_t a, float64_t b ) __ATTR_CONST__;
-float64_t __fp64_mulsd3x( float64_t a, float64_t b ) __ATTR_CONST__;
-float64_t __fp64_mulsd3( float64_t a, float64_t b ) __ATTR_CONST__;
-float64_t __fp64_divsd3x( float64_t a, float64_t b ) __ATTR_CONST__;
-float64_t __fp64_divsd3( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_modff (float64_t x, float64_t *iptr) __ATTR_CONST__;
 float64_t fp64_sqrtf( float64_t x ) __ATTR_CONST__;
 float64_t __fp64disd (long long x) __ATTR_CONST__;				// (signed) long long to float64_t

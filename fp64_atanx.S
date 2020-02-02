@@ -32,7 +32,7 @@
 #include "asmdef.h"
 
 /*	float64_t fp64_atan(float64_4 phi )
-	returns the arcus tangens of phi (inverse function to fp64_tanx(x)
+	returns the arcus tangens of phi (inverse function to fp64_tan(x)
 	
 	Basic algorithm:
 	fp64_atan (const f7_t *x) {
@@ -63,9 +63,9 @@
 	}
 	
 */
-FUNCTION fp64_atanx
+FUNCTION fp64_atan
 
-	; case |   x     | atanx(x) 
+	; case |   x     | atan(x) 
 	;------+---------+----------
 	;  1   |  NaN    |   NaN   
 	;  2   | +/-Inf  | +/-PI/2    
@@ -86,10 +86,10 @@ FUNCTION fp64_atanx
 .L_zero:
 	XJMP _U(__fp64_szero)			; no: return 0.0 for asin
 
-/*	float64_t fp64_atanx(float64_4 phi )
-	returns the arcus tangens of phi (inverse function to fp64_tanx(x)
+/*	float64_t fp64_atan(float64_4 phi )
+	returns the arcus tangens of phi (inverse function to fp64_tan(x)
 */
-ENTRY fp64_atanx
+ENTRY fp64_atan
 	XCALL _U(__fp64_splitA)
 	brcs .L_nan						; NaN or +/- INF
 	breq .L_zero					; x = 0 --> result of atan = 0
@@ -142,7 +142,7 @@ ENTRY fp64_atanx
 	ldi rAE1, 0x03
 	ldi rAE0, 0xff
 	clt
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	XCALL _U(__fp64_divsd3_pse)		; 1/|x|
 	inc r1							; flag = true
 
@@ -186,7 +186,7 @@ ENTRY fp64_atanx
 	ldi XL, lo8(.L_tableAtanDenom)	; calculate Denominator
 	ldi XH, hi8(.L_tableAtanDenom)
 	; rcall __fp64_saveAB
-	XCALL _U(__fp64_powserx)
+	XCALL _U(__fp64_powser)
 	
 	pop rBE0						; retrieve x2 = x^2
 	pop rBE1
@@ -217,7 +217,7 @@ ENTRY fp64_atanx
 	X_movw  rAE0, rBE0
 	ldi XL, lo8(.L_tableAtanNom)	; calculate Nominator
 	ldi XH, hi8(.L_tableAtanNom)
-	XCALL _U(__fp64_powserx)		; z = horner( x2, coeff_nominator )
+	XCALL _U(__fp64_powser)			; z = horner( x2, coeff_nominator )
 	; rcall __fp64_saveAB
 	
 	pop rBE0						; retrieve Denominator y = horner( x2, coeff_denominator )

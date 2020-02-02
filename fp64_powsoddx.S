@@ -31,8 +31,8 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-/* float64_t __fp64_powsoddx (float64_t_intern x, float64_t_intern* XH.XL);
-     The __fp64_powsoddx() function calculates a polynom with only odd
+/* float64_t __fp64_powsodd (float64_t_intern x, float64_t_intern* XH.XL);
+     The __fp64_powsodd() function calculates a polynom with only odd
      powers of x. As this function operates on internal unpacked data, it
 	 does not check for special cases like NaN or Inf. These case have
 	 to be handled properly by the caller.
@@ -48,10 +48,11 @@
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0, rAE1.rAE0	- result, rA7 will contain sign of result
 
    Notes:
-     * As __fp64_powsoddx() is one of base function, square() is't used.
+     * As __fp64_powsodd() is one of base function, square() is't used.
  */
 
-ENTRY __fp64_powsoddx
+FUNCTION __fp64_powsodd
+ENTRY __fp64_powsodd
 
 	bld rA7, 7					; save T flag as sign
 	X_movw	rB0, rA0			; save x
@@ -82,7 +83,7 @@ ENTRY __fp64_powsoddx
 
 	pop	XL						; retrieve pointer to table
 	pop	XH
-	XCALL	_U(__fp64_powserx)	; calculate polynom with even powers of x
+	XCALL	_U(__fp64_powser)	; calculate polynom with even powers of x
 
 	pop rBE1
 	pop rBE0
@@ -113,7 +114,7 @@ ENTRY __fp64_powsoddx
 	XJMP	_U(__fp64_nan)
 #endif
 
-ENTRY __fp64_check_powsoddx3
+ENTRY __fp64_check_powsodd3
 #ifndef CHECK_POWSER
 	ret
 #else
@@ -122,7 +123,7 @@ ENTRY __fp64_check_powsoddx3
 	ldi XL, lo8(.L__testTable3x)
 	ldi XH, hi8(.L__testTable3x)
 	
-ENTRY __fp64_check_powsoddxn
+ENTRY __fp64_check_powsoddn
 98:
 	XCALL	_U(__fp64_splitA)
 	brcs .L_nf
@@ -146,7 +147,7 @@ ENTRY __fp64_check_powsoddxn
 	push YL
 	push YH
 
-	XCALL _U(__fp64_powsoddx)
+	XCALL _U(__fp64_powsodd)
 
 	pop YH
 	pop YL
@@ -172,7 +173,7 @@ ENTRY __fp64_check_powsoddxn
 	XJMP _U(__fp64_rpretA)
 99:	ret
 
-ENTRY __fp64_check_powslogx
+ENTRY __fp64_check_powslog
 	push XL
 	push XH
 	ldi XL, lo8(.L__testTableLogx)
