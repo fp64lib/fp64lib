@@ -47,6 +47,13 @@ ENTRY __fp64_ldb_pi2
 	ldi ZL, lo8(__pi_o_2)
 	ldi ZH, hi8(__pi_o_2)
 ENTRY __fp64_ldb_const
+	rcall __fp64_ldb8_const
+	lpm rBE1, Z+
+	lpm rBE0, Z+
+	pop ZH
+	pop ZL
+	ret
+ENTRY __fp64_ldb8_const
 	lpm rB7, Z+
 	lpm rB6, Z+
 	lpm rB5, Z+
@@ -55,12 +62,7 @@ ENTRY __fp64_ldb_const
 	lpm rB2, Z+
 	lpm rB1, Z+
 	lpm rB0, Z+
-	lpm rBE1, Z+
-	lpm rBE0, Z+
-	pop ZH
-	pop ZL
 	ret
-
 	; PI/2 with 56 bits precision in unpacked format
 __pi_o_2:	.byte  0x00, 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x03, 0xff	; PI/2 = 1.5707963267948966
 ENDFUNC

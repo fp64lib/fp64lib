@@ -54,7 +54,8 @@ ENTRY fp64_log10
 	
 	ldi ZL, lo8(.L_log10)
 	ldi ZH, hi8(.L_log10)
-	XCALL _U(__fp64_loadB)
+	XCALL _U(__fp64_ldb8_const)
+	
 	XCALL _U(fp64_mul)
 	
 	pop rB0					; restore registers
