@@ -336,6 +336,13 @@ __fp64_add_pse_r0:
 	rol	rA6
 	ret
 	
+	; result is in T (sign), AE1.rAE0 (exp) and rA6.rA5.rA4.rA3.rA2.rA1.rA0 --> return it
+.L_ret:
+	tst rA6			; is topmost bit set?
+	brpl 8b			; no, subnormal number --> adjust result
+	clc				; clear carry --> no error, caller has to pack result
+	ret
+
 .L_zr:	; exponent is zero, but topmost bit is still not set --> subnormal number
 	; or A+(-A)
 	XCALL _U(__fp64_zero)	; return 0
@@ -363,13 +370,6 @@ __fp64_add_pse_r0:
 	brne .L_ret		; no -> return A
 	rcall .L_inf	; yes -> return infinity
 	sec				; set carry to indicate overflow and for already packed result
-	ret
-		
-	; result is in T (sign), AE1.rAE0 (exp) and rA6.rA5.rA4.rA3.rA2.rA1.rA0 --> return it
-.L_ret:
-	tst rA6			; is topmost bit set?
-	brpl 8b			; no, subnormal number --> adjust result
-	clc				; clear carry --> no error, caller has to pack result
 	ret
 	
 ENDFUNC
