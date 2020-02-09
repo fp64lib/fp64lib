@@ -104,10 +104,16 @@ ENTRY fp64_log
 	push rAE1					; save exponent of x
 	push rAE0
 
-	ldi rAE1, 0x03				; normalize x to be in range 0.5 - 1.0
-	ldi rAE0, 0xfe				; --> exponent of x becomes 0x3fe
-	
+	ldi rAE1, 0x03
+	ldi rAE0, 0xff				; normalize x to be in range [1/sqrt(2)..sqrt(2)]
+
+	cpi rA6, 0xb5				; x < sqrt(2) = 1.414 = 0xb5 / 2**7 ?
+	brlo 22f					; yes --> x already normalized
+	sbiw rAE0, 1				; no, divide x by 2 and x is normalized
+
 22:	; rcall __fp64_saveAB
+	push rAE0					; save exponent for normalization
+	
 	movw rC6, rA6				; save x
 	movw rC4, rA4
 	movw rC2, rA2
@@ -132,7 +138,7 @@ ENTRY fp64_log
 	XCALL _U(__fp64_ldb_1)		; load B with 1.0
 	clt
 	XCALL _U(__fp64_sub_pse)	; x - 1
-	bld rA7, 7					; save sign (always 1)
+	bld rA7, 7					; save sign
 	
 	movw rB6, rC6				; restore b = x + 1
 	movw rB4, rC4
@@ -141,7 +147,9 @@ ENTRY fp64_log
 	pop rBE0					; restore exponent of x+1
 	pop rBE1
 	
-	set
+	bst rA7, 7					; sign is sign of (x-1), as (x+1) is always > 0
+	tst rA6						; is (x-1) == 0?
+	breq 23f					; yes, (x-1) / (x-1) is also 0 (__fp64_divsd3_pse does not handle 0)
 	XCALL _U(__fp64_divsd3_pse)	; y = (x-1) / (x+1)
 	bld rA7, 7
 	; rcall __fp64_saveAB
@@ -150,7 +158,8 @@ ENTRY fp64_log
 	ldi XH, hi8(.L__tableLog)
 	XCALL _U(__fp64_powsodd)	; approximate log(y) = log((x-1)/(x+1)) by power series
 	; rcall __fp64_saveAB
-	
+23:	
+	pop r0						; restore normalization exponent
 	pop rBE0					; restore exponent			
 	pop rBE1
 
@@ -168,11 +177,13 @@ ENTRY fp64_log
 	
 10:	
 	movw rA6, rBE0				; convert exponent-base into float64_t
-	subi rA6, 0xfe				; exponent - base
+	sub rA6, r0				    ; exponent - base
 	sbci rA7, 0x03
 	
 	XCALL _U(__fp64sssd_pse) 	; int16 as a float
 	XCALL _U(__fp64_ldb_log2)	; B = log(2)
+	bld rA7, 7
+	; rcall __fp64_saveAB
 	XCALL _U(__fp64_mulsd3_pse)	
 	
 	pop rBE0					; restore B = log(y)
@@ -189,7 +200,7 @@ ENTRY fp64_log
 	mov r0, rB7					; T has to be sign(A) ^ sign(B)
 	eor r0, rA7
 	bst r0,7
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	XCALL _U(__fp64_add_pse)	; log(x*2^n) = log(x)+n*log(2)
 
 99:	
@@ -215,28 +226,19 @@ ENTRY fp64_log
 	pop rAx3
 	
 	XJMP _U(__fp64_rpretA)		; round, pack and return
-	
+
 .L__tableLog:
-	.byte 16	; polynom power = 16 --> 17 entries
-	.byte 0x00, 0xF8, 0x3E, 0x0F, 0x83, 0xE0, 0xF8, 0x3E, 0x03, 0xfa ; 0x3FAF07C1F07C1F08 = 0.06060606060606060606060606060606060606061 = 2 / 33
-	.byte 0x00, 0x84, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0x03, 0xfb ; 0x3FB8421084210840 = 0.06451612903225806451612903225806451612903 = 2 / 31
-	.byte 0x00, 0x8D, 0x3D, 0xCB, 0x08, 0xD3, 0xDC, 0xB1, 0x03, 0xfb ; 0x3FB1A7B9611A7B96 = 0.06896551724137931034482758620689655172414 = 2 / 29
-	.byte 0x00, 0x97, 0xB4, 0x25, 0xED, 0x09, 0x7B, 0x42, 0x03, 0xfb ; 0x3FB2F684BDA12F68 = 0.07407407407407407407407407407407407407407 = 2 / 27
-	.byte 0x00, 0xA3, 0xD7, 0x0A, 0x3D, 0x70, 0xA3, 0xD7, 0x03, 0xfb ; 0x3FB47AE147AE147B = 0.08000000000000000000000000000000000000000 = 2 / 25
-	.byte 0x00, 0xB2, 0x16, 0x42, 0xC8, 0x59, 0x0B, 0x21, 0x03, 0xfb ; 0x3FB642C8590B2164 = 0.08695652173913043478260869565217391304348 = 2 / 23
-	.byte 0x00, 0xC3, 0x0C, 0x30, 0xC3, 0x0C, 0x30, 0xC3, 0x03, 0xfb ; 0x3FB8618618618618 = 0.09523809523809523809523809523809523809524 = 2 / 21
-	.byte 0x00, 0xD7, 0x94, 0x35, 0xE5, 0x0D, 0x79, 0x43, 0x03, 0xfb ; 0x3FBAF286BCA1AF28 = 0.1052631578947368421052631578947368421053 = 2 / 19
-	.byte 0x00, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF1, 0x03, 0xfb ; 0x3FBE1E1E1E1E1E1E = 0.1176470588235294117647058823529411764706 = 2 / 17
-	.byte 0x00, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x89, 0x03, 0xfc ; 0x3FC1111111111111 = 0.1333333333333333333333333333333333333333 = 2 / 15
-	.byte 0x00, 0x9D, 0x89, 0xD8, 0x9D, 0x89, 0xD8, 0x9E, 0x03, 0xfc ; 0x3FC3B13B13B13B14 = 0.1538461538461538461538461538461538461538 = 2 / 13
-	.byte 0x00, 0xBA, 0x2E, 0x8B, 0xA2, 0xE8, 0xBA, 0x2F, 0x03, 0xfc ; 0x3FC745D1745D1746 = 0.1818181818181818181818181818181818181818 = 2 / 11
-	.byte 0x00, 0xE3, 0x8E, 0x38, 0xE3, 0x8E, 0x38, 0xE4, 0x03, 0xfc ; 0x3FCC71C71C71C71C = 0.2222222222222222222222222222222222222222 = 2 / 9
-	.byte 0x00, 0x92, 0x49, 0x24, 0x92, 0x49, 0x24, 0x92, 0x03, 0xfd ; 0x3FD2492492492492 = 0.2857142857142857142857142857142857142857 = 2 / 7
-	.byte 0x00, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCD, 0x03, 0xfd ; 0x3FD999999999999A = 0.4000000000000000000000000000000000000000 = 2 / 5
-	.byte 0x00, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAB, 0x03, 0xfe ; 0x3FE5555555555555 = 0.6666666666666666666666666666666666666667 = 2 / 3
-	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00 ; 0x4000000000000000 = 2.0000000000000000000000000000000000000000 = 2 / 1
+	.byte 7		; polynom power = 7 --> 8 entries
+	.byte 0x00, 0x98, 0x04, 0x81, 0xD8, 0x93, 0x16, 0x2F, 0x03, 0xfc ; 0x3FC300903B1262C6 = 0.14845469364515489619496639294147651679382323
+	.byte 0x00, 0x9C, 0xC3, 0xCA, 0xA0, 0x36, 0xDF, 0x02, 0x03, 0xfc ; 0x3FC398795406DBE0 = 0.15309063532706002857400705916802964525460117
+	.byte 0x00, 0xBA, 0x33, 0xA4, 0xA8, 0x2D, 0xCB, 0x87, 0x03, 0xfc ; 0x3FC746749505B971 = 0.18183762814028228319319571146839576150306150
+	.byte 0x00, 0xE3, 0x8E, 0x26, 0x5C, 0x1C, 0x31, 0x75, 0x03, 0xfc ; 0x3FCC71C4CB83862F = 0.22222194611735930977980985605447216481620959
+	.byte 0x00, 0x92, 0x49, 0x24, 0xA4, 0x88, 0x92, 0x50, 0x03, 0xfd ; 0x3FD249249491124A = 0.28571428783860553210658222441345541743520204
+	.byte 0x00, 0xCC, 0xCC, 0xCC, 0xCC, 0xBB, 0x2B, 0xC5, 0x03, 0xfd ; 0x3FD9999999976579 = 0.39999999999198324890372309941486219658990021
+	.byte 0x00, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAD, 0xE9, 0x03, 0xfe ; 0x3FE55555555555BD = 0.66666666666667818373685193388291900221762915
+	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00 ; 0x4000000000000000 = 1.9999999999999999972866132948540368981897486 
 	.byte 0x00												; byte needed for code alignment to even adresses!
-	
+#endif	
 	
 ENDFUNC
 	
