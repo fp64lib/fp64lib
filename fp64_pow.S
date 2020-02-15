@@ -117,23 +117,9 @@ ENTRY fp64_pow
 	; routine for calculating pow(abs(A)) = abs(A)^B = exp(log(abs(A))*B)
 .L_pow:
 	andi	rA7, 0x7f
-	push	rB7
-	push	rB6
-	push	rB5
-	push	rB4
-	push	rB3
-	push	rB2
-	push	rB1
-	push	rB0
+	XCALL _U(__fp64_pushB)
 	XCALL	_U(fp64_log)
-	pop	rB0
-	pop	rB1
-	pop	rB2
-	pop	rB3
-	pop	rB4
-	pop	rB5
-	pop	rB6
-	pop	rB7
+	XCALL _U(__fp64_popB)
 	XCALL	_U(fp64_mul)
 	XJMP	_U(fp64_exp)
 ENDFUNC

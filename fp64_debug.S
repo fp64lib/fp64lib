@@ -181,10 +181,100 @@ ENTRY __fp64_debugAB
 	ldi	r24, lo8(__a_sreg)
 	ldi r25, hi8(__a_sreg)
 	ret
-
+	
+ENTRY __fp64_before
+	sts __before, ZH
+	sts __before+1, ZL
+	push ZH
+	push ZL
+	ldi ZH, hi8(__before+2)
+	ldi ZL, lo8(__before+2)
+.L_saveall:
+	st Z+, r29
+	st Z+, r28
+	st Z+, r27
+	st Z+, r26
+	st Z+, r25
+	st Z+, r24
+	st Z+, r23
+	st Z+, r22
+	st Z+, r21
+	st Z+, r20
+	st Z+, r19
+	st Z+, r18
+	st Z+, r17
+	st Z+, r16
+	st Z+, r15
+	st Z+, r14
+	st Z+, r13
+	st Z+, r12
+	st Z+, r11
+	st Z+, r10
+	st Z+, r9
+	st Z+, r8
+	st Z+, r7
+	st Z+, r6
+	st Z+, r5
+	st Z+, r4
+	st Z+, r3
+	st Z+, r2
+	st Z+, r1
+	st Z+, r0
+	pop ZL
+	pop ZH
+	ret
 ENDFUNC
 
-	
+ENTRY __fp64_proxy1
+ENTRY __fp64_proxy1_int8
+ENTRY __fp64_proxy1_int16
+ENTRY __fp64_proxy1_int32
+ENTRY __fp64_proxy1_int64
+	sts __function, rA7
+	sts __function+1, rA6
+	movw ZL, rA4
+	ld rA0, Z+
+	ld rA1, Z+
+	ld rA2, Z+
+	ld rA3, Z+
+	ld rA4, Z+
+	ld rA5, Z+
+	ld rA6, Z+
+	ld rA7, Z+
+	lds ZH, __function
+	lds ZL, __function+1
+	rcall __fp64_before
+	icall
+ENTRY __fp64_after
+	sts __after, ZH
+	sts __after+1, ZL
+	push ZH
+	push ZL
+	ldi ZH, hi8(__after+2)
+	ldi ZL, lo8(__after+2)
+	rjmp .L_saveall
+
+ENTRY __fp64_proxy2
+ENTRY __fp64_proxy2_int8
+	rcall __fp64_saveAB
+	sts __function, rA7
+	sts __function+1, rA6
+	XCALL _U(__fp64_pushB)
+	movw ZL, rA2
+	ld rB0, Z+
+	ld rB1, Z+
+	ld rB2, Z+
+	ld rB3, Z+
+	ld rB4, Z+
+	ld rB5, Z+
+	ld rB6, Z+
+	ld rB7, Z+
+	rcall __fp64_proxy1
+	XCALL _U(__fp64_popB)
+	nop				; hack to avoid tail call optimization (avr-gcc will otherwise create a rjmp __fp64_popB, which will crash)
+	ret
+
+
 .data
 __a_sreg:	.skip	1
 __a_count:	.skip	1
@@ -207,3 +297,8 @@ __c_exp:	.skip	2
 __c_m:		.skip	7
 __c7:		.skip	1
 __cr1:		.skip	1
+ENTRY __before
+			.skip	32
+ENTRY __after
+			.skip	32
+__function:	.skip	2

@@ -114,19 +114,14 @@ FUNCTION fp64_atan2
 	; cases 1a & 1b: A  or B  is NaN    --> atan2(A,B) == NaN
 	; also case 3b:  A and B are +/-Inf --> atan2(A,B) == NaN
 .L_nan:				
-	XJMP	_U(__fp64_nan)
+	XJMP	_U(__fp64_nanp)
 
 	; return 0 or PI for
 	; case 2a-2d: A is 0, B is finite
 	; case 3a-3d: A is finite, B is +/-Inf
 .L_0orPI:
 	sbrs rB7, 7			; is B < 0?
-	; case 2a: A is +0,      B is +finite --> atan(A,B) == +0	
-	; case 2c: A is -0,      B is +finite --> atan(A,B) == -0	
-	; case 3a: A is +finite, B is +Inf    --> atan(A,B) == +0	
-	; case 3c: A is -finite, B is +Inf    --> atan(A,B) == -0	
-.L_zr:				
-	XJMP _U(__fp64_szero)
+	rjmp .L_zr			; no, handle positive cases
 
 	; here B < 0
 	; case 2b: A is +0, B is -finite --> atan(A,B) == +PI
@@ -139,8 +134,16 @@ FUNCTION fp64_atan2
 	ldi rB7, 0x80  			; set indicator to "add PI"
 	rjmp .L_addPi
 
+	; case 2a: A is +0,      B is +finite --> atan(A,B) == +0	
+	; case 2c: A is -0,      B is +finite --> atan(A,B) == -0	
+	; case 3a: A is +finite, B is +Inf    --> atan(A,B) == +0	
+	; case 3c: A is -finite, B is +Inf    --> atan(A,B) == -0	
+.L_zr:
+	XCALL _U(__fp64_popB)
+	XJMP _U(__fp64_szero)
 
 ENTRY   fp64_atan2
+	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)
 	; rcall __fp64_saveAB
 	brcs .L_nf			; handle special cases A or B being non-finite
@@ -199,9 +202,13 @@ ENTRY   fp64_atan2
 
 	; rcall __fp64_saveAB
 
-	sbrs rB7, 7		; indicator >= 0x80?
-	ret	  			; no: case 4, return atan(y/x)
-    				; yes, case 5-7, add +/- PI or +/- PI/2
+	sbrc rB7, 7		; indicator >= 0x80?
+	rjmp .L_addPi	; yes, case 5-7, add +/- PI or +/- PI/2
+    				
+	; no: case 4, return atan(y/x)
+	XCALL _U(__fp64_popB)
+	nop				; hack to avoid tail call optimization (avr-gcc will otherwise create a rjmp __fp64_popB, which will crash)
+	ret
 
 .L_addPi:
 	; add +/-PI or +/-PI/2, depending on
@@ -230,32 +237,14 @@ ENTRY   fp64_atan2
 
 	; add displacement
 	; rcall __fp64_saveAB
+	XCALL _U(__fp64_popB)
 	XJMP	_U(fp64_add)
 	
 1:	; cases 6 & 7: fabs(A) > fabs(B) --> swap values and change the atan sign
 	; atan(y/x) = -atan(x/y) +/- PI/2
 	;           = atan(x/-y) +/- PI/2
-	X_movw r0, rA0
-	X_movw rA0, rB0
-	X_movw rB0, r0
-	
-	X_movw r0, rA2
-	X_movw rA2, rB2
-	X_movw rB2, r0
-	
-	X_movw r0, rA4
-	X_movw rA4, rB4
-	X_movw rB4, r0
-	
-	X_movw r0, rA6
-	X_movw rA6, rB6
-	X_movw rB6, r0
-	
-	X_movw r0, rAE0
-	X_movw rAE0, rBE0
-	X_movw rBE0, r0
-	
-	clr r1
+	XCALL _U(__fp64_swapAB)
+
 	push rB7
 	ldi rB7, 0x81			; r0 = 0x81: add pi/2
 	mov r0, rB7

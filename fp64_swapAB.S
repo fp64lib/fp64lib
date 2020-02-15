@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020  Uwe Bissinger
+/* Copyright (c) 2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -31,38 +31,27 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-/* float64_t fp64_hypot(float64_t x, float64_t y);
-     The float64_t() function returns `sqrt (x*x + y*y)'. This is the length
-     of the hypotenuse of a right triangle with sides of length x and y,
-     or the distance of the point (x, y) from the origin. 
+/*  __fp64_swapAB() swap A and B
+   Input:
+     rAE1.rAE0.rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A
+     rBE1.rBE0.rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B
+   Return:
+     rAE1.rAE0.rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - now B
+     rBE1.rBE0.rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - now A
+	Modifies:
+	 nothing - also SREG is preserved
  */
 
-FUNCTION fp64_hypot
-ENTRY fp64_hypot
-	XCALL _U(__fp64_pushB)
-	XCALL _U(fp64_square)		; calc x^2
-	push rA7					; save x^2
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
-	movw rA6, rB6				; get y
-	movw rA4, rB4
-	movw rA2, rB2
-	movw rA0, rB0
-	XCALL _U(fp64_square)		; calc y^2
-	pop rB0						; restore x^2 into B
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	XCALL _U(fp64_add)			; x^2+y^2
-	XCALL _U(__fp64_popB)
-	XJMP _U(fp64_sqrt)			; calculate and return sqrt(x^2+y^2)
+FUNCTION __fp64_swapAB
+ENTRY __fp64_swapAB
+	push r0
+	push r1
+	_SWAPW rAE0, rBE0		
+	_SWAPW rA0, rB0
+	_SWAPW rA2, rB2
+	_SWAPW rA4, rB4
+	_SWAPW rA6, rB6
+	pop r1
+	pop r0
+	ret
 ENDFUNC

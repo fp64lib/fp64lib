@@ -57,7 +57,9 @@ ENTRY   __fp64_eqsd2
 ENTRY   __fp64_nesd2
 ENTRY   __fp64_ltsd2
 ENTRY   __fp64_lesd2
+    XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_cmp)
+    XCALL _U(__fp64_popB)
 	brcc	1f
 	ldi		r24, 1
 1:	ret

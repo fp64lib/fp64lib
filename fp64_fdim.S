@@ -91,6 +91,7 @@ ENTRY fp64_fdim
 	brlo	.L_nan
   
 	; check B for NaN
+	push rB7
 	lsl	rB7			; get rid of sign of B			
 	cp	r1, rB0
 	cpc	r1, rB1
@@ -100,6 +101,7 @@ ENTRY fp64_fdim
 	cpc	r1, rB5
 	cpc	ZL, rB6
 	cpc	ZH, rB7
+	pop rB7
 	brlo	.L_nan
 	; neither A nor B are NaN --> return 0
 	XJMP	_U(__fp64_zero)

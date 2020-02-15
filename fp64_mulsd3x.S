@@ -87,8 +87,8 @@ FUNCTION __fp64_mulsd3x
 	or rAE1, rA1
 	or rAE1, rA0
 	breq 1f					; A = 0, B = +/-Inf --> A*B = NaN
-	XJMP	_U(__fp64_inf)	; nonzero * Inf --> Inf (cases 5,6)
-1:	XJMP	_U(__fp64_nan)	; 0 * Inf --> NaN (cases 3,4)
+	XJMP	_U(__fp64_infp)	; nonzero * Inf --> Inf (cases 5,6)
+1:	XJMP	_U(__fp64_nanp)	; 0 * Inf --> NaN (cases 3,4)
 
 	; handle A*B = 0
 2:	clr		r1				; r1 may contain garbage, clear it
@@ -106,7 +106,7 @@ FUNCTION __fp64_mulsd3x
 ENTRY fp64_mul
 ENTRY   __fp64_mulsd3
 ENTRY   __fp64_mulsd3x
-	; rcall __fp64_saveAB
+	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)	; split A and B into parts for exponent and mantissa
 	brcs	0b					; A or B is NaN and/or InF --> manage special result
 	
@@ -125,6 +125,7 @@ ENTRY   __fp64_mulsd3x
 	pop rR5
 	
 	; rcall __fp64_saveAB
+	XCALL _U(__fp64_popB)
 	brcs 3f			; overflow?
 	XJMP _U(__fp64_rpretA)	; no, return with proper rounding, including carry
 3:	ret				; overflow, return already packed result +/-Inf

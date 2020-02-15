@@ -95,14 +95,15 @@
 
 ENTRY fp64_modf
 ENTRY fp64_modff
-	push rB7		; save used registers
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
+	XCALL _U(__fp64_pushB)
+	; push rB7		; save used registers
+	; push rB6
+	; push rB5
+	; push rB4
+	; push rB3
+	; push rB2
+	; push rB1
+	; push rB0
 	movw XL, ZL		; save iptr
 	
 	XCALL _U(__fp64_splitA)
@@ -179,16 +180,19 @@ ENTRY fp64_modff
 	st X+, rB5
 	st X+, rB6
 	st X+, rB7
-	pop rB0				; restore used registers
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+99:	
+	XCALL _U(__fp64_popB)
+	nop
+	; pop rB0				; restore used registers
+	; pop rB1
+	; pop rB2
+	; pop rB3
+	; pop rB4
+	; pop rB5
+	; pop rB6
+	; pop rB7
 	
-99:	ret
+	ret
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */

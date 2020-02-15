@@ -203,6 +203,13 @@ struct fp64_debug_t* __fp64_debugA(void);
 struct fp64_debug_t* __fp64_debugAB(void);
 void      __fp64_splitA( float64_t a );
 void      __fp64_split3( float64_t a, float64_t b );
+float64_t __fp64_proxy1( float64_t (*f1ptr)(float64_t), float64_t *a );
+int8_t    __fp64_proxy1_int8( int8_t (*f1ptr)(float64_t), float64_t *a );
+int16_t   __fp64_proxy1_int16( int16_t (*f1ptr)(float64_t), float64_t *a );
+int32_t   __fp64_proxy1_int32( int32_t (*f1ptr)(float64_t), float64_t *a );
+int64_t   __fp64_proxy1_int64( int64_t (*f1ptr)(float64_t), float64_t *a );
+float64_t __fp64_proxy2( float64_t (*f2ptr)(float64_t, float64_t), float64_t *a, float64_t *b );
+float64_t __fp64_proxy2_int8( int8_t (*f2ptr)(float64_t, float64_t), float64_t *a, float64_t *b );
 
 // internal functions to return special values
 float64_t __fp64_one( void ) __ATTR_CONST__;

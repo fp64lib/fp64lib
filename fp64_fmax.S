@@ -69,6 +69,7 @@ ENTRY fp64_fmin
 ENTRY fp64_fmax
 	clt							; clear flag for fmin
 .L_common:	
+	push rB7
 	lsl rA7
 	sbc rAE1, rAE1				; rAE1 = (A < 0) ? -1 : 0
 	lsl rB7
@@ -132,6 +133,7 @@ ENTRY fp64_fmax
 .L_retA:
 	lsr rAE1					; restore the sign
 	ror rA7
+	pop rB7
 	ret
 
 	; case 5,6: compare absolute values for fmin

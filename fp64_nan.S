@@ -36,7 +36,8 @@
 
 /* __fp64_nan() return NaN value: 0x7ff8XXXXX
  */
-
+ENTRY   __fp64_nanp
+	XCALL _U(__fp64_popB)
 ENTRY   __fp64_nan
 	ldi	rA7, 0x7F
 	ldi	rA6, 0xF8	; space saving implementation, ensure mantissa <> 0

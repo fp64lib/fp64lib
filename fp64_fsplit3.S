@@ -51,6 +51,7 @@
 	 * rA7 and rB7 can be used as scratch registers afterwards
      * All other registers are not changed.
  */
+
 ENTRY	__fp64_split3
 	; rA7[7] := sign(A) ^ sign(B)
 	sbrc rB7, 7		; is B negative?
@@ -104,12 +105,12 @@ ENTRY	__fp64_split3
 	; now check whether B is INF or NaN
 	; set Z=1 if INF, else Z=0 for NaN
 	; and return with C=1
-5:	call 3b			; even for NaN make sure that value is decomposed
-	call 3b			; correctly by shifting mantissa 4 bits to rights	
-	call 3b			; otherwise it is possible that a NaN might be 
-	call 3b			; converted to Inf 
+5:	rcall 3b			; even for NaN make sure that value is decomposed
+	rcall 3b			; correctly by shifting mantissa 4 bits to rights	
+	rcall 3b			; otherwise it is possible that a NaN might be 
+	rcall 3b			; converted to Inf 
 
-	call __fp64_splitA	; split A into rAx, return with flags set from A
+	rcall __fp64_splitA	; split A into rAx, return with flags set from A
 	brcc 51f		; ignore flags of A for finite number
 	brne 52f		; if A is NaN, don't care about flags for B
 51:	cp	rB6, r1		; Z = 1 if rBx = 0
@@ -125,9 +126,9 @@ ENTRY	__fp64_split3
 	; B is zero or subnormal, exponent rBE1,rBE0 was 0
 	; now check whether B is subnormal
 	; if so set exponent rBE1, rBE0 to 1
-4:	call 3b			; even for zero and subnormal make sure that value is decomposed
-	call 3b			; correctly by shifting mantissa 4 bits to rights	
-	call 3b			; otherwise it is possible that a subnormal might be 
+4:	rcall 3b			; even for zero and subnormal make sure that value is decomposed
+	rcall 3b			; correctly by shifting mantissa 4 bits to rights	
+	rcall 3b			; otherwise it is possible that a subnormal might be 
 	
 	cp	r1, rB0		; C = 1 if one of Bx > 0
 	cpc	r1, rB1		
@@ -201,8 +202,8 @@ ENTRY   __fp64_splitA
 	
 	; it is a normal number --> shift it to the left until MSB is set
 88:	ori  rA6, 0x10	; set leading one for mantissa
-8:	call 9f
-	call 9f
+8:	rcall 9f
+	rcall 9f
 9:	lsl  rA0		; shift A6.A5....A0 left one bit
 	rol  rA1
 	rol  rA2
@@ -231,10 +232,10 @@ ENTRY   __fp64_splitA
 	; now check whether A is INF or NaN
 	; set Z=1 if INF, else Z=0 for NaN
 	; and return with C=1
-7:	call 9b			; even for NaN make sure that value is decomposed
-	call 9b			; correctly by shifting mantissa 4 bits to rights	
-	call 9b			; otherwise it is possible that a NaN might be 
-	call 9b			; converted to Inf 
+7:	rcall 9b			; even for NaN make sure that value is decomposed
+	rcall 9b			; correctly by shifting mantissa 4 bits to rights	
+	rcall 9b			; otherwise it is possible that a NaN might be 
+	rcall 9b			; converted to Inf 
 
 	cp	rA6, r1		; Z = 1 if rAx = 0
 	cpc	rA5, r1

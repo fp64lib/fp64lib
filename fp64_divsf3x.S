@@ -73,7 +73,7 @@ FUNCTION __fp64_divsd3x
 	breq 	.L_nan		; B = 0, A = +/-Inf --> A/B = NaN, case 3
 	; now A is +/-Inf, B != 0, case 6 --> return +/- Inf
 .L_inf:
-	XJMP	_U(__fp64_inf)
+	XJMP	_U(__fp64_infp)
 
 1: ; B is +/-Inf, cases 4,5,7	
 	XCALL	_U(__fp64_pscA)
@@ -81,6 +81,7 @@ FUNCTION __fp64_divsd3x
 
 	; finite / Inf, cases 5,7: x / Inf = 0
 .L_zr:
+	XCALL _U(__fp64_popB)
 	XJMP	_U(__fp64_szero)
 	
 	; 0 / B, cases 8, 9
@@ -89,11 +90,12 @@ FUNCTION __fp64_divsd3x
 
 	; cases 1-4 and 8: result is NaN 
 .L_nan:
-	XJMP	_U(__fp64_nan)
+	XJMP	_U(__fp64_nanp)
 
 ENTRY fp64_div
 ENTRY	__fp64_divsd3x
 ENTRY	__fp64_divsd3
+	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)
 	; call __fp64_saveAB
 	brcs	0b			; handle special cases NaN / Inf
@@ -103,6 +105,7 @@ ENTRY	__fp64_divsd3
 	
 	XCALL _U(__fp64_divsd3_pse)
 	
+	XCALL _U(__fp64_popB)
 	brcs 99f				; underflow/overflow --> return already packed result
 	XJMP _U(__fp64_rpretA)	; everything ok --> round, pack result and return
 99:	ret	

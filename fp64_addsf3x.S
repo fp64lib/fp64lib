@@ -79,7 +79,7 @@ FUNCTION __fp64addsf3x
 	brmi .L_inf				; +Inf - -Inf or -Inf - +Inf --> return Inf with sign of A
 	; case 3a/3d: Inf + Inf with different sign, return NaN
 .L_nan:
-	XJMP	_U(__fp64_nan)
+	XJMP	_U(__fp64_nanp)
 
 	; recover sign(a)
 	; for addition: T = sign(a) ^ sign(b), rB7.7 = sign(b)
@@ -96,26 +96,13 @@ FUNCTION __fp64addsf3x
 	; case 4: Inf + Any -> return Inf with sign of A
 .L_inf:						
 	rcall .L_sign			; recover sign(a)
-	XJMP	_U(__fp64_inf)	; return Inf with sign(a)
+	XJMP	_U(__fp64_infp)	; return Inf with sign(a)
 
 	; case 5: Any + Inf -> return Inf with sign of B
 .L_infB:
 	sub		rB7, r0			; if mode is sub, reverse sign of B
 	bst		rB7, 7			; determine sign based on B
-	XJMP	_U(__fp64_inf)	; return Inf
-
-.L_swap:					; swap A and B
-	push r0
-	push r1
-	_SWAPW rAE0, rBE0		
-	_SWAPW rA0, rB0
-	_SWAPW rA2, rB2
-	_SWAPW rA4, rB4
-	_SWAPW rA6, rB6
-	pop r1
-	pop r0
-	;call __fp64_saveAB
-	ret
+	XJMP	_U(__fp64_infp)	; return Inf
 
 	/*
 	float64_t fp64_sub( float64_t A, float64_t B )
@@ -130,7 +117,6 @@ ENTRY	__fp64_subsd3
 	clr r0
 	sec
 	ror r0					; set mode to subtraction = 0x80
-	; sub rB7, r0 			; complement sign bit of B: A-B = A + (-B)
 	rjmp 1f
 	
 	/*
@@ -145,7 +131,8 @@ ENTRY fp64_add
 ENTRY __fp64_addsd3
 ENTRY __fp64_addsd3x
 	clr r0					; set mode to addition
-1:	XCALL _U(__fp64_split3)	; split A and B into parts for exponent and mantissa
+1:	XCALL _U(__fp64_pushB)
+	XCALL _U(__fp64_split3)	; split A and B into parts for exponent and mantissa
 	; rcall __fp64_saveAB
 	brcs	0b				; A or B is NaN and/or InF --> manage special cases
 	breq	11f				; A is 0 --> result is B, case 11
@@ -154,9 +141,11 @@ ENTRY __fp64_addsd3x
 	brne	2f				; A and B are != 0 --> check whether A > B
 							; B is 0, case 12
 	rcall	.L_sign			; recover sign(A), as B might be -0
+	XCALL _U(__fp64_popB)
 	XJMP _U(__fp64_pretA)	; B is 0 --> result is A
 	
 2:	rcall __fp64_add_pse_r0
+	XCALL _U(__fp64_popB)
 	XJMP _U(__fp64_rpretA)	; round, pack result and return
  
 	/*
@@ -248,7 +237,8 @@ __fp64_add_pse_r0:
 	; case 11: A is 0 --> result is B, sign depending on B and op
 11:	sub rB7, r0				; reverse sign of B in case of a subtraction
 	bst rB7, 7				; set sign of result = sign(B)
-	rcall .L_swap			; so move B into A and return it
+	XCALL _U(__fp64_swapAB)	; so move B into A and return it
+	XCALL _U(__fp64_popB)
 	XJMP _U(__fp64_pretA)	; B is 0 --> result is A
 
 14: ; cases 1-4, fabs(A) > fabs(b)
@@ -266,7 +256,7 @@ __fp64_add_pse_r0:
 	com r0
 33:	bst rB7, 7				; set sign of result = sign(B) or sign(-B)
 	
-	rcall .L_swap			; swap A  & B
+	XCALL _U(__fp64_swapAB)	; swap A  & B
 
 	; from now on, fabs(A) > fabs(b), A != 0, B != 0
 	; T = sign(result), r0 = op
@@ -368,7 +358,9 @@ __fp64_add_pse_r0:
 	brne .L_ret		; no -> return A
 	cpi rAE1, 0x7
 	brne .L_ret		; no -> return A
-	rcall .L_inf	; yes -> return infinity
+
+	rcall .L_sign	; yes, return inf with recovered sign(a)
+	XCALL _U(__fp64_inf)
 	sec				; set carry to indicate overflow and for already packed result
 	ret
 	
