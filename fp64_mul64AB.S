@@ -299,10 +299,7 @@ ENTRY __fp64_domul64AB
 	
 	XCALL _U(__fp64_mul64AB)	; C = A * B
 	
-	movw rA6, rC6	; move result into A
-	movw rA4, rC4
-	movw rA2, rC2
-	movw rA0, rC0
+	XCALL _U(__fp64_movAC)		; move result to A
 	
 	pop rC7		; restore registers
 	pop rC6

@@ -1,7 +1,4 @@
-/* Copyright (c) 2018-2020  Uwe Bissinger
-   Based on 32bit floating point arithmetic routines which are:
-   Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
-   Copyright (c) 2006  Dmitry Xmelkov
+/* Copyright (c) 2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -34,9 +31,88 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-ENTRY __fp64_norm2
-1:	sbiw rAE0, 1			; exponent--
-	XCALL _U(__fp64_lslA)	; mantissa <<= 1
-	brpl	1b				; until mantissa starts with a leading 1 bit
+/*  __fp64_cpcAB() compare A with B
+   Input:
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A in unpacked format
+		rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B in unpacked format
+   Return:
+		C=1		B > A
+		C=0 Z=1	B == A
+		C=0 Z=0 B < A
+	Modifies:
+		SREG
+ */
+
+FUNCTION __fp64_cmpA
+ENTRY __fp64_cpcAB
+	cp	rA0, rB0
+	cpc	rA1, rB1
+	cpc	rA2, rB2
+	cpc	rA3, rB3
+	cpc	rA4, rB4
+	cpc	rA5, rB5
+	cpc	rA6, rB6
+	ret
+
+/*  __fp64_cpcBA() compare B with A
+   Input:
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A in unpacked format
+		rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B in unpacked format
+   Return:
+		C=1		B < A
+		C=0 Z=1	B == A
+		C=0 Z=0 B > A
+	Modifies:
+		SREG
+ */
+
+ENTRY __fp64_cpcBA
+	cp	rB0, rA0
+	cpc	rB1, rA1
+	cpc	rB2, rA2
+	cpc	rB3, rA3
+	cpc	rB4, rA4
+	cpc	rB5, rA5
+	cpc	rB6, rA6
+	ret
+	
+/*  __fp64_cpc0A5() compare A with 0
+   Input:
+		rA5.rA4.rA3.rA2.rA1.rA0  - A in unpacked format
+   Return:
+		C=1		0 > A
+		C=0 Z=1	0 == A
+		C=0 Z=0 0 < A
+	Modifies:
+		SREG
+ */
+
+ENTRY __fp64_cpc0A5
+	cp r1, rA0
+	cpc r1, rA1
+	cpc r1, rA2
+	cpc r1, rA3
+	cpc r1, rA4
+	cpc r1, rA5
+	ret
+	
+/*  __fp64_cpc0B5() compare B with 0
+   Input:
+		rB5.rB4.rB3.rB2.rB1.rB0  - B in unpacked format
+   Return:
+		C=1		0 > B
+		C=0 Z=1	0 == B
+		C=0 Z=0 0 < B
+	Modifies:
+		SREG
+ */
+
+ENTRY __fp64_cpc0B5
+	cp	r1, rB0		; check rest of mantissa
+	cpc	r1, rB1
+	cpc	r1, rB2
+	cpc	r1, rB3
+	cpc	r1, rB4
+	cpc	r1, rB5
 	ret
 ENDFUNC

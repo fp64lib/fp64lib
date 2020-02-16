@@ -1,7 +1,4 @@
-/* Copyright (c) 2018-2020  Uwe Bissinger
-   Based on 32bit floating point arithmetic routines which are:
-   Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
-   Copyright (c) 2006  Dmitry Xmelkov
+/* Copyright (c) 2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -34,9 +31,20 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-ENTRY __fp64_norm2
-1:	sbiw rAE0, 1			; exponent--
-	XCALL _U(__fp64_lslA)	; mantissa <<= 1
-	brpl	1b				; until mantissa starts with a leading 1 bit
-	ret
+FUNCTION __fp64_movAC
+
+/*  __fp64_movAC() move C into A
+   Input:
+	  rC7.rC6.rC5.rC4.rC3.rC2.rC1.rC0  - C in packed format 
+   Return:
+	  rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - a copy of C in packed format
+   Modifies:
+	  nothing - also SREG is preserved
+ */
+ENTRY __fp64_movAC
+   X_movw rA6, rC6		; A = C
+   X_movw rA4, rC4
+   X_movw rA2, rC2
+   X_movw rA0, rC0
+   ret
 ENDFUNC

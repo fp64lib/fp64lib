@@ -154,7 +154,7 @@ Registers
 # error	"The FUNCTION macro must be defined after FUNC_SEGNAME"
 #endif
 // #define FUNC_SEGNAME	MLIB_SECTION
-#define FUNC_SEGNAME	.text.fp64lib
+#define FUNC_SEGNAME	.text.libfp64.asm
 
 /* Put constant tables at low addresses in program memory, so they are
    reachable for "lpm" without using RAMPZ on >64K devices.  */

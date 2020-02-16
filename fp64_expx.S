@@ -96,22 +96,7 @@ ENTRY fp64_exp
 
 
 1:	; x is in valid range
-	push rC7			; save used registers
-	push rC6
-	push rC5
-	push rC4
-	push rC3
-	push rC2
-	push rC1
-	push rC0
-	push rB7
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
+	XCALL _U(__fp64_pushCB) ; preserve register set
 	bld r0, 7				; save sign of x
 	push r0
 
@@ -135,32 +120,14 @@ ENTRY fp64_exp
 	XCALL	_U(__fp64_powser)
 	pop YH
 	pop YL
-	pop rBE1			; load n into B
+	pop rBE1				; load n into B
 	pop rBE0
 
 
 	pop r0
-	bst r0, 7			; restore saved sign of x
+	bst r0, 7				; restore saved sign of x
 	; rcall __fp64_saveABC
-	pop rB0				; restore used registers part1
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	
-	pop rC0				; restore used registers part 2
-	pop rC1
-	pop rC2
-	pop rC3
-	pop rC4
-	pop rC5
-	pop rC6
-	pop rC7
-	
-	; rjmp .L_retA ; !!!!*****!!!!
+	XCALL _U(__fp64_popBC)	; restore register set
 	
 	; multiply result by 2^n --> add n to exponent
 	; rcall __fp64_saveAB
@@ -190,16 +157,11 @@ ENTRY fp64_exp
 	
 	brne .L_retA	; exponent > 0 --> normal case, return A
 	; exponent == 0, check for 0
-	cp	r1, rA0		; C = 1 if one of Ax > 0
-	cpc	r1, rA1		
-	cpc	r1, rA2
-	cpc	r1, rA3
-	cpc	r1, rA4
-	cpc	r1, rA5
+	XCALL _U(__fp64_cpc0A5)	; C = 1 if one of Ax > 0
 	cpc	r1, rA6		; C = 1, if A is not a zero
 	brcc .L_retA	; A == 0 --> return A
 	; A != 0, exponent == 0 --> only one shift is needed to return A as subnormal
-	XCALL _U(__fp64_lsrA6)
+	XCALL _U(__fp64_lsrA)
 	rjmp .L_retA
 	
 	; exponent <= 0, check if in range for subnormal number
@@ -228,18 +190,10 @@ ENTRY fp64_exp
 	breq 6f
 
 	; shift 1 bit at a time
-	lsr rA6				; A >>= 1
-	ror rA5
-	ror rA4
-	ror rA3
-	ror rA2
-	ror rA1
-	ror rA0
+	XCALL _U(__fp64_lsrA)	; A >>= 1
 	adiw rAE0, 1
-	brmi 5b				; until exponent > 0
-	; breq 5b
-	; sbiw rAE0, 1
-	rjmp .L_retA		; return subnormal number
+	brmi 5b					; until exponent > 0
+	rjmp .L_retA			; return subnormal number
 
 6:	; real underflow, return 0
 	rjmp .L_zr

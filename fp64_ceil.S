@@ -96,13 +96,7 @@ ENTRY	fp64_ceil
 	push rAE1
 	clr r0						; save flag for fraction
 	
-0:	lsr rA6						; shift number downwards -> this clears the fraction
-	ror rA5
-	ror rA4
-	ror rA3
-	ror rA2
-	ror rA1
-	ror rA0
+0:	XCALL _U(__fp64_lsrA)		; shift number downwards -> this clears the fraction
 	adc r0, r1					; add all fractional bits
 	dec rAE1
 	brne 0b
@@ -124,13 +118,7 @@ ENTRY	fp64_ceil
 1:	pop rAE1					; restore number of shifts
 	; rcall __fp64_saveAB
 	
-2:	lsl rA0						; now shift the number back into position
-	rol rA1
-	rol rA2
-	rol rA3
-	rol rA4
-	rol rA5
-	rol rA6
+2:	XCALL _U(__fp64_lslA)		; now shift the number back into position
 	dec rAE1
 	brne 2b
 

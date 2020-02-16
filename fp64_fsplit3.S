@@ -130,12 +130,7 @@ ENTRY	__fp64_split3
 	rcall 3b			; correctly by shifting mantissa 4 bits to rights	
 	rcall 3b			; otherwise it is possible that a subnormal might be 
 	
-	cp	r1, rB0		; C = 1 if one of Bx > 0
-	cpc	r1, rB1		
-	cpc	r1, rB2
-	cpc	r1, rB3
-	cpc	r1, rB4
-	cpc	r1, rB5
+	XCALL _U(__fp64_cpc0B5)	; C = 1 if one of Bx > 0
 	cpc	r1, rB6		; C = 1, if A is not a zero
 	rol	rBE0		; if C = 1 --> exponent rAE0 = 1 else exponent = 0
 	; rjmp __fp64_splitA	; split A into rAx, return with flags set from A as B does not matter
@@ -202,27 +197,16 @@ ENTRY   __fp64_splitA
 	
 	; it is a normal number --> shift it to the left until MSB is set
 88:	ori  rA6, 0x10	; set leading one for mantissa
-8:	rcall 9f
-	rcall 9f
-9:	lsl  rA0		; shift A6.A5....A0 left one bit
-	rol  rA1
-	rol  rA2
-	rol  rA3
-	rol  rA4
-	rol  rA5
-	rol  rA6
-	clz				; clear Z (needed for subnormal numbers as rA6 may be 0)
-	ret				; C = 0, Z = 0
+8:	XCALL _U(__fp64_lslA)
+	XCALL _U(__fp64_lslA)
+	XCALL _U(__fp64_lslA)	; shift A6.A5....A0 left one bit
+	clz						; clear Z (needed for subnormal numbers as rA6 may be 0)
+	ret						; C = 0, Z = 0
 	
 	; A is zero or subnormal, exponent rAE1,rAE0 was 0
 	; now check whether A is subnormal
 	; if so set exponent rAE1, rAE0 to 1
-6:	cp	r1, rA0		; C = 1 if one of Ax > 0
-	cpc	r1, rA1		
-	cpc	r1, rA2
-	cpc	r1, rA3
-	cpc	r1, rA4
-	cpc	r1, rA5
+6:	XCALL _U(__fp64_cpc0A5)	; C = 1 if one of Ax > 0
 	cpc	r1, rA6		; C = 1, if A is not a zero
 	rol	rAE0		; if C = 1 --> exponent rAE0 = 1 else exponent = 0
 	brne 8b			; if Z != 0 --> subnormal, shift for correct operations
@@ -232,10 +216,10 @@ ENTRY   __fp64_splitA
 	; now check whether A is INF or NaN
 	; set Z=1 if INF, else Z=0 for NaN
 	; and return with C=1
-7:	rcall 9b			; even for NaN make sure that value is decomposed
-	rcall 9b			; correctly by shifting mantissa 4 bits to rights	
-	rcall 9b			; otherwise it is possible that a NaN might be 
-	rcall 9b			; converted to Inf 
+7:	XCALL _U(__fp64_lslA)	; even for NaN make sure that value is decomposed
+	XCALL _U(__fp64_lslA)	; correctly by shifting mantissa 4 bits to rights	
+	XCALL _U(__fp64_lslA)	; otherwise it is possible that a NaN might be 
+	XCALL _U(__fp64_lslA)	; converted to Inf 
 
 	cp	rA6, r1		; Z = 1 if rAx = 0
 	cpc	rA5, r1

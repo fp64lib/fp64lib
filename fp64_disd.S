@@ -69,14 +69,9 @@ ENTRY __fp64unsdisd
 	clt			; result sign = +
 	
 __fp64_di2sd:
-	clr rAE0			; exponent = 0
+	clr rAE0				; exponent = 0
 	clr rAE1
-	cp r1, rA0			; A = 0?
-	cpc r1, rA1
-	cpc r1, rA2
-	cpc r1, rA3
-	cpc r1, rA4
-	cpc r1, rA5
+	XCALL _U(__fp64_cpc0A5)	; A = 0?
 	cpc r1, rA6
 	cpc r1, rA7
 	brne 0f				; no, convert
@@ -113,13 +108,7 @@ __fp64_di2sd:
 	; rA6 is not 0.  It is needed shift to left by 0..7 positions.
 4:	brmi	.L_round; stop, if topmost bit is set
 	dec	rAE0		; exponent -= 1
-	lsl rA0			; A <<= 1
-	rol rA1
-	rol rA2
-	rol rA3
-	rol rA4
-	rol rA5
-	rol rA6
+	XCALL _U(__fp64_lslA)	; A <<= 1
 	rjmp 4b
 
 	; Round and pack

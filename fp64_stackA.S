@@ -1,7 +1,4 @@
-/* Copyright (c) 2018-2020  Uwe Bissinger
-   Based on 32bit floating point arithmetic routines which are:
-   Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
-   Copyright (c) 2006  Dmitry Xmelkov
+/* Copyright (c) 2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -34,9 +31,76 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-ENTRY __fp64_norm2
-1:	sbiw rAE0, 1			; exponent--
-	XCALL _U(__fp64_lslA)	; mantissa <<= 1
-	brpl	1b				; until mantissa starts with a leading 1 bit
-	ret
+/* stack manipulation routines for A register set */
+FUNCTION __fp64_stack
+
+/* __fp64_pushA() save A register set in stack
+	Does not rely on YL,YH being the frame pointer
+	Function must be called via rcall or call, cannot be a target of rjmp/jmp!
+
+	Input:
+		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A will be saved on stack
+	Return:
+		nothing
+	Modifies:
+		nothing - also SREG is preserved
+ */
+
+ENTRY __fp64_pushA
+	sts __fp64_saver01, r0		; save r0 & r1 
+	sts __fp64_saver01+1, r1
+	
+	pop r0						; get return address
+	pop r1
+#if defined (ARDUINO_AVR_MEGA2560)
+	sts  __fp64_saver01+2, r0
+	pop r0
+#endif
+
+	push rA7					; save A
+	push rA6
+	push rA5
+	push rA4
+	push rA3
+	push rA2
+	push rA1
+	push rA0
+	
+	XJMP _U(__fp64_L_ret)
+
+
+/* __fp64_popA() restore A register set
+	Does not rely on YL,YH being the frame pointer
+	Function must be called via rcall or call, cannot be a target of rjmp/jmp!
+	Input:
+		none
+	Return:
+		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A will be saved on stack
+	Modifies:
+		nothing - also SREG is preserved
+ */
+
+ENTRY   __fp64_popA
+	;call __fp64_saveAB
+	sts __fp64_saver01, r0	; save r0 & r1 
+	sts __fp64_saver01+1, r1
+	
+	pop r0				; get return address
+	pop r1
+#if defined (ARDUINO_AVR_MEGA2560)
+	sts  __fp64_saver01+2, r0
+	pop r0
+#endif
+
+	pop rA0				; restore B
+	pop rA1
+	pop rA2
+	pop rA3
+	pop rA4
+	pop rA5
+	pop rA6
+	pop rA7
+
+	XJMP _U(__fp64_L_ret)
+
 ENDFUNC

@@ -31,95 +31,31 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-FUNCTION __fp64_popB
-
-/* __fp64_pushB() save B register set in stack
-	Does not rely on YL,YH being the frame pointer
+/*  __fp64_movBAx() move A into B
    Input:
-     rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B will be saved on stack
+	  rAE1.rAE0.rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A in unpacked format
    Return:
-     nothing
-	Modifies:
-	 nothing - also SREG is preserved
+	  rBE1.rBE0.rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - a copy of A in unpacked format
+   Modifies:
+	  nothing - also SREG is preserved
  */
 
-ENTRY __fp64_pushB
-	sts __fp64_saver01, r0		; save r0 & r1 
-	sts __fp64_saver01+1, r1
-	
-	pop r0						; get return address
-	pop r1
-#if defined (ARDUINO_AVR_MEGA2560)
-	sts  __fp64_saver01+2, r0
-	pop r0
-#endif
+FUNCTION __fp64_movBA
+ENTRY __fp64_movBAx
+   X_movw rBE0, rAE0
 
-	push rB7					; save B as it will be modified
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
-	
-	; rjmp .L_ret
-
-#if defined (ARDUINO_AVR_MEGA2560)
-	push r0
-	lds r0, __fp64_saver01+2
-#endif
-	push r1						; push return address back to stack
-	push r0
-
-	lds r1, __fp64_saver01+1	; restore r0 & r1
-	lds r0, __fp64_saver01
-	ret
-
-/* __fp64_popB() restore B register set
-	Does not rely on YL,YH being the frame pointer
+/*  __fp64_movBA() move A into B
    Input:
-     none
+	  rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A in packed format
    Return:
-     rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B restored from stack, as originally pushed by __fp64_pushB
-	Modifies:
-	 nothing - also SREG is preserved
+	  rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - a copy of A in packed format
+   Modifies:
+	  nothing - also SREG is preserved
  */
-
-ENTRY   __fp64_popB
-	;call __fp64_saveAB
-	sts __fp64_saver01, r0	; save r0 & r1 
-	sts __fp64_saver01+1, r1
-	
-	pop r0				; get return address
-	pop r1
-#if defined (ARDUINO_AVR_MEGA2560)
-	sts  __fp64_saver01+2, r0
-	pop r0
-#endif
-
-	pop rB0				; restore B
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-
-.L_ret:					; restore return address, r0&r1 and return to caller
-#if defined (ARDUINO_AVR_MEGA2560)
-	push r0
-	lds r0, __fp64_saver01+2
-#endif
-	push r1				; push return address back to stack
-	push r0
-
-	lds r1, __fp64_saver01+1	; retore r0 & r1
-	lds r0, __fp64_saver01
-	ret
+ENTRY __fp64_movBA
+   X_movw rB6, rA6		; B = A
+   X_movw rB4, rA4
+   X_movw rB2, rA2
+   X_movw rB0, rA0
+   ret
 ENDFUNC
-
-.data
-ENTRY __fp64_saver01
-	.skip 3

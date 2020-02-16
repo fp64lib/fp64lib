@@ -177,23 +177,7 @@ ENTRY __fp64_ftoa_pse
 	subi rAE0, 0xff
 	sbci rAE1, 0x03			; remove base from exponent
 
-	push rC7				; save registers used by __fp64_10pown
-	push rC6
-	push rC5
-	push rC4
-	push rC3
-	push rC2
-	push rC1
-	push rC0
-	
-	push rB7				; save registers used by __fp64_10pown
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
+	XCALL _U(__fp64_pushCB) ; save registers used by 10pown
 
 	push rA7				; save registers used by 10pown
 	push rA6
@@ -232,13 +216,10 @@ ENTRY __fp64_ftoa_pse
 	pop rB5
 	pop rB6
 	pop rB7
-	pop r0					; throw away rA7
+	pop r0						; throw away rA7
 	XCALL _U(__fp64_mul64AB)	; C = significand * 10^-exp10
 	XCALL _U(__fp64_lshift64)	;
-	movw rA6, rC6			; move result to A
-	movw rA4, rC4
-	movw rA2, rC2
-	movw rA0, rC0
+	XCALL _U(__fp64_movAC)		; move result to A
 
 	adiw rExp2L, 1			; exponent += 1 - shiftLeft(A)
 	sub rExp2L, r0
@@ -278,10 +259,7 @@ ENTRY __fp64_ftoa_pse
 	XCALL _U(__fp64_mul64AB)	; C = A * 0.1
 	XCALL _U(__fp64_lshift64)	; shift left C until bit63 is set
 	pop r1
-	movw rA6, rC6				; move result back to A
-	movw rA4, rC4
-	movw rA2, rC2
-	movw rA0, rC0
+	XCALL _U(__fp64_movAC)		; move result back to A
 	
 	adiw rExp10L, 1				; exp10++
 	
@@ -301,12 +279,7 @@ ENTRY __fp64_ftoa_pse
 	;	A <<= 1 + exp2
 	;   digit = A >> 63-exp2 
 7:	add rA0, rA0
-	rol rA1
-	rol rA2
-	rol rA3
-	rol rA4
-	rol rA5
-	rol rA6
+	XCALL _U(__fp64_lslA1)
 	rol rA7
 	rol r0				; highest bit of A now comes into r0
 	sbiw rExp2L, 1
@@ -394,23 +367,7 @@ ENTRY __fp64_ftoa_pse
 	pop rExp10L
 	pop rExp10H 
 
-	pop rB0					; restore saved registers
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	
-	pop rC0					; restore saved registers
-	pop rC1
-	pop rC2
-	pop rC3
-	pop rC4
-	pop rC5
-	pop rC6
-	pop rC7
+	XCALL _U(__fp64_popBC)		; restore register set
 	
 	movw ZL, rB2			; // if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0
@@ -454,10 +411,7 @@ ENTRY __fp64_ftoa_pse
 	XCALL _U(__fp64_mul64AB)	; C = A * 10
 	XCALL _U(__fp64_lshift64)	; shift left C until bit63 is set
 	pop r1
-	movw rA6, rC6				; move result back to A
-	movw rA4, rC4
-	movw rA2, rC2
-	movw rA0, rC0
+	XCALL _U(__fp64_movAC)		; move result back to A
 	
 	; exp2 = exp2 + 4 - numberOfShifts in r0
 	adiw rExp2L, 4

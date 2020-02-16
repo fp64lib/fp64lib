@@ -114,10 +114,7 @@ ENTRY fp64_log
 22:	; rcall __fp64_saveAB
 	push rAE0					; save exponent for normalization
 	
-	movw rC6, rA6				; save x
-	movw rC4, rA4
-	movw rC2, rA2
-	movw rC0, rA0
+	XCALL _U(__fp64_movCA)		; save x
 	push rAE1
 	push rAE0
 
@@ -140,10 +137,7 @@ ENTRY fp64_log
 	XCALL _U(__fp64_sub_pse)	; x - 1
 	bld rA7, 7					; save sign
 	
-	movw rB6, rC6				; restore b = x + 1
-	movw rB4, rC4
-	movw rB2, rC2
-	movw rB0, rC0
+	XCALL _U(__fp64_movBC)		; restore b = x + 1
 	pop rBE0					; restore exponent of x+1
 	pop rBE1
 	

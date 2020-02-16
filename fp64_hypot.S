@@ -49,10 +49,7 @@ ENTRY fp64_hypot
 	push rA2
 	push rA1
 	push rA0
-	movw rA6, rB6				; get y
-	movw rA4, rB4
-	movw rA2, rB2
-	movw rA0, rB0
+	XCALL _U(__fp64_movAB)		; get y
 	XCALL _U(fp64_square)		; calc y^2
 	pop rB0						; restore x^2 into B
 	pop rB1	

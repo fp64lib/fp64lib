@@ -148,15 +148,9 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	; make sure A < B
 	clr rA7
 	clr rB7
-	XCALL	_U(__fp64_lsrA6)		; A >>= 1, make room for overflow bit
+	XCALL	_U(__fp64_lsrA)		; A >>= 1, make room for overflow bit
 	
-22:	cp	rA0, rB0	; check whether A < B
-	cpc	rA1, rB1
-	cpc	rA2, rB2
-	cpc	rA3, rB3
-	cpc	rA4, rB4
-	cpc	rA5, rB5
-	cpc	rA6, rB6
+22:	XCALL _U(__fp64_cpcAB)		; check whether A < B
 	brlo	3f		; A >= B, everything aligned, division can start
 	
 	; as we do allow subnormal numbers, mantissa of B might not start with 
@@ -253,7 +247,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 
 	; handle subnormal numbers
 	; shift left mantissa until exponent is 0
-14:	XCALL _U(__fp64_lsrA6)	; mantissa >>= 1
+14:	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
 	adiw rAE0, 1			; exponent++
 	brmi 14b				; exponent still < 0
 	; stops when exponent == 0 --> indicator for subnormal number
@@ -267,21 +261,9 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	clr r0
 	inc r0
 .L_div1:
-	lsl	rA0			; A <<= 1
-	rol	rA1
-	rol	rA2
-	rol	rA3
-	rol rA4
-	rol rA5
-	rol rA6
+	XCALL _U(__fp64_lslA)	; A <<= 1
 	rol rA7
-	cp	rA0, rB0	; is A > B
-	cpc	rA1, rB1
-	cpc	rA2, rB2
-	cpc	rA3, rB3
-	cpc	rA4, rB4
-	cpc	rA5, rB5
-	cpc	rA6, rB6
+	XCALL _U(__fp64_cpcAB)	; is A > B
 	cpc	rA7, rB7
 	brcs	2f		; no, skip subtraction
 	sub	rA0, rB0	; yes, A -= B

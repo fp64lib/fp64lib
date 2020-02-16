@@ -39,21 +39,11 @@
  */
 
 ENTRY fp64_inverse
-	push rB0			; save temporarely used registers
-	push rB1
-	push rB2
-	push rB3
-	push rB4
-	push rB5
-	push rB6
-	push rB7
+	XCALL _U(__fp64_pushB)		; preserve registers
 
-	X_movw	rB0, rA0	; B = x
-	X_movw	rB2, rA2
-	X_movw	rB4, rA4
-	X_movw	rB6, rA6
+	XCALL _U(__fp64_movBA)		; B = x
 
-	ldi	rA7, 0x3f		; set A = +1.0 = 0x3ff000..00
+	ldi	rA7, 0x3f				; set A = +1.0 = 0x3ff000..00
 	ldi rA6, 0xf0
 	clr rA5
 	clr rA4
@@ -62,14 +52,5 @@ ENTRY fp64_inverse
 	
 	XCALL	_U(__fp64_divsd3)	; calculate 1.0 / x
 	
-	pop rB7			; restore temporarely used registers
-	pop rB6
-	pop rB5
-	pop rB4
-	pop rB3
-	pop rB2
-	pop rB1
-	pop rB0
-	
-	ret
+	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC

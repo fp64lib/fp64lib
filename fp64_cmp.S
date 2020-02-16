@@ -64,12 +64,7 @@ ENTRY	__fp64_cmp
 	cpi rA6, 0xf0	; we have to check lower 4 bits of exponent
 	brlo 1f			; exponent = 0x7fx --> normal number, do normal compare
 	brne 9f			; exponent = 0x7ff and mantissa > 0 --> NaN
-	cp	r1, rA0		; check rest of mantissa
-	cpc	r1, rA1
-	cpc	r1, rA2
-	cpc	r1, rA3
-	cpc	r1, rA4
-	cpc	r1, rA5
+	XCALL _U(__fp64_cpc0A5)	; check rest of mantissa
 	brlo	9f		; 0 < mantissa --> NaN
 
 1:	; A is normal number or INF, isnan(B) ?
@@ -79,12 +74,7 @@ ENTRY	__fp64_cmp
 	cpi rB6, 0xf0	; we have to check lower 4 bits of exponent
 	brlo 2f			; exponent = 0x7fx --> normal number, do normal compare
 	brne 9f			; exponent = 0x7ff and mantissa > 0 --> NaN
-	cp	r1, rB0		; check rest of mantissa
-	cpc	r1, rB1
-	cpc	r1, rB2
-	cpc	r1, rB3
-	cpc	r1, rB4
-	cpc	r1, rB5
+	XCALL _U(__fp64_cpc0B5)	; check rest of mantissa
 	brlo	9f		; 0 < mantissa --> NaN
 
 2:	; both A & B are normal numbers or INF	

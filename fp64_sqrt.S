@@ -160,30 +160,13 @@ ENTRY __fp64_sqrt_pse
 	eor	rB5, msk5
 	eor	rB6, msk6
 	
-3:	lsl	rA0		; Shift left remainder argument (C used
-	rol	rA1
-	rol	rA2
-	rol	rA3
-	rol	rA4
-	rol	rA5
-	rol	rA6		; (C used at .Loop)
+3:	XCALL _U(__fp64_lslA)	; Shift left remainder argument (C used at .Loop)
 	brcs	4f
 	
-	cp	rB0, rA0
-	cpc	rB1, rA1
-	cpc	rB2, rA2
-	cpc	rB3, rA3
-	cpc	rB4, rA4
-	cpc	rB5, rA5
-	cpc	rB6, rA6
+	XCALL _U(__fp64_cpcBA)
 
 4:	sbrs	tv, 1
 	rjmp	.Loop
-
-  ; Rounding
-	; adc	rB4, msk1
-	; adc	rB5, msk1
-	; adc	rB6, msk1	; Rounded mantissa ready (msk1=0)
 
 	X_movw	rA0, rB0	; copy result from rB6.rB5...rB0 to A
 	X_movw	rA2, rB2	

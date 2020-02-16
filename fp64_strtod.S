@@ -363,22 +363,13 @@ ENTRY   fp64_strtod
 	cpc rC1, r1
 	cpc rC0, r1
 
-	; movw rB6, rC6				; 	move result back to A for next iteration
-	; movw rB4, rC4
-	; movw rB2, rC2
-	; movw rB0, rC0	
-	; rcall __fp64_saveB
-
 	breq 26f
 	XCALL _U(__fp64_lshift64)	; 	shift left C until bit63 is set, if C!= 0
 	sub rExp2L, r0				;	exp2 -= number of neccessary left shifts
 	sbci rExp2H, 0
 
 26:
-	movw rA6, rC6				; 	move result back to A for next iteration
-	movw rA4, rC4
-	movw rA2, rC2
-	movw rA0, rC0	
+	XCALL _U(__fp64_movAC)		; 	move result back to A for next iteration
 	; rcall __fp64_saveA
 
 	rjmp .L_nextDigit
@@ -526,10 +517,7 @@ ENTRY   fp64_strtod
 
 	XCALL _U(__fp64_mul64AB)	; C = significand (in B) * 10^exp10 (still in A)
 	XCALL _U(__fp64_lshift64)	; shift result to the left
-	movw rA6, rC6			; move result to A
-	movw rA4, rC4
-	movw rA2, rC2
-	movw rA0, rC0
+	XCALL _U(__fp64_movAC)		; move result to A
 
 	; adjust exp2 for shifts
 	sub rExp2L, r0				; exp2 += shiftLeft(A)
@@ -618,10 +606,10 @@ ENTRY   fp64_strtod
 .L_subn:	; handle subnormal number / underflow
 	cpi rAE0, lo8(-51)
 	brlt .L_RetZero			; result will not fit into 52 bits --> round down to 0 
-	XCALL _U(__fp64_lsrA6)	; mantissa >>= 1
+	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
 	
 40:	; shift subnormal number right until exponent is 0
-	XCALL _U(__fp64_lsrA6)	; mantissa >>= 1
+	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
 	adiw rAE0, 1			; exponent++
 	; rcall __fp64_saveAB
 	brmi 40b				; exponent still < 0

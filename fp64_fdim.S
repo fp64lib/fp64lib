@@ -53,25 +53,13 @@ ENTRY fp64_fdim
 	brmi	2f
 	
 	; A >= 0 and B >= 0
-	cp	rA0, rB0		; is B > A ? (or: is A-B < 0?)
-	cpc	rA1, rB1
-	cpc	rA2, rB2
-	cpc	rA3, rB3
-	cpc	rA4, rB4
-	cpc	rA5, rB5
-	cpc	rA6, rB6
+	XCALL _U(__fp64_cpcAB)	; is B > A ? (or: is A-B < 0?)
 	cpc	rA7, rB7
 	brcs 	3f			; yes, check for NaN
 1:	XJMP _U(__fp64_subsd3)	; no ---> A-B > 0, return A-B
 
 	; A < 0 or B < 0 or both < 0
-2:	cp	rB0, rA0		; is A > B?
-	cpc	rB1, rA1
-	cpc	rB2, rA2
-	cpc	rB3, rA3
-	cpc	rB4, rA4
-	cpc	rB5, rA5
-	cpc	rB6, rA6
+2:	XCALL _U(__fp64_cpcBA)	; is A > B?
 	cpc	rB7, rA7
 	brcc 1b				; no --> A-B > 0, return A-B
 	
@@ -80,12 +68,7 @@ ENTRY fp64_fdim
 3:	ldi	ZL, 0xf0	; hlo8(Inf)
 	ldi	ZH, 0xfe	; hhi8(Inf) after 'lsl'
 	lsl	rA7			; get rid of sign of A
-	cp	r1, rA0
-	cpc	r1, rA1
-	cpc	r1, rA2
-	cpc	r1, rA3
-	cpc	r1, rA4
-	cpc	r1, rA5
+	XCALL _U(__fp64_cpc0A5)
 	cpc	ZL, rA6
 	cpc	ZH, rA7
 	brlo	.L_nan
@@ -93,12 +76,7 @@ ENTRY fp64_fdim
 	; check B for NaN
 	push rB7
 	lsl	rB7			; get rid of sign of B			
-	cp	r1, rB0
-	cpc	r1, rB1
-	cpc	r1, rB2
-	cpc	r1, rB3
-	cpc	r1, rB4
-	cpc	r1, rB5
+	XCALL _U(__fp64_cpc0B5)
 	cpc	ZL, rB6
 	cpc	ZH, rB7
 	pop rB7

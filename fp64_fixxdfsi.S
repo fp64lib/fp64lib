@@ -349,12 +349,7 @@ __fp64_fixxdfxi:
 4:	breq .L_sign			; no, set the sign	
 	lsr rA7					; yes, shift down 1 bit
 	ror rA6
-	ror rA5
-	ror rA4
-	ror rA3
-	ror rA2
-	ror rA1
-	ror rA0
+	XCALL _U(__fp64_rorA5)
 	dec rAE1
 	rjmp 4b
 	

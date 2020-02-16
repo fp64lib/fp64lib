@@ -59,10 +59,7 @@
 
 0:	breq 1f		; if Inf
 	XCALL _U(__fp64_nan)	; case 1: result = NaN
-	movw rB6, rA6			; *iptr = NaN
-	movw rB4, rA4
-	movw rB2, rA2
-	movw rB0, rA0
+	XCALL _U(__fp64_movBA)	; *iptr = NaN
 	rjmp .L_write 
 	
 1:	XCALL  _U(__fp64_inf)	; case 2: result = Inf
@@ -81,7 +78,7 @@
 	
 .L_nfrc: ; case 4 fabs(x) > 2^53 --> no fraction
 	XCALL _U(__fp64_pretA)	; pack result
-	movw rB6, rA6			; *iptr = x
+	XCALL _U(__fp64_movBA)	; *iptr = x
 	movw rB4, rA4
 	movw rB2, rA2
 	movw rB0, rA0
@@ -96,14 +93,6 @@
 ENTRY fp64_modf
 ENTRY fp64_modff
 	XCALL _U(__fp64_pushB)
-	; push rB7		; save used registers
-	; push rB6
-	; push rB5
-	; push rB4
-	; push rB3
-	; push rB2
-	; push rB1
-	; push rB0
 	movw XL, ZL		; save iptr
 	
 	XCALL _U(__fp64_splitA)
@@ -181,18 +170,7 @@ ENTRY fp64_modff
 	st X+, rB6
 	st X+, rB7
 99:	
-	XCALL _U(__fp64_popB)
-	nop
-	; pop rB0				; restore used registers
-	; pop rB1
-	; pop rB2
-	; pop rB3
-	; pop rB4
-	; pop rB5
-	; pop rB6
-	; pop rB7
-	
-	ret
+	XJMP _U(__fp64_popBret)
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */

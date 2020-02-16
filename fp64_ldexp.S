@@ -100,13 +100,7 @@ ENTRY fp64_ldexp
 	
 	; case 6: exponent between -1024 and -1074
 	; create subnormal number
-1:	lsr rA6
-	ror rA5
-	ror rA4
-	ror rA3
-	ror rA2
-	ror rA1
-	ror rA0
+1:	XCALL _U(__fp64_lsrA)		; A >>= 1
 	inc rAE0
 	brmi 1b
 	

@@ -52,12 +52,8 @@ ENTRY __fp64_cmp_1
 
 	; now here: 1 <= |x| < 2
 	; check, whether |x| is == 1.0, i.e. significand = 0x80....0
-	cp r1, rA0
-	cpc r1, rA1
-	cpc r1, rA2
-	cpc r1, rA3
-	cpc r1, rA4
-	cpc r1, rA5
+	
+	XCALL _U(__fp64_cpc0A5)
 	brne .L_ret		; significand != 0 --> |x|>1, return Z=0, C=0
 
 	cpi rA6, 0x80	; significand = 0x80...0? --> Z=1 C=0 if yes, otherwise x>1 --> Z=0 C=0

@@ -129,11 +129,7 @@ ENTRY fp64_atan
 	; use atan(x) + atan(1/x) = pi/2 to reduce argument to [0, 1]	
 	; --> compute 1/x , which will be <= 1.0
 
-	X_movw	rB0, rA0				; B = |x|
-	X_movw	rB2, rA2
-	X_movw	rB4, rA4
-	X_movw	rB6, rA6
-	X_movw  rBE0, rAE0
+	XCALL _U(__fp64_movBAx)			; B = |x|
 
 	set
 	XCALL _U(__fp64_szero)			; will return packed -0, which is nearly unpacked 1.0
@@ -151,11 +147,7 @@ ENTRY fp64_atan
 	clr r1
 	clt
 
-	X_movw	rB0, rA0				; B = A = |x|
-	X_movw	rB2, rA2
-	X_movw	rB4, rA4
-	X_movw	rB6, rA6
-	X_movw  rBE0, rAE0
+	XCALL _U(__fp64_movBAx)			; B = A = |x|
 
 	push rA7						; save res = |x| (or 1/|x|)
 	push rA6
@@ -210,11 +202,7 @@ ENTRY fp64_atan
 	push rAE1
 	push rAE0
 	
-	X_movw	rA0, rB0				; A = B = x2
-	X_movw	rA2, rB2
-	X_movw	rA4, rB4
-	X_movw	rA6, rB6
-	X_movw  rAE0, rBE0
+	XCALL _U(__fp64_movABx)			; A = B = x2
 	ldi XL, lo8(.L_tableAtanNom)	; calculate Nominator
 	ldi XH, hi8(.L_tableAtanNom)
 	XCALL _U(__fp64_powser)			; z = horner( x2, coeff_nominator )

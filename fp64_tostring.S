@@ -263,8 +263,6 @@ ENTRY   fp64_to_string
 	push rB2
 	push rB1
 	push rB0
-	; push rExp10L
-	; push rExp10H
 	
 	sbrc rFlags, fZero
 	bset 1						; set Z flag if x was 0.0
@@ -294,12 +292,6 @@ ENTRY   fp64_to_string
 	pop rB7
 	bst rFlags, fSign			; restore sign
 	
-	; rcall __fp64_saveAB
-	; movw r24, ZL
-	; pop rB7
-	; pop rFlags
-	; ret
-
 	push YH
 	push YL
 	push ZH						; save original value for later use
@@ -392,14 +384,6 @@ ENTRY   fp64_to_string
 	mov rExp10H, rExp10L		; for( int i = 0 ; i < exp10; i++ ) {
 	tst rExp10H	
 	
-	; rcall __fp64_saveAB
-	; pop ZL
-	; pop ZH
-	; movw r24, ZL
-	; pop YL
-	; pop YH
-	; ret
-
 80:	breq 81f
 	ldd r0, Z+1					; 	s[pos] = s[pos+1]
 	st Z+, r0
@@ -423,16 +407,6 @@ ENTRY   fp64_to_string
 
 9:	; format number in exponential form
 	; nothing to do, just remove trailing 0s
-	; rcall __fp64_saveAB
-	; movw r24, ZL
-	; ; ldi rExp10H, 'F'
-	; ; st Z, rExp10H
-	; pop ZL
-	; pop ZH
-	; pop YL
-	; pop YH
-	; ret
-
 	add ZL, rPrec				; endpos = prec + 1
 	adc ZH, r1
 	adiw ZL, 1					; ZL.ZH now points to s[endPos]
@@ -462,15 +436,6 @@ ENTRY   fp64_to_string
 	rjmp 93f
 92:	adiw ZL,1
 	st Z, r1					;	s[++endPos] = '\0';
-
-	; rcall __fp64_saveAB
-	; pop ZL
-	; pop ZH
-	; movw r24, ZL
-	; pop YL
-	; pop YH
-	; ret
-
 	rjmp .L_ret
 								; else {
 								; 	// copy exponent part

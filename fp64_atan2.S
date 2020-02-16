@@ -165,13 +165,7 @@ ENTRY   fp64_atan2
 
   ; compare absolute values
 .L_cmp:
-	cp	rB0, rA0
-	cpc	rB1, rA1
-	cpc	rB2, rA2
-	cpc	rB3, rA3
-	cpc	rB4, rA4
-	cpc	rB5, rA5
-	cpc	rB6, rA6
+	XCALL _U(__fp64_cpcAB)
 	cpc rBE0, rAE0
 	cpc rBE1, rAE1
 	; rcall __fp64_saveAB
@@ -206,9 +200,7 @@ ENTRY   fp64_atan2
 	rjmp .L_addPi	; yes, case 5-7, add +/- PI or +/- PI/2
     				
 	; no: case 4, return atan(y/x)
-	XCALL _U(__fp64_popB)
-	nop				; hack to avoid tail call optimization (avr-gcc will otherwise create a rjmp __fp64_popB, which will crash)
-	ret
+	XJMP _U(__fp64_popBret)		; restore registers and return
 
 .L_addPi:
 	; add +/-PI or +/-PI/2, depending on

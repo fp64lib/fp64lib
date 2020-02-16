@@ -38,17 +38,10 @@
 
 FUNCTION fp64_cbrt
 ENTRY fp64_cbrt
+	XCALL _U(__fp64_pushB)		; preserve registers
+
 	push rA7					; save original sign
 	andi rA7, 0x7f				; delete sign
-	
-	push	rB7					; save needed registers
-	push	rB6
-	push	rB5
-	push	rB4
-	push	rB3
-	push	rB2
-	push	rB1
-	push	rB0
 	
 	ldi rB7, 0x3f				; load b with 0x3FD555555555555555LLU = 1/3
 	ldi rB6, 0x55
@@ -60,17 +53,8 @@ ENTRY fp64_cbrt
 
 	XCALL _U(fp64_pow)			; calc x^(1/3) = cbrt(x)
 	
-	pop rB0						; restore registers
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	
 	pop r0						; restore original sign
 	bst r0, 7
 	bld rA7, 7					; and transfer it to result
-	ret
+	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC

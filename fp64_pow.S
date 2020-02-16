@@ -77,12 +77,7 @@ ENTRY fp64_pow
 	; preliminary check for significand of A == 0
 	ldi	ZL, 0x3f
 
-	cp	rA0, r1
-	cpc	rA1, r1
-	cpc	rA2, r1
-	cpc	rA3, r1
-	cpc	rA4, r1
-	cpc	rA5, r1
+	XCALL _U(__fp64_cpc0A5)
 	brne 0f						; skip a bit of comparisons
 	
 	; x == +1.0 ?

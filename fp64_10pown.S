@@ -78,14 +78,12 @@ ENTRY __fp64_10pown
 1:	adiw XL, 0			; while( 0 != n ) {
 	breq 3f
 	
-	sbrs XL, 0			; 	if( 0 != (n & 1) ) {
+	sbrs XL, 0					; 	if( 0 != (n & 1) ) {
 	rjmp 2f
-	XCALL _U(__fp64_mul64AB);		res = res * pot;
-	XCALL _U(__fp64_lshift64);		// align result		
-	movw rA6, rC6		; move result of res * pot to res
-	movw rA4, rC4
-	movw rA2, rC2
-	movw rA0, rC0		; 	}
+	XCALL _U(__fp64_mul64AB)	;		res = res * pot;
+	XCALL _U(__fp64_lshift64)	;		// align result		
+	XCALL _U(__fp64_movAC)		; 		move result of res * pot to res
+								; 	}
 
 	add rAE0, YL		; exp2 += pot_exp2
 	adc rAE1, YH
@@ -108,16 +106,10 @@ ENTRY __fp64_10pown
 	push rA1
 	push rA0
 	
-	movw rA6, rB6		
-	movw rA4, rB4
-	movw rA2, rB2
-	movw rA0, rB0
+	XCALL _U(__fp64_movAB)		; B = A = pot
 	XCALL _U(__fp64_mul64AB)	; pot = pot * pot
 	XCALL _U(__fp64_lshift64)
-	movw rB6, rC6
-	movw rB4, rC4
-	movw rB2, rC2
-	movw rB0, rC0
+	XCALL _U(__fp64_movBC)
 	
 	lsl YL					; pot_exp2 <<= 1
 	rol YH
@@ -160,7 +152,6 @@ ENTRY __fp64_10pown
 .L_01:	; 0.1
 	.byte 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcc, 0xcd
 
-; #ifdef CHECK_FTOA
 /*  uint64_t fp64_10pown (int16_t n, int16_t *exp2);
     return 64 bit significant of 10^n
 	input	rA7.rA6	n		exponent for 10^n
@@ -169,23 +160,7 @@ ENTRY __fp64_10pown
 			*exp2			exponent in base 2 of result
  */
 ENTRY fp64_10pown
-	push rB7		; save registers used by __fp64_10pown
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
-	
-	push rC7
-	push rC6
-	push rC5
-	push rC4
-	push rC3
-	push rC2
-	push rC1
-	push rC0
+	XCALL _U(__fp64_pushCB) ; preserve register set
 
 	movw XL, rA6	; for __fp64_10pown, n has to be in XH.XL
 	push rA4		; save pointer
@@ -200,25 +175,9 @@ ENTRY fp64_10pown
 	st X+, rAE0		; save exp2
 	st X, rAE1
 	
-1:	pop rC0			; restore used registers
-	pop rC1
-	pop rC2
-	pop rC3
-	pop rC4
-	pop rC5
-	pop rC6
-	pop rC7
-	
-	pop rB0
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-
+1:	
+	XCALL _U(__fp64_popBC)	; restore register set
+	nop						; hack to avoid tail call optimization
 	ret
-; #endif
 
 ENDFUNC

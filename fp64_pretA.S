@@ -109,10 +109,10 @@ ENTRY __fp64_pretA
 	brmi 3f			; yes --> normal number, start packing
 	clr rAE0		; no --> subnormal number, set exponent to 0
 	clr rAE1
-2:	rcall 16f		; save topmost bit for subnormal number
-3:	rcall 16f		; shift mantissa 3 bits to make room for exponent
-	rcall 16f
-	rcall 16f
+2:	XCALL _U(__fp64_lsrA)	; save topmost bit for subnormal number
+3:	XCALL _U(__fp64_lsrA)	; shift mantissa 3 bits to make room for exponent
+	XCALL _U(__fp64_lsrA)
+	XCALL _U(__fp64_lsrA)
 
 	swap rAE0		; exponent is 11 bits = 3 nibbles = e2.e1.e0
 	swap rAE1		; rAE1.rAE0 is now e2.0.e0.e1
@@ -126,27 +126,6 @@ ENTRY __fp64_pretA
 
 	bld	rA7, 7		; get sign
 	ret
-	
-/* <non_standard> __fp64_lsrA6 (float_64_unpacked A);
-     Internal function to shift mantissa of A 1 bit to the right.
-
-   Input:
-     rA6.rA5.rA4.rA3.rA2.rA1.rA0 - mantissa of A
-   Output:
-     rA6.rA5.rA4.rA3.rA2.rA1.rA0 - result A >>= 1
-	 C contains LSB of rA0
- */
-ENTRY	__fp64_lsrA6
-16:	lsr	rA6			; shift mantissa of A >> 1
-ENTRY	__fp64_rorA5
-	ror	rA5
-	ror	rA4
-	ror	rA3
-	ror	rA2
-	ror	rA1
-	ror	rA0
-	ret
-
 ENDFUNC
 	
 	

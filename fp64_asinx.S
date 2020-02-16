@@ -113,12 +113,7 @@ ENTRY fp64_asin
 	; now here: 1 <= |x| < 2
 	; check, whether |x| is == 1.0, i.e. significand = 0x80....0
 
-	cp r1, rA0
-	cpc r1, rA1
-	cpc r1, rA2
-	cpc r1, rA3
-	cpc r1, rA4
-	cpc r1, rA5
+	XCALL _U(__fp64_cpc0A5)
 	brne .L_nan
 	cpi rA6, 0x80
 	brne .L_nan
@@ -164,11 +159,7 @@ ENTRY fp64_asin
 	push XH
 	push XL
 	
-	X_movw	rB0, rA0		; B = A = x1
-	X_movw	rB2, rA2
-	X_movw	rB4, rA4
-	X_movw	rB6, rA6
-	X_movw  rBE0, rAE0
+	XCALL _U(__fp64_movBAx)	; B = A = x1
 
 	lds r0, __sinFlags
 	sbrc r0, 0
@@ -248,11 +239,7 @@ ENTRY fp64_asin
 	push rAE1
 	push rAE0
 
-	X_movw	rA0, rB0				; A = B = x2
-	X_movw	rA2, rB2
-	X_movw	rA4, rB4
-	X_movw	rA6, rB6
-	X_movw  rAE0, rBE0
+	XCALL _U(__fp64_movABx)			; A = B = x2
 	
 12:
 	; start polynom calculation
@@ -298,11 +285,7 @@ ENTRY fp64_asin
 	push rAE1
 	push rAE0
 	
-	X_movw	rA0, rB0				; A = B
-	X_movw	rA2, rB2
-	X_movw	rA4, rB4
-	X_movw	rA6, rB6
-	X_movw  rAE0, rBE0
+	XCALL _U(__fp64_movABx)			; A = B = x3
 	ldi XL, lo8(.L_tableAsinNom)	; calculate Nominator
 	ldi XH, hi8(.L_tableAsinNom)
 	XCALL _U(__fp64_powser)			; res = horner( x2, coeff_zähler )

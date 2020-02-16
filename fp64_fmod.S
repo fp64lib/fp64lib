@@ -212,13 +212,7 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	clr rC5
 	movw rC6, rC4
 	
-	cp	rA0, rB0	; check whether A < B
-	cpc	rA1, rB1
-	cpc	rA2, rB2
-	cpc	rA3, rB3
-	cpc	rA4, rB4
-	cpc	rA5, rB5
-	cpc	rA6, rB6
+	XCALL _U(__fp64_cpcAB)	; check whether A < B
 	cpc rAE0, rBE0
 	cpc rAE1, rBE1
 	;call __fp64_saveAB
@@ -231,15 +225,9 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	tst rA6
 	brmi 3f
 	
-2:	sbiw rAE0,1		; decrease exponent
-	lsl	rA0			; A <<= 1
-	rol	rA1
-	rol	rA2
-	rol	rA3
-	rol	rA4
-	rol	rA5
-	rol	rA6
-	brpl 2b		; repeat until we have a leading 1 bit
+2:	sbiw rAE0,1				; decrease exponent
+	XCALL _U(__fp64_lslA)	; A <<= 1
+	brpl 2b					; repeat until we have a leading 1 bit
 
 3:	; as we do allow subnormal numbers, mantissa of B might not start with 
 	; a leading 1 bit, so normalize B
@@ -303,13 +291,7 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	rol rC5
 	rol rC6
 	rol rC7
-	lsl	rA0			; A <<= 1
-	rol	rA1
-	rol	rA2
-	rol	rA3
-	rol rA4
-	rol rA5
-	rol rA6
+	XCALL _U(__fp64_lslA)	; A <<= 1
 	rol rA7
 	rjmp .Loop
 66:	sbiw rAE0, 1
@@ -325,15 +307,9 @@ ENTRY	__fp64_fmod_pse	; post split entry
 7:	sbiw rBE0,1		; exponent B--
 	brmi 10f
 	breq 9f
-8:	tst rA6			; is topmost bit of result set?
-	brmi 9f			; yes, we can return
-	lsl	rA0			; A <<= 1
-	rol	rA1
-	rol	rA2
-	rol	rA3
-	rol rA4
-	rol rA5
-	rol rA6
+8:	tst rA6					; is topmost bit of result set?
+	brmi 9f					; yes, we can return
+	XCALL _U(__fp64_lslA)	; A <<= 1
 	rol rA7
 	sbiw rBE0, 1
 	brne 8b			; repeat until topmost bit or exponent = 0, i.e. subnormal number
@@ -344,13 +320,7 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	ret
 	
 10: 
-	lsr	rA6			; A >>= 1
-	ror	rA5
-	ror	rA4
-	ror	rA3
-	ror	rA2
-	ror	rA1
-	ror	rA0
+	XCALL _U(__fp64_lsrA)	; A >>= 1
 	adiw rBE0, 1	; exponent++
 	brne 10b		; repeat until exponent = 0
 	rjmp 9b

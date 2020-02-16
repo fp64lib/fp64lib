@@ -67,7 +67,7 @@ ENTRY fp64_fmin
 */
 
 ENTRY fp64_fmax
-	clt							; clear flag for fmin
+   clt							; clear flag for fmin
 .L_common:	
 	push rB7
 	lsl rA7
@@ -78,23 +78,13 @@ ENTRY fp64_fmax
 	; isNan(A)
 	ldi rBE0, 0xf0				; A is NaN if A is >0x3ff0000000000000
 	ldi rAE0, 0xfe				; as rA7 is shifted, max high byte is now 0x3f << 1 --> 0xfe
-	cp	r1, rA0
-	cpc	r1, rA1
-	cpc	r1, rA2
-	cpc	r1, rA3
-	cpc	r1, rA4
-	cpc	r1, rA5
+    XCALL _U(__fp64_cpc0A5)
 	cpc rBE0, rA6
 	cpc rAE0, rA7
 	brlo .L_retB				; case 1: A is NaN --> return B
 	
 	; isNan(B)
-	cp	r1, rB0
-	cpc	r1, rB1
-	cpc	r1, rB2
-	cpc	r1, rB3
-	cpc	r1, rB4
-	cpc	r1, rB5
+	XCALL _U(__fp64_cpc0B5)
 	cpc rBE0, rB6
 	cpc rAE0, rB7
 	brlo .L_retA				; case 2: B is NaN --> return A
@@ -109,13 +99,7 @@ ENTRY fp64_fmax
 	
 	; case 5,6: compare absolute values for fmax
 	brts 3f
-	cp	rA0, rB0
-	cpc	rA1, rB1
-	cpc	rA2, rB2
-	cpc	rA3, rB3
-	cpc	rA4, rB4
-	cpc	rA5, rB5
-	cpc	rA6, rB6
+	XCALL _U(__fp64_cpcAB)
 	cpc	rA7, rB7				; C is set, if A < B
 
 	; analyse result
@@ -125,10 +109,7 @@ ENTRY fp64_fmax
 	; return B
 .L_retB:
 	mov rAE1, rBE1				; move B to A, including saved sign
-	movw rA6, rB6
-	movw rA4, rB4
-	movw rA2, rB2
-	movw rA0, rB0
+	XCALL _U(__fp64_movAB)
 	; return A
 .L_retA:
 	lsr rAE1					; restore the sign
@@ -137,13 +118,7 @@ ENTRY fp64_fmax
 	ret
 
 	; case 5,6: compare absolute values for fmin
-3:	cp	rB0, rA0
-	cpc	rB1, rA1
-	cpc	rB2, rA2
-	cpc	rB3, rA3
-	cpc	rB4, rA4
-	cpc	rB5, rA5
-	cpc	rB6, rA6
+3:	XCALL _U(__fp64_cpcBA)
 	cpc	rB7, rA7				; C is set, if B < A
 	rjmp 2b
 

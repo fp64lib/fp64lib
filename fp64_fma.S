@@ -48,26 +48,24 @@ FUNCTION fp64_fma
 ENTRY fp64_fma
 	; rcall __fp64_saveAB
 	XCALL	_U(fp64_mul)
+	XCALL _U(__fp64_pushB)	; save used registers
+	
 	; with gcc, only up to 16 bytes of parameters are passed via registers
 	; as 3 float64_t as parameters exceed that limit, the last parameter is
-	; passed via the stack (pushed by the caller).
-	; So we have to access c via the stack
-	push YL					; save current value of frame pointer
-	push YH
-	in YL, 0x3d				; get stack pointer to get access to parameters on the stack
-	in YH, 0x3e
-	ldd rB0, Y+5			; Y+1/+2 = YL/YH, Y+3/+4 = return address, Y+5 = c
-	ldd rB1, Y+6			; parameters are pushed MSB first
-	ldd rB2, Y+7
-	ldd rB3, Y+8
-	ldd rB4, Y+9
-	ldd rB5, Y+10
-	ldd rB6, Y+11
-	ldd rB7, Y+12
+	; passed via the stack (pushed by the caller), pointed to by the frame pointer Y
+	; So we have to access C via the stack
+	sbiw YL, 7				; get to start of paramter
+	ld rB0, Y+				; get parameter from stack
+	ld rB1, Y+
+	ld rB2, Y+
+	ld rB3, Y+
+	ld rB4, Y+
+	ld rB5, Y+
+	ld rB6, Y+
+	ld rB7, Y				; frame pointer is back to original value
 	; rcall __fp64_saveAB
-	pop YH					; restore frame pointer Y
-	pop YL
-	XJMP	_U(fp64_add)	; and add c to a*b
+	XCALL _U(fp64_add)		; and add c to a*b
+	XJMP _U(__fp64_popBret)	; restore used registers and return
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */

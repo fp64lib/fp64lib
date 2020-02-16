@@ -38,14 +38,7 @@
 
 FUNCTION fp64_tanh
 ENTRY fp64_tanh
-	push	rB7					; save needed registers
-	push	rB6
-	push	rB5
-	push	rB4
-	push	rB3
-	push	rB2
-	push	rB1
-	push	rB0
+	XCALL _U(__fp64_pushB)		; preserve registers
 
 	push	rA7					; save x
 	push	rA6
@@ -58,10 +51,7 @@ ENTRY fp64_tanh
 
 	XCALL _U(fp64_sinh)			; calculate sinh(x) 
 
-	movw rB6, rA6				; save sinh(x)
-	movw rB4, rA4
-	movw rB2, rA2
-	movw rB0, rA0
+	XCALL _U(__fp64_movBA)		; save sinh(x)
 	
 	pop rA0						; restore x
 	pop rA1	
@@ -75,14 +65,5 @@ ENTRY fp64_tanh
 	XCALL _U(fp64_cosh)			; calculate cosh(x) 
 	XCALL _U(fp64_div)			; calculate sinh(x)/cosh(x)
 	
-	pop rB0						; restore registers
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-
-	ret
+	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC

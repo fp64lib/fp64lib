@@ -141,13 +141,26 @@ ENTRY __fp64_addsd3x
 	brne	2f				; A and B are != 0 --> check whether A > B
 							; B is 0, case 12
 	rcall	.L_sign			; recover sign(A), as B might be -0
-	XCALL _U(__fp64_popB)
-	XJMP _U(__fp64_pretA)	; B is 0 --> result is A
+	rjmp	12f
 	
 2:	rcall __fp64_add_pse_r0
 	XCALL _U(__fp64_popB)
 	XJMP _U(__fp64_rpretA)	; round, pack result and return
  
+	; case 11: A is 0 --> result is B, sign depending on B and op
+11:	sub rB7, r0				; reverse sign of B in case of a subtraction
+	bst rB7, 7				; set sign of result = sign(B)
+	; rcall __fp64_saveAB
+	XCALL _U(__fp64_movABx)	; so move B into A and return it
+
+12:	; case 12: B = 0 --> result is A
+	XCALL _U(__fp64_popB)
+	sbrc rA6, 7				; is A normal number ?
+	XJMP _U(__fp64_pretA)	; yes: result is already ok
+	XCALL _U(__fp64_lslA)
+	sbiw rAE0, 1		
+	XJMP _U(__fp64_pretA)
+
 	/*
 	float64_t_intern __fp64_add_pse( float64_t_intern A, float64_t_intern B )
 	Adds two 64 bit floating point numbers, both numbers have to be finite,
@@ -211,13 +224,7 @@ __fp64_add_pse_r0:
 	; op will be stored in bit 7 of r0, so subi r0, 0x80 will reverse the operation
 
     ; compare fabs(A) and fabs(B), both being != 0, cases 1-8
-	cp	rA0, rB0
-	cpc	rA1, rB1
-	cpc	rA2, rB2
-	cpc	rA3, rB3
-	cpc	rA4, rB4
-	cpc	rA5, rB5
-	cpc	rA6, rB6
+	XCALL _U(__fp64_cpcAB)
 	cpc	rAE0, rBE0
 	cpc rAE1, rBE1
 	; rcall __fp64_saveAB
@@ -234,13 +241,6 @@ __fp64_add_pse_r0:
 	;call __fp64_saveAB
 	rjmp 6f					; start immediately with add or sub
 	
-	; case 11: A is 0 --> result is B, sign depending on B and op
-11:	sub rB7, r0				; reverse sign of B in case of a subtraction
-	bst rB7, 7				; set sign of result = sign(B)
-	XCALL _U(__fp64_swapAB)	; so move B into A and return it
-	XCALL _U(__fp64_popB)
-	XJMP _U(__fp64_pretA)	; B is 0 --> result is A
-
 14: ; cases 1-4, fabs(A) > fabs(b)
 	bld rA7, 7
 	sbrc rA7, 7				; sign(a) != sign(b), cases 2,3
@@ -303,13 +303,7 @@ __fp64_add_pse_r0:
 	breq 8f					; underflow --> subnormal handling
 	brcs 8f
 	
-	lsl rA0
-	rol	rA1
-	rol	rA2
-	rol	rA3
-	rol	rA4
-	rol	rA5
-	rol	rA6
+	XCALL _U(__fp64_lslA)
 	rjmp 7b		
 	
 8:	; subnormal number: 
@@ -317,13 +311,7 @@ __fp64_add_pse_r0:
 	; 	significand is already in correct position
 	; so everything is fine, just return
 	; rcall __fp64_saveAB
-	lsl rA0
-	rol	rA1
-	rol	rA2
-	rol	rA3
-	rol	rA4
-	rol	rA5
-	rol	rA6
+	XCALL _U(__fp64_lslA)
 	ret
 	
 	; result is in T (sign), AE1.rAE0 (exp) and rA6.rA5.rA4.rA3.rA2.rA1.rA0 --> return it

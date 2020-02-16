@@ -270,9 +270,7 @@ ENTRY __fp64_proxy2_int8
 	ld rB6, Z+
 	ld rB7, Z+
 	rcall __fp64_proxy1
-	XCALL _U(__fp64_popB)
-	nop				; hack to avoid tail call optimization (avr-gcc will otherwise create a rjmp __fp64_popB, which will crash)
-	ret
+	XJMP _U(__fp64_popBret)
 
 
 .data

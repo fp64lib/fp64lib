@@ -43,14 +43,7 @@ FUNCTION fp64_log10
 ENTRY fp64_log10
 	XCALL _U(fp64_log)
 	
-	push rB7				; preserve registers
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
+	XCALL _U(__fp64_pushB)		; preserve registers
 	
 	ldi ZL, lo8(.L_log10)
 	ldi ZH, hi8(.L_log10)
@@ -58,15 +51,7 @@ ENTRY fp64_log10
 	
 	XCALL _U(fp64_mul)
 	
-	pop rB0					; restore registers
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	ret
+	XJMP _U(__fp64_popBret)		; restore registers and return
 
 .L_log10: ; 1/log(10) = 0x3fdbcb7b1526e50d = 0.43429448190325176
 	.byte 0x3f, 0xdb, 0xcb, 0x7b, 0x15, 0x26, 0xe5, 0x0d

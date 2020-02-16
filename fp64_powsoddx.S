@@ -55,21 +55,11 @@ FUNCTION __fp64_powsodd
 ENTRY __fp64_powsodd
 
 	bld rA7, 7					; save T flag as sign
-	X_movw	rB0, rA0			; save x
-	X_movw	rB2, rA2
-	X_movw	rB4, rA4
-	X_movw	rB6, rA6			; rA7 contains sign of x
+	XCALL _U(__fp64_movBA)		; save x
 	X_movw  YL, rAE0			; save exponent temporarely in YH.YL as XH.XL is still occupied
 								; with pointer to polynom table
 
-	push	rB7					; save x for later use
-	push	rB6
-	push	rB5
-	push	rB4
-	push	rB3
-	push	rB2
-	push	rB1
-	push	rB0
+	XCALL _U(__fp64_pushB)		; save x for later use
 	push	YL					; including the exponent
 	push	YH
 	
@@ -87,23 +77,14 @@ ENTRY __fp64_powsodd
 
 	pop rBE1
 	pop rBE0
-	pop	rB0						; retrieve x into B
-	pop	rB1
-	pop	rB2
-	pop	rB3
-	pop	rB4
-	pop	rB5
-	pop	rB6
-	pop	rB7
+	XCALL _U(__fp64_popB)		; retrieve x into B
 
 	mov r0, rB7					; set sign of A*B = sign(A)^sign(B)
 	eor r0, rA7
 	bst r0,7
 
 	; rcall __fp64_saveABC
-	XCALL	_U(__fp64_mulsd3_pse)	; multiply polynom by x --> polynom is calculated with odd powers of x
-
-	ret
+	XJMP	_U(__fp64_mulsd3_pse)	; multiply polynom by x --> polynom is calculated with odd powers of x
 
 #ifdef CHECK_POWSER
 .L_nf:	
@@ -128,22 +109,7 @@ ENTRY __fp64_check_powsoddn
 	XCALL	_U(__fp64_splitA)
 	brcs .L_nf
 
-	push rC7			; save used registers
-	push rC6
-	push rC5
-	push rC4
-	push rC3
-	push rC2
-	push rC1
-	push rC0
-	push rB7
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
+	XCALL _U(__fp64_pushCB) ; preserve register set
 	push YL
 	push YH
 
@@ -151,22 +117,8 @@ ENTRY __fp64_check_powsoddn
 
 	pop YH
 	pop YL
-	pop rB0				; restore used registers part1
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	pop rC0				; restore used registers part 2
-	pop rC1
-	pop rC2
-	pop rC3
-	pop rC4
-	pop rC5
-	pop rC6
-	pop rC7
+	XCALL _U(__fp64_popBC)	; restore register set
+
 	pop XH
 	pop XL
 	brcs 99f

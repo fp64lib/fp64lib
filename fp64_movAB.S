@@ -1,7 +1,4 @@
-/* Copyright (c) 2018-2020  Uwe Bissinger
-   Based on 32bit floating point arithmetic routines which are:
-   Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
-   Copyright (c) 2006  Dmitry Xmelkov
+/* Copyright (c) 2020  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -34,9 +31,31 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-ENTRY __fp64_norm2
-1:	sbiw rAE0, 1			; exponent--
-	XCALL _U(__fp64_lslA)	; mantissa <<= 1
-	brpl	1b				; until mantissa starts with a leading 1 bit
-	ret
+/*  __fp64_movABx() move B into A
+   Input:
+	  rBE1.rBE0.rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B in unpacked format 
+   Return:
+	  rAE1.rAE0.rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - a copy of B in unpacked format
+   Modifies:
+	  nothing - also SREG is preserved
+ */
+
+FUNCTION __fp64_movAB
+ENTRY __fp64_movABx
+   X_movw rAE0, rBE0
+
+/*  __fp64_movAB() move B into A
+   Input:
+	  rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B in packed format 
+   Return:
+	  rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - a copy of B in packed format
+   Modifies:
+	  nothing - also SREG is preserved
+ */
+ENTRY __fp64_movAB
+   X_movw rA6, rB6		; A = B
+   X_movw rA4, rB4
+   X_movw rA2, rB2
+   X_movw rA0, rB0
+   ret
 ENDFUNC
