@@ -223,7 +223,6 @@ ENTRY __fp64_before
 	pop ZL
 	pop ZH
 	ret
-ENDFUNC
 
 ENTRY __fp64_proxy1
 ENTRY __fp64_proxy1_int8
@@ -271,7 +270,7 @@ ENTRY __fp64_proxy2_int8
 	ld rB7, Z+
 	rcall __fp64_proxy1
 	XJMP _U(__fp64_popBret)
-
+ENDFUNC
 
 .data
 __a_sreg:	.skip	1

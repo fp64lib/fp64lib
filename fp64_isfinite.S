@@ -39,6 +39,7 @@
      plus or minus infinity, and not NaN.
 */
 
+FUNCTION fp64_isfinite
 ENTRY fp64_isfinite
 	XCALL	_U(__fp64_splitA)
 	ldi	r24, 0

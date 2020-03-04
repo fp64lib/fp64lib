@@ -38,6 +38,7 @@
      The fp64_square() function returns square of A.
  */
 
+FUNCTION fp64_square
 ENTRY fp64_square
 	XCALL _U(__fp64_pushB)		; preserve registers
 	push rBE1

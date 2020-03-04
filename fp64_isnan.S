@@ -39,6 +39,7 @@
      "not-a-number" (NaN), and 0 otherwise.
  */
 
+FUNCTION fp64_isnan
 ENTRY fp64_isnan
 ENTRY __fp64_unordsd2
 	XCALL	_U(__fp64_splitA)

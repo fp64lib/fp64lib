@@ -46,6 +46,7 @@
      is fast if both arguments are equal.
  */
 
+FUNCTION fp64_fdim
 ENTRY fp64_fdim
   ; sign(A) | sign(B)
 	mov	r0, rA7

@@ -46,6 +46,7 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
+FUNCTION __fp64disd
 ENTRY fp64_int64_to_float64
 ENTRY __fp64disd
 	bst	rA7, 7				; set sign

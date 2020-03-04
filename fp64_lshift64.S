@@ -37,6 +37,7 @@
 	output	rC7...rC0		C shifted to left with topbit in rC7 set
 			r0				number of shifts needed (will be 64, if C is 0 )
  */
+FUNCTION __fp64_lshift64
 ENTRY __fp64_lshift64
 	push XL
 	clr XL

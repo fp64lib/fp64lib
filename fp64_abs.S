@@ -37,6 +37,7 @@
 /* float64_t fp64_abs(float64_t x) return abs(x)
  */
 
+FUNCTION fp64_abs
 ENTRY   fp64_abs
 	andi	rA7, 0x7f	; clear sign bit
 	ret

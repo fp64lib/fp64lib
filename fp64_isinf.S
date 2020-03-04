@@ -41,6 +41,7 @@
      infinity, 1 if value represents positive infinity, and 0 otherwise.
  */
 
+FUNCTION fp64_isinf
 ENTRY fp64_isinf
 	XCALL	_U(__fp64_splitA)
 	ldi	r24, 0

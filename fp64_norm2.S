@@ -34,6 +34,7 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
+FUNCTION __fp64_norm2
 ENTRY __fp64_norm2
 1:	sbiw rAE0, 1			; exponent--
 	XCALL _U(__fp64_lslA)	; mantissa <<= 1

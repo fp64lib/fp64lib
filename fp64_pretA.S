@@ -127,8 +127,5 @@ ENTRY __fp64_pretA
 	bld	rA7, 7		; get sign
 	ret
 ENDFUNC
-	
-	
-ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */

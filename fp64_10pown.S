@@ -41,7 +41,7 @@
 	modifies rB7..rB0
 			 rC7..rC0
  */
-
+FUNCTION __fp64_10pown
 ENTRY __fp64_10pown
 	push YL
 	push YH

@@ -36,6 +36,7 @@
 
 /* __fp64_nan() return NaN value: 0x7ff8XXXXX
  */
+FUNCTION __fp64_nan
 ENTRY   __fp64_nanp
 	XCALL _U(__fp64_popB)
 ENTRY   __fp64_nan

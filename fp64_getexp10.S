@@ -45,6 +45,7 @@
 			r0				
  */
 
+FUNCTION __fp64_getExp10
 ENTRY   __fp64_getExp10r
 	ldi rB7, lo8(999)	
 	ldi rB6, hi8(999)

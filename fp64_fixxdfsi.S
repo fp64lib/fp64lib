@@ -54,6 +54,7 @@
 	  5 | |A|<2^63  | 0	| (long long) A
  */
 
+FUNCTION __fp64_fixsddi
 ENTRY __fp64_fixsddi
 ENTRY fp64_to_int64
 	push rBE0

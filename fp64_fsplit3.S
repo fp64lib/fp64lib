@@ -52,6 +52,7 @@
      * All other registers are not changed.
  */
 
+FUNCTION __fp64_split3
 ENTRY	__fp64_split3
 	; rA7[7] := sign(A) ^ sign(B)
 	sbrc rB7, 7		; is B negative?

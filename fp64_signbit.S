@@ -45,6 +45,7 @@
     to builtin GCC realization for float.
  */
 
+FUNCTION fp64_signbit
 ENTRY fp64_signbit
 	lsl	rA7
 	sbc	rA6, rA6

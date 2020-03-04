@@ -52,6 +52,7 @@
      else // A < B || isnan(A) || isnan(B)
         -1
  */
+FUNCTION __fp64_gesd2
 ENTRY   __fp64_gesd2
 ENTRY   __fp64_gtsd2
     XCALL _U(__fp64_pushB)

@@ -52,6 +52,7 @@
      else // isnan(A) || isnan(B)
         C = 1
  */
+FUNCTION __fp64_cmp
 ENTRY	__fp64_cmp
 	lsl	rA7
 	sbc	r0, r0		; r0 = (A < 0) ? -1 : 0

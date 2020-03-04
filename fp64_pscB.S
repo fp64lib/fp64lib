@@ -45,6 +45,7 @@
 	C = 0, Z = 1	for finite number 0
  */
 
+FUNCTION   __fp64_pscB
 ENTRY   __fp64_pscB
 	cpi rBE1,0x07	; is exponent = 0x7ff? --> Inf/NaN
 	brne 1f

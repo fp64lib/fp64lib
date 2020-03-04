@@ -44,6 +44,7 @@
 	C = 0, Z = 0	for finite number
  */
 
+FUNCTION __fp64_pscA
 ENTRY   __fp64_pscA
 	cpi rAE1,0x07	; is exponent = 0x7ff? --> Inf/NaN
 	brne 1f

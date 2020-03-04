@@ -44,6 +44,7 @@
 	in all cases, C = 0
  */
 
+FUNCTION __fp64_isBzero
 ENTRY	__fp64_isBzero
 	push r0
 	mov  r0, rB6

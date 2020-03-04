@@ -41,6 +41,7 @@
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - Inf value with sign
  */
 
+FUNCTION __fp64_inf
 ENTRY	__fp64_infp
 	XCALL _U(__fp64_popB)
 ENTRY   __fp64_inf

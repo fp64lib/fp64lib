@@ -57,6 +57,7 @@
 	; 4	  |	>2^53 |	0.0  |   x
 	; 5   | <1.0  |  x   |  0.0
 
+FUNCTION fp64_modf
 0:	breq 1f		; if Inf
 	XCALL _U(__fp64_nan)	; case 1: result = NaN
 	XCALL _U(__fp64_movBA)	; *iptr = NaN

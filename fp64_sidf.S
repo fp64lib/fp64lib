@@ -49,6 +49,7 @@
 										  always fit into the 53-bit significand
  */
 
+FUNCTION __fp64sisd
 ENTRY fp64_uint32_to_float64
 ENTRY   __fp64unssisd
 	clt

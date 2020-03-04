@@ -38,6 +38,7 @@
      The inverse() function returns 1/A value.
  */
 
+FUNCTION fp64_inverse
 ENTRY fp64_inverse
 	XCALL _U(__fp64_pushB)		; preserve registers
 

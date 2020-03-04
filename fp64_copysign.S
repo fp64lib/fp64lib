@@ -39,6 +39,7 @@
      They work even if x or y are NaN, Inf or zero.
  */
 
+FUNCTION fp64_copysign
 ENTRY   fp64_copysign
 	bst	rB7, 7
 	bld	rA7, 7

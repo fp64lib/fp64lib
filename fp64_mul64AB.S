@@ -39,6 +39,7 @@
 	output	rC7...rC0		top 64 bit of result A*B 
 	modifies r0
  */
+FUNCTION __fp64_mul64AB
 ENTRY __fp64_mul64AB
 	push ZL				; need ZL, ZH
 	push ZH
