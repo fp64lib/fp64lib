@@ -138,22 +138,7 @@ ENTRY fp64_asin
 	sts __sinFlags, r0	; save sign and function
 	clt
 
-	push rAx3	; as all registers may be used, save them
-	push rAx2
-	push rAx1
-	push rAx0
-	push rBx11
-	push rBx10
-	push rBx9
-	push rBx8
-	push rBx7
-	push rBx6
-	push rBx5
-	push rBx4
-	push rBx3
-	push rBx2
-	push rBx1
-	push rBx0
+	XCALL _U(__fp64_pushCB)	; as all registers may be used, save them
 	push YH
 	push YL
 	push XH
@@ -168,14 +153,7 @@ ENTRY fp64_asin
 	; x1 <= 0.5
 	; compute x2 = 2 * x1 * x1
 	; and put x1 = fabs(x) as factor on the stack
-	push rA7				; save factor = x1 = fabs(x)
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)	; save factor = x1 = fabs(x)
 	push rAE1
 	push rAE0
 	
@@ -200,14 +178,7 @@ ENTRY fp64_asin
 	XCALL _U(__fp64_sub_pse)		; x2 = 1 - x1
 	clt
 	
-	push rA7						; save x2 = 1 - x1
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)			; save x2 = 1 - x1
 	push rAE1
 	push rAE0
 
@@ -217,25 +188,11 @@ ENTRY fp64_asin
 
 	pop rBE0						; retrieve x2
 	pop rBE1
-	pop rB0
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)
 
 	;rcall __fp64_saveAB
 
-	push rA7						; save factor = sqrt(2*x2)
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)			; save factor = sqrt(2*x2)
 	push rAE1
 	push rAE0
 
@@ -248,14 +205,7 @@ ENTRY fp64_asin
 	; stack: factor
 	; rcall __fp64_saveAB
 
-	push rA7				; save x2
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)			; save x2
 	push rAE1
 	push rAE0
 
@@ -263,25 +213,11 @@ ENTRY fp64_asin
 	ldi XH, hi8(.L_tableAsinDenom)
 	XCALL _U(__fp64_powser)
 	
-	pop rBE0				; retrieve x2
+	pop rBE0						; retrieve x2
 	pop rBE1
-	pop rB0
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)
 
-	push rA7						; save x3 = horner( x2, coeff_nenner )
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)			; save x3 = horner( x2, coeff_nenner )
 	push rAE1
 	push rAE0
 	
@@ -292,14 +228,7 @@ ENTRY fp64_asin
 	
 	pop rBE0						; retrieve Denominator x3 = horner( x2, coeff_nenner )
 	pop rBE1
-	pop rB0
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)
 
 	; rcall __fp64_saveAB
 	
@@ -307,14 +236,7 @@ ENTRY fp64_asin
 	
 	pop rBE0				; retrieve either x1 = fabs(x) or x1 = sqrt(2*fabs(x))
 	pop rBE1
-	pop rB0
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)
 	
 	XCALL _U(__fp64_mulsd3_pse)	; res = res / x3 * x1 or res = res / x3 * sqrt(2*fabs(x))
 	
@@ -342,22 +264,7 @@ ENTRY fp64_asin
 	pop XH
 	pop YL
 	pop YH
-	pop rBx0
-	pop rBx1
-	pop rBx2
-	pop rBx3
-	pop rBx4
-	pop rBx5
-	pop rBx6
-	pop rBx7
-	pop rBx8
-	pop rBx9
-	pop rBx10
-	pop rBx11
-	pop rAx0
-	pop rAx1
-	pop rAx2
-	pop rAx3
+	XCALL _U(__fp64_popBC)
 	
 	lds r0, __sinFlags			; retrieve sign(x)
 	sbrs r0,1					; asin?
