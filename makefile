@@ -36,7 +36,7 @@ FP64_ASM_OBJECTS = $(patsubst %, %.o, $(FP64_ASM_PARTS))
 OBJS = $(FP64_ASM_OBJECTS)
 
 # All Target
-all: libfp64.a
+all: libfp64-$(MCU).a
 
 $(FP64_ASM_OBJECTS) : asmdef.h fp64def.h
 
@@ -49,10 +49,18 @@ libfp64.a: $(patsubst %, libfp64.a(%), $(FP64_ASM_OBJECTS))
 libfp64.a(%.o): %.o
 	$(AR) cr $@ $<
 
+libfp64-%.a: 
+	$(warning $(patsubst libfp64-%.a,%,$@))
+	make clean-libfp64 libfp64.a MCU=$(MCU)
+	ln libfp64.a $@
+
 # Other Targets
-clean:
-	-$(RM) $(FP64_ASM_OBJECTS) libfp64.a
+clean: clean-libfp64
+	-$(RM) $(wildcard libfp64-*.a)
 	-@echo ' '
 
-.PHONY: all clean dependents
+clean-libfp64:
+	-$(RM) $(wildcard $(FP64_ASM_OBJECTS) libfp64.a)
+
+.PHONY: all clean clean-libfp64
 
