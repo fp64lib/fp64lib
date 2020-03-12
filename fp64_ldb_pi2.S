@@ -41,6 +41,12 @@
 */
 
 FUNCTION __fp64_ldb_pi2
+ENTRY __fp64_ldb_pi2x
+	push ZL				; load b with PI/2
+	push ZH
+	ldi ZL, lo8(__pi_o_2x)
+	ldi ZH, hi8(__pi_o_2x)
+	rjmp __fp64_ldb_const
 ENTRY __fp64_ldb_pi2
 	push ZL				; load b with PI/2
 	push ZH
@@ -64,5 +70,6 @@ ENTRY __fp64_ldb8_const
 	lpm rB0, Z+
 	ret
 	; PI/2 with 56 bits precision in unpacked format
-__pi_o_2:	.byte  0x00, 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x03, 0xff	; PI/2 = 1.5707963267948966
+__pi_o_2:	.byte  0x00, 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x03, 0xff	; PI/2 = 1.570796326794896613510132965529919601977
+__pi_o_2x:	.byte  0x00, 0xD3, 0x13, 0x19, 0x8A, 0x2E, 0x03, 0x70, 0x03, 0xc5	; π-PI/2 = 5.721188726109831797891137135379528169152E-18
 ENDFUNC

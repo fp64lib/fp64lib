@@ -75,22 +75,7 @@ ENTRY fp64_sin
 	clt					; further calculations on fabs(x) 
 	andi rA7, 0x7f
 
-	push rAx3	; as all registers may be used, save them
-	push rAx2
-	push rAx1
-	push rAx0
-	push rBx11
-	push rBx10
-	push rBx9
-	push rBx8
-	push rBx7
-	push rBx6
-	push rBx5
-	push rBx4
-	push rBx3
-	push rBx2
-	push rBx1
-	push rBx0
+	XCALL _U(__fp64_pushCB)	; as all registers may be used, save them
 	push YH
 	push YL
 	push XH
@@ -115,7 +100,12 @@ ENTRY fp64_sin
 								;			  = +/-sin( -fmod(x,PI/2) + PI/2
 	ori rA7, 0x80
 	set
-	XCALL _U(__fp64_add_pse)	; fmod(x,PI/2) - PI/2
+	XCALL _U(__fp64_add_pse)	; fmod(x,PI/2) - PI/2 (upper 56 bits)
+
+	XCALL _U(__fp64_ldb_pi2x)
+	clt
+	XCALL _U(__fp64_add_pse)	; fmod(x,PI/2) - PI/2 (lower 56 bits)
+	
 	; we can ignore the returned C flag, as neither underflow nor overflow will happen
 		
 12:	; adjust sign according to quadrant: for x in Q3 and Q4, sign must be negative
@@ -150,22 +140,7 @@ ENTRY fp64_sin
 	pop XH
 	pop YL
 	pop YH
-	pop rBx0
-	pop rBx1
-	pop rBx2
-	pop rBx3
-	pop rBx4
-	pop rBx5
-	pop rBx6
-	pop rBx7
-	pop rBx8
-	pop rBx9
-	pop rBx10
-	pop rBx11
-	pop rAx0
-	pop rAx1
-	pop rAx2
-	pop rAx3
+	XCALL _U(__fp64_popBC)	; restore register set
 
 .L_retA:	
 	XJMP _U(__fp64_rpretA)
