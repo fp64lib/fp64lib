@@ -90,28 +90,14 @@ FUNCTION fp64_atan
 	returns the arcus tangens of phi (inverse function to fp64_tan(x)
 */
 ENTRY fp64_atan
+GCC_ENTRY __atan
 	XCALL _U(__fp64_splitA)
 	brcs .L_nan						; NaN or +/- INF
 	breq .L_zero					; x = 0 --> result of atan = 0
 	
 	push rA7						; save sign of x
 
-	push rAx3						; as all registers may be used, save them
-	push rAx2
-	push rAx1
-	push rAx0
-	push rBx11
-	push rBx10
-	push rBx9
-	push rBx8
-	push rBx7
-	push rBx6
-	push rBx5
-	push rBx4
-	push rBx3
-	push rBx2
-	push rBx1
-	push rBx0
+	XCALL _U(__fp64_pushCB)			; as all registers may be used, save them
 	push YH
 	push YL
 	push XH
@@ -149,14 +135,7 @@ ENTRY fp64_atan
 
 	XCALL _U(__fp64_movBAx)			; B = A = |x|
 
-	push rA7						; save res = |x| (or 1/|x|)
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)			; save res = |x| (or 1/|x|)
 	push rAE1
 	push rAE0
 
@@ -164,14 +143,7 @@ ENTRY fp64_atan
 	XCALL _U(__fp64_mulsd3_pse)		; x2 = x^2
 	; rcall __fp64_saveA
 
-	push rA7						; save x2 = x^2
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)			; save x2 = x^2
 	push rAE1
 	push rAE0
 
@@ -182,23 +154,9 @@ ENTRY fp64_atan
 	
 	pop rBE0						; retrieve x2 = x^2
 	pop rBE1
-	pop rB0
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)
 
-	push rA7						; save y = horner( x2, coeff_denominator )
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)			; save y = horner( x2, coeff_denominator )
 	push rAE1
 	push rAE0
 	
@@ -210,14 +168,7 @@ ENTRY fp64_atan
 	
 	pop rBE0						; retrieve Denominator y = horner( x2, coeff_denominator )
 	pop rBE1
-	pop rB0
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)
 
 	; rcall __fp64_saveAB
 	
@@ -225,14 +176,7 @@ ENTRY fp64_atan
 	
 	pop rBE0							; retrieve res = |x| or 1/|x|
 	pop rBE1
-	pop rB0
-	pop rB1
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)
 	
 	XCALL _U(__fp64_mulsd3_pse)			; res = z / y * res
 	
@@ -251,22 +195,7 @@ ENTRY fp64_atan
 	pop XH
 	pop YL
 	pop YH
-	pop rBx0
-	pop rBx1
-	pop rBx2
-	pop rBx3
-	pop rBx4
-	pop rBx5
-	pop rBx6
-	pop rBx7
-	pop rBx8
-	pop rBx9
-	pop rBx10
-	pop rBx11
-	pop rAx0
-	pop rAx1
-	pop rAx2
-	pop rAx3
+	XCALL _U(__fp64_popBC)		; restore register set
 	
 	pop r0						; rerieve sign(x)
 	bst r0, 7					; yes, return res*sign
