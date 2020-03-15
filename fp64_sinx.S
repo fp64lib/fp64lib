@@ -52,6 +52,7 @@ FUNCTION fp64_sin
 	returns the cosine of phi
 */
 ENTRY fp64_cos
+GCC_ENTRY __cos
 	XCALL _U(__fp64_splitA)
 	brcs 0b		; NaN or +/i INF
 	breq 2b		; A = 0 --> result of sin = 0
@@ -63,6 +64,7 @@ ENTRY fp64_cos
 	returns the sine of phi
 */
 ENTRY fp64_sin
+GCC_ENTRY __sin
 	XCALL _U(__fp64_splitA)
 	brcs 0b		; NaN or +/i INF
 	breq 1b		; A = 0 --> result of sin = 0

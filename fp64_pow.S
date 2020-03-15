@@ -67,6 +67,7 @@ FUNCTION fp64_pow
 	XJMP _U(__fp64_one)			; case 1: return 1.0 for y == 0.0
 
 ENTRY fp64_pow
+GCC_ENTRY __pow
 	; ZH.ZL := exponent of y without sign
 	movw ZL, rB6				; save exponent and sign
 	andi ZH, 0x7f				; get rid of sign bit

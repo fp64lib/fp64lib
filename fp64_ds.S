@@ -74,7 +74,7 @@ FUNCTION fp64_ds
 .L_zr:
 	XJMP _U(__fp_szero)			; case 4&5: return +/- 0
 
-ENTRY __fp64_sdsf
+GCC_ENTRY __truncdfsf2
 ENTRY fp64_ds
 	XCALL _U(__fp64_splitA)
 	brcs .L_NaN					; handle NaN and +/-INF

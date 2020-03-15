@@ -41,7 +41,7 @@
 
 FUNCTION fp64_isnan
 ENTRY fp64_isnan
-ENTRY __fp64_unordsd2
+GCC_ENTRY __unorddf2
 	XCALL	_U(__fp64_splitA)
 	ldi	r24, 0
 	ldi	r25, 0

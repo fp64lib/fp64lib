@@ -53,6 +53,7 @@ FUNCTION fp64_sd
 8:	XJMP	_U(__fp64_inf)	; return Inf with sign(a)
 
 ENTRY	fp64_sd
+GCC_ENTRY __extendsfdf2
 	clr rA3						; clear lower mantissa bits
 	clr rA2
 	movw rA0, rA2

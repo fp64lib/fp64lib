@@ -105,6 +105,12 @@ _U(\name):
 _U(\name):
 .endm
 
+/* Create an entry that is use by GCC standard arithmetik */
+.macro  GCC_ENTRY name
+	.global	_U(\name)
+_U(\name):
+.endm
+
 .macro	ENDFUNC
 .LEND:
 .endm

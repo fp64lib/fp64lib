@@ -31,7 +31,7 @@
 
 /* $Id$ */
 
-/* float64_t __fp64_negsd2 (float64_t A);
+/* float64_t __fp64_negdf2 (float64_t A);
    float64_t fp64_neg (float64_t A);
 	 Returns -A. Also works for special cases (NaN, +Inf, -Inf),
 	 subnormal numbers and +0 and -0.
@@ -42,7 +42,7 @@
 
 FUNCTION fp64_neg
 ENTRY fp64_neg
-ENTRY __fp64_negsd2				; alias for fplib naming convention
+GCC_ENTRY __negdf2				; alias for fplib naming convention
 	subi	rA7, 0x80			; just flip the sign bit and return
 	ret
 ENDFUNC

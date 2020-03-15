@@ -109,6 +109,7 @@ FUNCTION fp64_lrint
 	ret
 
 ENTRY	fp64_lrint
+GCC_ENTRY __lrint
 	XCALL _U(__fp64_splitA)
 	brcs .L_err					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0

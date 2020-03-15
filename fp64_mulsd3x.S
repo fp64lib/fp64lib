@@ -104,7 +104,7 @@ FUNCTION __fp64_mulsd3x
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A * B
 	*/
 ENTRY fp64_mul
-ENTRY   __fp64_mulsd3
+GCC_ENTRY __muldf3
 ENTRY   __fp64_mulsd3x
 	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)	; split A and B into parts for exponent and mantissa

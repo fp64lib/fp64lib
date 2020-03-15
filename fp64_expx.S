@@ -72,6 +72,7 @@ FUNCTION fp64_exp
 	ret
 
 ENTRY fp64_exp
+GCC_ENTRY __exp
 	; split and analyse A
 	XCALL	_U(__fp64_splitA)
 	; rcall __fp64_saveA

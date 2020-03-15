@@ -51,7 +51,7 @@
 
 FUNCTION __fp64sisd
 ENTRY fp64_uint32_to_float64
-ENTRY   __fp64unssisd
+GCC_ENTRY __floatunsidf
 	clt
 	rjmp .L_common
 	
@@ -69,7 +69,7 @@ ENTRY   __fp64unssisd
 */										  
 ENTRY fp64_int32_to_float64
 ENTRY fp64_long_to_float64
-ENTRY __fp64sisd
+GCC_ENTRY __floatsidf
 	bst	rA7, 7		; save sign
 	brtc .L_common	; if x > 0, start conversion
 	; negate A

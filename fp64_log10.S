@@ -41,6 +41,7 @@
 
 FUNCTION fp64_log10
 ENTRY fp64_log10
+GCC_ENTRY __log10
 	XCALL _U(fp64_log)
 	
 	XCALL _U(__fp64_pushB)		; preserve registers

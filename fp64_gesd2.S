@@ -53,8 +53,8 @@
         -1
  */
 FUNCTION __fp64_gesd2
-ENTRY   __fp64_gesd2
-ENTRY   __fp64_gtsd2
+GCC_ENTRY __gedf2
+GCC_ENTRY __gtdf2
     XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_cmp)
     XCALL _U(__fp64_popB)

@@ -41,6 +41,7 @@
 
 FUNCTION fp64_cosh
 ENTRY fp64_sinh
+GCC_ENTRY __sinh
 	ldi XL, 0x80
 	rjmp .L_common
 	
@@ -51,6 +52,7 @@ ENTRY fp64_sinh
  */
 
 ENTRY fp64_cosh
+GCC_ENTRY __cosh
 	clr XL
 	
 .L_common:						; calculate sinh or cosh, depending on r0

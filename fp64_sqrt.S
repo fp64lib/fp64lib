@@ -55,6 +55,7 @@ FUNCTION fp64_sqrt
 .L_zr:	XJMP	_U(__fp64_szero)
 
 ENTRY fp64_sqrt
+GCC_ENTRY __sqrt
 ALIAS_ENTRY fp64_sqrtf
   ; split and check arg.
 	XCALL	_U(__fp64_splitA)

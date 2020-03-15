@@ -68,6 +68,7 @@ FUNCTION fp64_ldexp
 	XJMP _U(__fp64_szero)		; case 3: return +0
 
 ENTRY fp64_ldexp
+GCC_ENTRY __ldexp
 	XCALL _U(__fp64_splitA)
 	brcs .L_NaN					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0

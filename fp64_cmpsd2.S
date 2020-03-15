@@ -53,10 +53,10 @@ FUNCTION fp64_compare
  
 ENTRY	fp64_compare
 ENTRY   __fp64_cmpsd2
-ENTRY   __fp64_eqsd2
-ENTRY   __fp64_nesd2
-ENTRY   __fp64_ltsd2
-ENTRY   __fp64_lesd2
+GCC_ENTRY  __eqdf2
+GCC_ENTRY  __nedf2
+GCC_ENTRY  __ltdf2
+GCC_ENTRY  __ledf2
     XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_cmp)
     XCALL _U(__fp64_popB)

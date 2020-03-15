@@ -55,7 +55,7 @@
  */
 
 FUNCTION __fp64_fixsddi
-ENTRY __fp64_fixsddi
+GCC_ENTRY __fixdfdi
 ENTRY fp64_to_int64
 	push rBE0
 	ldi rBE0, 63
@@ -82,7 +82,7 @@ ENTRY fp64_to_int64
 	  6 | -2^64<A<0 | 0	| -((unsigned long long) (-A)
  */
 
-ENTRY __fp64_fixunssddi
+GCC_ENTRY __fixunsdfdi
 ENTRY fp64_to_uint64
 	push rBE0
 	ldi rBE0, 64
@@ -108,7 +108,7 @@ ENTRY fp64_to_uint64
 	  5 | |A|<2^15  | 0	| (int) A
  */
 
-ENTRY __fp64_fixsdsi
+GCC_ENTRY __fixdfsi
 ENTRY fp64_to_int16
 	push rBE0
 	ldi rBE0, 15
@@ -135,7 +135,7 @@ ENTRY fp64_to_int16
 	  6 | -2^16<A<0 | 0	| -((unsigned int) (-A)
  */
 
-ENTRY __fp64_fixunssdsi
+GCC_ENTRY __fixunsdfsi
 ENTRY fp64_to_uint16
 	push rBE0
 	ldi rBE0, 16

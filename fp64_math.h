@@ -45,6 +45,15 @@ extern "C"{
 #include <string.h>
 #include <math.h>
 
+/* TYPES */
+#if defined(__HAVE_LONG_DOUBLE64__)
+typedef long double float64_t;  /* IEEE 754 double precision floating point number */
+typedef float       float32_t;  /* IEEE 754 single precision floating point number */
+#else
+typedef uint64_t float64_t;     /* IEEE 754 double precision floating point number */
+typedef float    float32_t;     /* IEEE 754 single precision floating point number */
+#endif
+
 /* definitions that should be in float.h, but there is not float.h on avr gcc */
 #define FLT_ROUNDS		1		/* round to nearest */
 #define FLT_RADIX		2		/* base radix representation of the exponent */
@@ -117,10 +126,6 @@ extern "C"{
 #define MATH_ERREXCEPT   2
 #define math_errhandling 0	/* fp64lib uses silent signalling, errno is not used */
 
-/* TYPES */
-typedef uint64_t float64_t; /* IEEE 754 double precision floating point number */
-typedef float    float32_t; /* IEEE 754 single precision floating point number */
-
 /* GENERIC FUNCTION MACROS */
 // unfortunately, math.h defined functions for the is... macros, 
 // we can only overload the is...f macros so
@@ -162,7 +167,9 @@ int8_t fp64_compare( float64_t x, float64_t b);
 float64_t fp64_copysign(float64_t x, float64_t y); [all added with C99]
 float64_t fp64_cos(float64_t x);
 float64_t fp64_cosh(float64_t x);
+float64_t fp64_cotan(float64_t x);
 float64_t fp64_exp(float64_t x);
+float64_t fp64_exp10(float64_t x);
 float64_t fp64_fabs(float64_t x);
 //float64_t fabs(long float64_t x);
 float64_t fp64_fdim(float64_t x, float64_t y);
@@ -178,6 +185,7 @@ long fp64_lrint(float64_t x);
 long fp64_lround(float64_t x);
 float64_t fp64_log(float64_t x);
 float64_t fp64_log10(float64_t x);
+float64_t fp64_log2(float64_t x);
 float64_t fp64_modf(float64_t x, float64_t *pint);
 float64_t fp64_pow(float64_t x, float64_t y);
 float64_t fp64_round(float64_t x);

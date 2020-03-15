@@ -64,6 +64,7 @@ FUNCTION fp64_frexp
 	ret
 		
 ENTRY fp64_frexp
+GCC_ENTRY __frexp
 	X_movw	XL, rB6			; move pointer to one of the pointer registers
 
 	; Write 0 for next cases: Zero, Inf or NaN.

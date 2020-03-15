@@ -60,6 +60,7 @@
 
 FUNCTION fp64_floor
 ENTRY	fp64_floor
+GCC_ENTRY __floor
 	subi rA7, 0x80				; floor(x) = -ceil(-x)
 	XCALL _U(fp64_ceil)
 	subi rA7, 0x80

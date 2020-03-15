@@ -92,6 +92,7 @@ FUNCTION fp64_lround
 	ret
 
 ENTRY	fp64_lround
+GCC_ENTRY __lround
 	XCALL _U(__fp64_splitA)
 	brcs .L_err					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0

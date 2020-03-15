@@ -93,7 +93,7 @@ FUNCTION __fp64_divsd3x
 	XJMP	_U(__fp64_nanp)
 
 ENTRY fp64_div
-ENTRY	__fp64_divsd3x
+GCC_ENTRY __divdf3
 ENTRY	__fp64_divsd3
 	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)

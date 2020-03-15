@@ -107,6 +107,7 @@ ENTRY fp64_fmodn
      towards zero to an integer.
  */
 ENTRY fp64_fmod
+GCC_ENTRY __fmod
   ; split and check exceptions
     cbr rB7, 0x80		; sign of B does not matter
  	XCALL	_U(__fp64_split3)

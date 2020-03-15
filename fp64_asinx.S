@@ -85,6 +85,7 @@ FUNCTION fp64_asin
 	returns the arcus cosine of phi (inverse function to fp64_cos(x)
 */
 ENTRY fp64_acos
+GCC_ENTRY __acos
 	inc r1
 	inc r1				; set bit 1 of r1 as flag for acos
 
@@ -92,6 +93,7 @@ ENTRY fp64_acos
 	returns the arcus sine of phi (inverse function to fp64_sin(x)
 */
 ENTRY fp64_asin
+GCC_ENTRY __asin
 	sts __sinFlags, r1	; either r1 = 0 (default) or r1 = 0x02 (acos)
 	clr r1
 	XCALL _U(__fp64_splitA)

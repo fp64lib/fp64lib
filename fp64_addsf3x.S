@@ -113,7 +113,7 @@ FUNCTION __fp64addsf3x
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A - B
 	*/
 ENTRY fp64_sub
-ENTRY	__fp64_subsd3
+ENTRY __subdf3
 	clr r0
 	sec
 	ror r0					; set mode to subtraction = 0x80
@@ -128,7 +128,7 @@ ENTRY	__fp64_subsd3
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A + B
 	*/
 ENTRY fp64_add
-ENTRY __fp64_addsd3
+ENTRY __adddf3
 ENTRY __fp64_addsd3x
 	clr r0					; set mode to addition
 1:	XCALL _U(__fp64_pushB)
