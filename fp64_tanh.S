@@ -38,30 +38,14 @@
 
 FUNCTION fp64_tanh
 ENTRY fp64_tanh
+GCC_ENTRY __tanh
 	XCALL _U(__fp64_pushB)		; preserve registers
-
-	push	rA7					; save x
-	push	rA6
-	push	rA5
-	push	rA4
-	push	rA3
-	push	rA2
-	push	rA1
-	push	rA0
+	XCALL _U(__fp64_pushA)		; save x
 
 	XCALL _U(fp64_sinh)			; calculate sinh(x) 
-
 	XCALL _U(__fp64_movBA)		; save sinh(x)
 	
-	pop rA0						; restore x
-	pop rA1	
-	pop rA2
-	pop rA3
-	pop rA4
-	pop rA5
-	pop rA6
-	pop rA7
-	
+	XCALL _U(__fp64_popA)		; restore x
 	XCALL _U(fp64_cosh)			; calculate cosh(x) 
 	XCALL _U(fp64_div)			; calculate sinh(x)/cosh(x)
 	
