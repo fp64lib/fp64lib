@@ -39,26 +39,13 @@
 
 FUNCTION fp64_hypot
 ENTRY fp64_hypot
+GCC_ENTRY __hypot
 	XCALL _U(__fp64_pushB)
 	XCALL _U(fp64_square)		; calc x^2
-	push rA7					; save x^2
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)		; save x^2
 	XCALL _U(__fp64_movAB)		; get y
 	XCALL _U(fp64_square)		; calc y^2
-	pop rB0						; restore x^2 into B
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)       ; restore x^2 into B
 	XCALL _U(fp64_add)			; x^2+y^2
 	XCALL _U(__fp64_popB)
 	XJMP _U(fp64_sqrt)			; calculate and return sqrt(x^2+y^2)
