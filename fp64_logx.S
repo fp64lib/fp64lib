@@ -67,6 +67,7 @@ FUNCTION fp64_log
 	returns the natural logarithm ln of x
 */
 ENTRY fp64_log
+GCC_ENTRY __log
 	XCALL _U(__fp64_splitA)
 	brcs .L_nf					; case 1-3: return NaN for x=NaN,-Inf, +Inf for +Inf
 	breq .L_inf					; case 4: return -Inf for x = 0
@@ -80,22 +81,7 @@ ENTRY fp64_log
 	XCALL _U(__fp64_norm2)		; yes, normalize it
 	
 2:	
-	push rAx3					; as all registers may be used, save them
-	push rAx2
-	push rAx1
-	push rAx0
-	push rBx11
-	push rBx10
-	push rBx9
-	push rBx8
-	push rBx7
-	push rBx6
-	push rBx5
-	push rBx4
-	push rBx3
-	push rBx2
-	push rBx1
-	push rBx0
+	XCALL _U(__fp64_pushCB)		; as all registers may be used, save them
 	push YH
 	push YL
 	push XH
@@ -158,14 +144,7 @@ ENTRY fp64_log
 	pop rBE1
 
 	bld rA7,7
-	push rA7					; save result of log(y)
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)		; save result of log(y)
 	push rAE1
 	push rAE0
 	
@@ -182,14 +161,7 @@ ENTRY fp64_log
 	
 	pop rBE0					; restore B = log(y)
 	pop rBE1
-	pop rB0
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)
 	
 	mov r0, rB7					; T has to be sign(A) ^ sign(B)
 	eor r0, rA7
@@ -202,22 +174,7 @@ ENTRY fp64_log
 	pop XH
 	pop YL
 	pop YH
-	pop rBx0
-	pop rBx1
-	pop rBx2
-	pop rBx3
-	pop rBx4
-	pop rBx5
-	pop rBx6
-	pop rBx7
-	pop rBx8
-	pop rBx9
-	pop rBx10
-	pop rBx11
-	pop rAx0
-	pop rAx1
-	pop rAx2
-	pop rAx3
+	XCALL _U(__fp64_popBC)
 	
 	XJMP _U(__fp64_rpretA)		; round, pack and return
 
