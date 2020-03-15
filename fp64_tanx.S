@@ -38,49 +38,20 @@
 
 FUNCTION fp64_tan
 ENTRY fp64_tan
+GCC_ENTRY __tan
 	XCALL _U(__fp64_pushB)		; preserve registers
 
-	push rA7					; save x
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)		; save x
 
 	XCALL _U(fp64_cos)			; calculate cos(x) 
 
-	pop rB0						; restore x
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	
-	push rA7					; save cos(x)
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
-	
+	XCALL _U(__fp64_popB)		; restore x
+	XCALL _U(__fp64_pushA)		; save cos(x)
 	XCALL _U(__fp64_movAB)		; move x into A
+
 	XCALL _U(fp64_sin)			; calculate sin(x) 
 	
-	pop rB0						; restore cos(x)
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	
+	XCALL _U(__fp64_popB)		; restore cos(x)
 	XCALL _U(__fp64_isBzero)	; is cos(x) == 0?
 	sec
 	breq 1f						; yes, no need to calculate sin(x)/cos(x), return +/-Inf.
