@@ -79,9 +79,13 @@ FUNCTION fp64_to_string
 
 0:	; handle NaN and Inf
 	pop rFlags
+	pop rNrd
+	pop rPrec
 	XJMP _U(__fp64_ftoa_nan)	; return string as from ftoa
 
 ENTRY   fp64_to_string
+    push rPrec					; ABI requires anything below r18 to be saved
+	push rNrd
 	push rFlags
 	clr rFlags
 	XCALL _U(__fp64_splitA)
@@ -454,6 +458,8 @@ ENTRY   fp64_to_string
 
 	pop rB7
 	pop rFlags
+	pop rNrd
+	pop rPrec
 	
 	movw r24, ZL				; return( s )
 	ret
