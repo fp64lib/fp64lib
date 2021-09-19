@@ -1,7 +1,4 @@
-/* Copyright (c) 2018-2020  Uwe Bissinger
-   Based on 32bit floating point arithmetic routines which are:
-   Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
-   Copyright (c) 2006,2009  Dmitry Xmelkov
+/* Copyright (c) 2018-2021  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -46,13 +43,11 @@
 	Example: modf(123.45) makes 0.45 (return value) + 123.0 (stored in *iptr)
  */
 
-#define	iptr_lo	r20
-
 	; do special case handling
 	; case|	 x	  |	modf |	*iptr
 	;-----+-------+------+------
 	; 1	  |	NaN	  |	NaN  |	NaN
-	; 2	  |	Inf	  |	Inf  |	0.0
+	; 2	  |	Inf	  |	 0   |	Inf
 	; 3	  |	 0	  |	 0   |	0.0
 	; 4	  |	>2^53 |	0.0  |   x
 	; 5   | <1.0  |  x   |  0.0
@@ -60,52 +55,59 @@
 FUNCTION fp64_modf
 0:	breq 1f		; if Inf
 	XCALL _U(__fp64_nan)	; case 1: result = NaN
-	XCALL _U(__fp64_movBA)	; *iptr = NaN
+	XCALL _U(__fp64_movBA)	;         *iptr = NaN
 	rjmp .L_write 
 	
 1:	XCALL  _U(__fp64_inf)	; case 2: result = Inf
-.L_zero:
-	clr rB7					; *iptr = 0.0
-	bld rB7, 7				; copy sign from x
+.L_zero:					;         *iptr = 0.0 
+	clr rB7					
 	clr rB6
 	movw rB4, rB6
 	movw rB2, rB6
 	movw rB0, rB6
+	bld rB7, 7				; copy sign from x
 	rjmp .L_write
 
 	; case 5: x < 1.0
-2:	XCALL _U(__fp64_pretA)	; pack result, fmod(x) = x
-	rjmp .L_zero			; *iptr = 0.0
+2:	tst rA6					; check for subnormal number
+	brmi 21f
+	XCALL _U(__fp64_lslA)
+ 21:
+	; rcall __fp64_saveABC
+	XCALL _U(__fp64_pretA)	; case 5: result = x
+	rjmp .L_zero			;         *iptr = 0.0
 	
 .L_nfrc: ; case 4 fabs(x) > 2^53 --> no fraction
 	XCALL _U(__fp64_pretA)	; pack result
 	XCALL _U(__fp64_movBA)	; *iptr = x
-	movw rB4, rA4
-	movw rB2, rA2
-	movw rB0, rA0
 	clr rA7					; modf(x) = 0.0
 	bld rA7, 7				; copy sign from x
 	clr rA6
-	movw rA4, rB4
-	movw rA2, rB2
-	movw rA0, rB0
+	clr r0
+	movw rA4, r0
+	movw rA2, r0
+	movw rA0, r0
 	rjmp .L_write
 
 ENTRY fp64_modf
 ENTRY fp64_modff
-	XCALL _U(__fp64_pushB)
-	movw XL, ZL		; save iptr
+	XCALL _U(__fp64_pushCB)	; save used registers
+	push rB7				; and iptr
+	push rB6
+	; rcall __fp64_saveAB
 	
 	XCALL _U(__fp64_splitA)
-	brcs 0b			; NaN or +/i INF
-	breq .L_zero	; x = 0? --> return 0
+	; rcall __fp64_saveAB
+	brcs 0b					; NaN or +/i INF
+	breq .L_zero			; x = 0? --> return 0
 	
 	; is there an integral part?
 	cpi rAE1, hi8(0x03ff)	; is exponent < 0x3ff, i.e. x < 1.0?
-	brlo 2b			; yes, case 5: return x
-	brne 3f			; no, break x into parts
+	brlo 2b					; yes, case 5: return x
+	brne 3f					; no, break x into parts
 	cpi rAE0, lo8(0x03ff)
 	brlo 2b
+	
 3:	; fabs(x) >= 1.0
 	cpi rAE1, hi8(0x3ff+53)	; x > 2^53
 	brlo 4f
@@ -114,64 +116,103 @@ ENTRY fp64_modff
 	brsh .L_nfrc
 
 4:	; fabs(x) > 1.0 and < 2^53, there is a fraction part
+	; rcall __fp64_saveAB
+	
+	ldi rB6, 0xff			; set mask to eleminate fraction
+	mov rC7, rB6
+	mov rC6, r1
+	mov rC5, r1
+	mov rC4, r1
+	movw rC2, rC4
+	movw rC0, rC4
 
-  ; Is there a fraction part?
-1:	subi	XH, 23
-	brsh	4f		; no fraction part
+	XCALL _U(__fp64_movBAx)	; B will contain the integer part
+	subi rAE0, 0xfe 		; A will contain the fraction part < 1.0
+	
+	; get rid of integer part by shifting A left until A is < 1
+5:
+	breq 6f
+	rcall __fp64_lslA		; A << 1 , get rid of an integer digit
+	asr rC7				; C >> 1 (add 1 more integer digit to mask)
+	ror rC6
+	ror rC5
+	ror rC4
+	ror rC3
+	ror rC2
+	ror rC1
+	ror rC0
+	dec rAE0
+	rjmp 5b
 
-	; check fraction:  B >>= 23 - (exp-127)
-	mov	XL, XH		; Now XH is -23..-1
-	clr	r0		; to control, is the fraction zero?
-2:	lsr	rB2
-	ror	rB1
-	ror	rB0
-	adc	r0, r1
-	inc	XL
-	brmi	2b
-	tst	r0
-	breq	.L_nfrc		; fraction == 0
-  ; restore and clear fraction:  B <<= 23 - (exp-127)
-3:	lsl	rB0
-	rol	rB1
-	rol	rB2
-	inc	XH
-	brmi	3b
-  ; write B
-	rcall	.L_write
-  ; return nonzero fraction:  A - B
-	XJMP	_U(__subsf3)
+6:
+	ldi rAE1, 0x03			; set exponent to 0x3fe = 0.5
+	ldi rAE0, 0xfe
+	; A is now modf(x)
+	; mask out the fraction of x in B 
+	; rcall __fp64_saveABC
+	and rB6, rC6
+	and rB5, rC5
+	and rB4, rC4
+	and rB3, rC3
+	and rB2, rC2
+	and rB1, rC1
+	and rB0, rC0
+	
+	; check for modf(x) == 0
+	mov r0, rA6
+	or r0, rA5
+	or r0, rA4
+	or r0, rA3
+	or r0, rA2
+	or r0, rA1
+	or r0, rA0
+	brne 7f				; there is a fraction --> normalize it
 
-	; exponent too big:  compare with smallest NaN (0x7f800001)
-4:	cpi	rA0, 1
-	cpc	rA1, r1
-	ldi	XL, 0x80
-	cpc	rA2, XL
-	sbci	XH, 128 - 23
-	brsh	.L_write	; NaN: write and return as is
-  ; fraction == 0
+	mov rA7, r1			; set modf(x) to 0.0
+	bld rA7, 7			; get sign from x
+	rjmp .L_packB		; return with *iptr = x
 
- ;.L_nfrc:
-	X_movw	rB0, rA0
-	X_movw	rB2, rA2
-  ; A = 0.0 with sign
-	clr	rA0
-	clr	rA1
-	clr	rA2
-	andi	rA3, 0x80
+	; fraction != 0, now normalize fraction
+7:
+	tst rA6			
+	brmi .L_retAB			; stop as soon as topmost bit is set
+	XCALL _U(__fp64_lslA)	; otherwise A << 1
+	dec rAE0				; and reduce the exponent
+	rjmp 7b
 
-.L_write:
-	adiw	XL, 0		; skip writing with NULL pointer
-	breq	99f
-	st X+, rB0			; save integral part
-	st X+, rB1
-	st X+, rB2
-	st X+, rB3
-	st X+, rB4
-	st X+, rB5
-	st X+, rB6
-	st X+, rB7
-99:	
-	XJMP _U(__fp64_popBret)
+	; fraction is now normalized
+	; A contains modf, B has integer part
+	; now pack A and B
+.L_retAB:
+	XCALL _U(__fp64_pretA)
+
+.L_packB:
+	; rcall __fp64_saveAB
+
+	XCALL _U(__fp64_swapAB)
+	XCALL _U(__fp64_pretA)
+	XCALL _U(__fp64_swapAB)
+
+.L_write:	
+	pop ZL					; restore iptr
+	pop ZH
+	adiw XL, 0
+	breq 99f				; skip write if iptr == 0
+	
+	;  store packed integer part B in *iptr
+	st Z+, rB0
+	st Z+, rB1
+	st Z+, rB2
+	st Z+, rB3
+	st Z+, rB4
+	st Z+, rB5
+	st Z+, rB6
+	st Z+, rB7
+
+99:	; restore used B registers and return with A = modf(x)
+	XCALL _U(__fp64_popBC)
+	nop						; hack to avoid tail call optimization
+	ret
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */
