@@ -230,8 +230,8 @@ GCC_ENTRY __atan2
 
 	; add displacement
 	; rcall __fp64_saveAB
-	XCALL _U(__fp64_popB)
-	XJMP	_U(fp64_add)
+	XCALL _U(fp64_add)
+	XJMP _U(__fp64_popBret)
 	
 1:	; cases 6 & 7: fabs(A) > fabs(B) --> swap values and change the atan sign
 	; atan(y/x) = -atan(x/y) +/- PI/2
