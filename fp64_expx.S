@@ -116,6 +116,10 @@ GCC_ENTRY __exp
 
 	push YL
 	push YH
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L_expxTable)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(.L_expxTable)
 	ldi XH, hi8(.L_expxTable)
 	XCALL	_U(__fp64_powser)

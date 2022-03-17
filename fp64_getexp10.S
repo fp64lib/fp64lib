@@ -146,12 +146,23 @@ ENTRY __fp64_getExp10int
 	; of exp2 values, with terminating value which is always 
 	; greater than the biggest exponent
 	movw rB4, rExp2L	; save exponent
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi zl, byte3(.L_exc)
+	out  RAMPZ, ZL
+#endif
 	ldi ZL, lo8(.L_exc)
 	ldi ZH, hi8(.L_exc)
 
+#ifdef ARDUINO_AVR_MEGA2560
+4:	elpm r0, Z+
+	cp rB4, r0
+	elpm r0, Z+
+#else	
 4:	lpm r0, Z+
 	cp rB4, r0
 	lpm r0, Z+
+#endif
+
 	cpc rB5, r0
 	brlo .L_nomatch		; no match up to now, exp2 is lower than current entry, stop
 	brne 4b				; exp2 is greater than current entry, try next one

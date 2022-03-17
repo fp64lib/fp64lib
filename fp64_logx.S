@@ -134,6 +134,10 @@ GCC_ENTRY __log
 	bld rA7, 7
 	; rcall __fp64_saveAB
 
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L__tableLog)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(.L__tableLog)
 	ldi XH, hi8(.L__tableLog)
 	XCALL _U(__fp64_powsodd)	; approximate log(y) = log((x-1)/(x+1)) by power series

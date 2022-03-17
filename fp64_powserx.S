@@ -48,7 +48,8 @@
    Input:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0,rAE1.rAE0	- an 'x' arg as float64_t_intern
 												  rA7 must contain sign of A
-     XH.XL										- table address (in low 64K flash memory)
+     XH.XL										- table address 
+		 RAMPZ										- segment of table (for CPUs with >64k flash memory)
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0, rAE1.rAE0	- result, rA7 will contain sign of result
 
@@ -64,7 +65,11 @@ ENTRY __fp64_powser
 	push ZL						; Z is in use by A
 	push ZH
 	movw ZL, XL
+#ifdef ARDUINO_AVR_MEGA2560
+	elpm	rcntr, Z+				; load polynom power (3 in our example)
+#else
 	lpm	rcntr, Z+				; load polynom power (3 in our example)
+#endif
 	sts .L_saveZ, ZL			; save pointer to table
 	sts .L_saveZ+1, ZH
 	; rcall __fp64_saveABC
@@ -124,8 +129,25 @@ ENTRY __fp64_powser
 .Load10:
 	push ZL
 	push ZH
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi zl, byte3(.L_saveZ)
+	out  RAMPZ, ZL
+#endif
 	lds ZL, .L_saveZ			; load table pointer
 	lds ZH, .L_saveZ+1
+
+#ifdef ARDUINO_AVR_MEGA2560
+	elpm	rB7, Z+				; load next constant from program memory
+	elpm	rB6, Z+
+	elpm	rB5, Z+
+	elpm	rB4, Z+
+	elpm	rB3, Z+
+	elpm	rB2, Z+
+	elpm	rB1, Z+
+	elpm	rB0, Z+
+	elpm	rBE1, Z+
+	elpm	rBE0, Z+
+#else
 	lpm	rB7, Z+				; load next constant from program memory
 	lpm	rB6, Z+
 	lpm	rB5, Z+
@@ -136,6 +158,8 @@ ENTRY __fp64_powser
 	lpm	rB0, Z+
 	lpm	rBE1, Z+
 	lpm	rBE0, Z+
+#endif
+
 	sts .L_saveZ, ZL			; save table pointer, now pointing to the next constant
 	sts .L_saveZ+1, ZH
 	pop ZH
@@ -157,6 +181,10 @@ ENTRY __fp64_check_powser3
 #else
 	push XL
 	push XH
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L_expxTable)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(__testTablex3)
 	ldi XH, hi8(__testTablex3)
 

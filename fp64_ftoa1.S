@@ -85,10 +85,18 @@ ENTRY __fp64_ftoa_nan
 	
 0:	; handle NaN and +/-Inf
 	breq 3f					; handle Inf differently
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi zl, byte3(.L_nan)
+	out  RAMPZ, ZL
+#endif
 	ldi ZL, lo8(.L_nan)
 	ldi ZH, hi8(.L_nan)		; return "NaN"
 
+#ifdef ARDUINO_AVR_MEGA2560
+1:	elpm rA7, Z+				; copy string into buffer
+#else
 1:	lpm rA7, Z+				; copy string into buffer
+#endif
 2:	st X+, rA7
 	tst rA7
 	brne 1b
@@ -97,6 +105,10 @@ ENTRY __fp64_ftoa_nan
 	rjmp .L_ret
 
 3:	; handle +/-Inf
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi zl, byte3(.L_inf)
+	out  RAMPZ, ZL
+#endif
 	ldi ZL, lo8(.L_inf)
 	ldi ZH, hi8(.L_inf)
 	ldi rA7, '+'			; return either +Inf

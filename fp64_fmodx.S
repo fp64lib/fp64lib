@@ -455,6 +455,10 @@ ENTRY	__fp64_fmodx
 ENTRY __fp64_load_xln2
 	push ZL				; load b with ln2
 	push ZH
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi zl, byte3(__xln2)
+	out  RAMPZ, ZL
+#endif
 	ldi ZL, lo8(__xln2)
 	ldi ZH, hi8(__xln2)
 	rjmp __fp64_load_xconst
@@ -466,6 +470,10 @@ ENTRY __fp64_load_xln2
 ENTRY __fp64_load_xpio2
 	push ZL				; load b with PI/2
 	push ZH
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi zl, byte3(__xpi_o_2)
+	out  RAMPZ, ZL
+#endif
 	ldi ZL, lo8(__xpi_o_2)
 	ldi ZH, hi8(__xpi_o_2)
 	
@@ -475,6 +483,22 @@ ENTRY __fp64_load_xpio2
 	 Output: rBx11..rB0, rBE1.rBE0	loaded constant in internal 96 bit format
 */
 ENTRY __fp64_load_xconst	
+#ifdef ARDUINO_AVR_MEGA2560
+	elpm rBx11, Z+
+	elpm rBx10, Z+
+	elpm rBx9, Z+
+	elpm rBx8, Z+
+	elpm rBx7, Z+
+	elpm rBx6, Z+
+	elpm rBx5, Z+
+	elpm rBx4, Z+
+	elpm rBx3, Z+
+	elpm rBx2, Z+
+	elpm rBx1, Z+
+	elpm rBx0, Z+
+	elpm rBE1, Z+
+	elpm rBE0, Z+
+#else
 	lpm rBx11, Z+
 	lpm rBx10, Z+
 	lpm rBx9, Z+
@@ -489,6 +513,7 @@ ENTRY __fp64_load_xconst
 	lpm rBx0, Z+
 	lpm rBE1, Z+
 	lpm rBE0, Z+
+#endif
 	pop ZH
 	pop ZL
 	ret

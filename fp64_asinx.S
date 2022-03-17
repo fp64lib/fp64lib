@@ -211,6 +211,10 @@ GCC_ENTRY __asin
 	push rAE1
 	push rAE0
 
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L_tableAsinDenom)
+	out RAMPZ, XL
+#endif
 	ldi XL, lo8(.L_tableAsinDenom)	; calculate Denominator
 	ldi XH, hi8(.L_tableAsinDenom)
 	XCALL _U(__fp64_powser)
@@ -224,6 +228,10 @@ GCC_ENTRY __asin
 	push rAE0
 	
 	XCALL _U(__fp64_movABx)			; A = B = x3
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L_tableAsinNom)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(.L_tableAsinNom)	; calculate Nominator
 	ldi XH, hi8(.L_tableAsinNom)
 	XCALL _U(__fp64_powser)			; res = horner( x2, coeff_zähler )

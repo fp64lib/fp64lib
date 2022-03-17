@@ -38,6 +38,11 @@
 #define	_FP64DEF_H
 
 //#include "sectionname.h"
+#ifdef ARDUINO_AVR_MEGA2560
+#ifndef RAMPZ
+#define RAMPZ	0x3b
+#endif
+#endif
 
 /*
 Registers 

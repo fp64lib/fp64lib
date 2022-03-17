@@ -101,6 +101,10 @@ ENTRY __fp64_check_powsodd3
 #else
 	push XL
 	push XH
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L__testTable3x)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(.L__testTable3x)
 	ldi XH, hi8(.L__testTable3x)
 	

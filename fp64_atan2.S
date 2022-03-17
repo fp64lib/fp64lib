@@ -211,11 +211,25 @@ GCC_ENTRY __atan2
 	;   bit 7 of r0  == 1 --> subtract displacement
 	
 	; sector II, III, VI, VII: add +/- PI/2
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi zl, byte3(.L_pi_o_2)
+	out RAMPZ, ZL
+#endif
 	ldi ZL, lo8(.L_pi_o_2)
 	ldi ZH, hi8(.L_pi_o_2)
 	sbrs rB7, 0		; indicator = 0x81?
 	adiw ZL, 0x08	; no: sector IV, V: add PI
 
+#ifdef ARDUINO_AVR_MEGA2560
+	elpm rB7, Z+
+	elpm rB6, Z+
+	elpm rB5, Z+
+	elpm rB4, Z+
+	elpm rB3, Z+
+	elpm rB2, Z+
+	elpm rB1, Z+
+	elpm rB0, Z+
+#else	
 	lpm rB7, Z+
 	lpm rB6, Z+
 	lpm rB5, Z+
@@ -224,6 +238,7 @@ GCC_ENTRY __atan2
 	lpm rB2, Z+
 	lpm rB1, Z+
 	lpm rB0, Z+
+#endif
 	
 	sbrc r0, 7		; y < 0?
 	subi rB7, 0x80	; yes: Sector V, VI, VII: change sign of displacement

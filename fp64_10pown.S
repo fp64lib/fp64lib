@@ -48,6 +48,10 @@ ENTRY __fp64_10pown
 	ldi YL, 3			; pot_exp2 = 3		// first 3 bits of pot are the leading bits
 	clr YH
 
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi zl, byte3(.L_10)
+	out RAMPZ, ZL
+#endif
 	ldi ZL, lo8(.L_10)	; pot = 10 << 60
 	ldi ZH, hi8(.L_10)
 	bst XH, 7			; neg = 0
@@ -57,6 +61,16 @@ ENTRY __fp64_10pown
 	sbci XH, 0
 	adiw ZL, 8			; 	pot = 0.1 << 63
 
+#ifdef ARDUINO_AVR_MEGA2560
+0:	elpm rB7, Z+			; load pot with 10.0 or 0.1
+	elpm rB6, Z+
+	elpm rB5, Z+
+	elpm rB4, Z+
+	elpm rB3, Z+
+	elpm rB2, Z+
+	elpm rB1, Z+
+	elpm rB0, Z+
+#else	
 0:	lpm rB7, Z+			; load pot with 10.0 or 0.1
 	lpm rB6, Z+
 	lpm rB5, Z+
@@ -65,6 +79,7 @@ ENTRY __fp64_10pown
 	lpm rB2, Z+
 	lpm rB1, Z+
 	lpm rB0, Z+
+#endif
 
 	clr rAE1			; exp2 = 0 // exponent of result in base 2
 	clr rAE0

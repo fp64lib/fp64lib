@@ -147,6 +147,10 @@ GCC_ENTRY __atan
 	push rAE1
 	push rAE0
 
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L_tableAtanDenom)
+	out RAMPZ, XL
+#endif
 	ldi XL, lo8(.L_tableAtanDenom)	; calculate Denominator
 	ldi XH, hi8(.L_tableAtanDenom)
 	; rcall __fp64_saveAB
@@ -161,6 +165,10 @@ GCC_ENTRY __atan
 	push rAE0
 	
 	XCALL _U(__fp64_movABx)			; A = B = x2
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L_tableAtanNom)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(.L_tableAtanNom)	; calculate Nominator
 	ldi XH, hi8(.L_tableAtanNom)
 	XCALL _U(__fp64_powser)			; z = horner( x2, coeff_nominator )
