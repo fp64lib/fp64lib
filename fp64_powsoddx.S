@@ -132,6 +132,10 @@ ENTRY __fp64_check_powsoddn
 ENTRY __fp64_check_powslog
 	push XL
 	push XH
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi XL, byte3(.L__testTable3x)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(.L__testTableLogx)
 	ldi XH, hi8(.L__testTableLogx)
 	rjmp 98b

@@ -87,6 +87,7 @@ ENTRY __fp64_ftoa_nan
 	breq 3f					; handle Inf differently
 #ifdef ARDUINO_AVR_MEGA2560
 	ldi zl, byte3(.L_nan)
+  rcall __fp64_saveAB
 	out  RAMPZ, ZL
 #endif
 	ldi ZL, lo8(.L_nan)
@@ -101,12 +102,16 @@ ENTRY __fp64_ftoa_nan
 	tst rA7
 	brne 1b
 	st X+, rA7				; store additional '\0' to terminate exponent string
+#ifdef ARDUINO_AVR_MEGA2560
+	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+#endif
 	sec						; flag for special case
 	rjmp .L_ret
 
 3:	; handle +/-Inf
 #ifdef ARDUINO_AVR_MEGA2560
 	ldi zl, byte3(.L_inf)
+  rcall __fp64_saveAB
 	out  RAMPZ, ZL
 #endif
 	ldi ZL, lo8(.L_inf)

@@ -84,7 +84,7 @@ FUNCTION fp64_to_string
 	XJMP _U(__fp64_ftoa_nan)	; return string as from ftoa
 
 ENTRY   fp64_to_string
-    push rPrec					; ABI requires anything below r18 to be saved
+  push rPrec					; ABI requires anything below r18 to be saved
 	push rNrd
 	push rFlags
 	clr rFlags
@@ -460,7 +460,7 @@ ENTRY   fp64_to_string
 	pop rFlags
 	pop rNrd
 	pop rPrec
-	
+
 	movw r24, ZL				; return( s )
 	ret
 ENDFUNC

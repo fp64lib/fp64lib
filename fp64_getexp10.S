@@ -178,6 +178,9 @@ ENTRY __fp64_getExp10int
 	sbci rExp10H, 0
 5:	
 	; now exp10H.exp10L contains result, return to caller
+#ifdef ARDUINO_AVR_MEGA2560
+	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+#endif
 	ret	
 
 .L_exc:	; list of exp values where approximation needs to be corrected

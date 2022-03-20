@@ -272,6 +272,7 @@ _U(\name):
 .endm
 
 /* alias to be compatible with AVR programming manual */
-#define byte3(x)	pm_hh8(x)
+// #define byte3(x)	pm_hh8(x)
+#define byte3(x)	hh8(x)
 
 #endif	/* !_ASMDEF_H */

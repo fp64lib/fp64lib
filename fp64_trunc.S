@@ -106,15 +106,31 @@ ENTRY   fp64_cut_noninteger_fraction
 	andi rAE0, 0xf8				; bottom 3 bits were already used above
 	lsr rAE0					; index = (exp/8)*4 as 4 byte are used for clearing out a register
 	mov rAE1, rAE0				; take care of proper order of operation as rAE0 == ZL!
-	ldi ZL, lo8(.L_mask)		; add offset to jump table
 
+#ifdef ARDUINO_AVR_MEGA2560
+	ldi ZL, byte3(.L_mask)
+	mov r0, ZL
+#endif
+
+	ldi ZL, lo8(.L_mask)		; add offset to jump table
 	add ZL, rAE1		
 	ldi ZH, hi8(.L_mask)
 	adc ZH, r1					; take care of any overflows
+
+#ifdef ARDUINO_AVR_MEGA2560
+	adc r0, r1					; extend to 256MB address calculation
+	lsr r0							; PC addresses words, so divide target address by 2
+	ror ZH	 						
+	ror ZL
+	out  EIND, r0
+	eijmp
+#else
 	; rcall __fp64_saveAB
 	lsr ZH						; PC addresses words, so divide target address by 2
 	ror ZL
 	ijmp						; and clear out the bits top to bottom
+#endif
+
 		
 .L_mask:
 	; for 2^0 <= |x| < 2^8, i.e. (rAE0/8)*4 == 0 
@@ -148,6 +164,10 @@ ENTRY   fp64_cut_noninteger_fraction
 	pop rAE0
 
 .L_ret:
+#ifdef ARDUINO_AVR_MEGA2560
+	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+#endif	
+
 	subi rAE0, -0xff			; add base 1023
 	sbci rAE1, -0x04
 	XJMP _U(__fp64_pretA)		; pack and return x

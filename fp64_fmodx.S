@@ -498,6 +498,7 @@ ENTRY __fp64_load_xconst
 	elpm rBx0, Z+
 	elpm rBE1, Z+
 	elpm rBE0, Z+
+	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
 #else
 	lpm rBx11, Z+
 	lpm rBx10, Z+

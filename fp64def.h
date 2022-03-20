@@ -42,6 +42,9 @@
 #ifndef RAMPZ
 #define RAMPZ	0x3b
 #endif
+#ifndef EIND
+#define EIND 0x3c
+#endif
 #endif
 
 /*
@@ -58,6 +61,7 @@ Registers
 */
 
 // #define CHECK_POWSER
+// #define CHECK_BIGMEM
 
 #define MAX_SIGNIFICAND		17
 #define	MAX_EXPONENT		3

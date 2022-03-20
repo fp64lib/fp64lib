@@ -229,6 +229,7 @@ GCC_ENTRY __atan2
 	elpm rB2, Z+
 	elpm rB1, Z+
 	elpm rB0, Z+
+	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
 #else	
 	lpm rB7, Z+
 	lpm rB6, Z+

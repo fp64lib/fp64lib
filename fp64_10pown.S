@@ -70,6 +70,7 @@ ENTRY __fp64_10pown
 	elpm rB2, Z+
 	elpm rB1, Z+
 	elpm rB0, Z+
+	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
 #else	
 0:	lpm rB7, Z+			; load pot with 10.0 or 0.1
 	lpm rB6, Z+

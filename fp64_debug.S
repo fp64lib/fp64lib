@@ -37,6 +37,9 @@
  */
  
 FUNCTION __fp64_debug
+#ifdef CHECK_BIGMEM
+	.skip 65000			; force programs to exceed >64kb for testing proper handling of page registers
+#endif
 
 ENTRY __fp64_saveC
 	sts __cr1, r0

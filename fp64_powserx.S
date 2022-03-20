@@ -52,6 +52,7 @@
 		 RAMPZ										- segment of table (for CPUs with >64k flash memory)
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0, rAE1.rAE0	- result, rA7 will contain sign of result
+		 RAMPZ										- preserved from input
 
  */
 
@@ -61,20 +62,39 @@ ENTRY __fp64_powser
 	bld rA7, 7					; save T flag as sign
 	XCALL _U(__fp64_movCA)		; save x
 	X_movw  YL, rAE0
-	
+
+#ifdef ARDUINO_AVR_MEGA2560
 	push ZL						; Z is in use by A
 	push ZH
+	in ZL, RAMPZ
+	push ZL
+
 	movw ZL, XL
-#ifdef ARDUINO_AVR_MEGA2560
 	elpm	rcntr, Z+				; load polynom power (3 in our example)
-#else
-	lpm	rcntr, Z+				; load polynom power (3 in our example)
-#endif
+	in r1, RAMPZ
 	sts .L_saveZ, ZL			; save pointer to table
 	sts .L_saveZ+1, ZH
+	sts .L_saveZ+2, r1
+	clr r1
+
+	pop ZL
+	out RAMPZ, ZL
+	pop ZH
+	pop ZL
+#else
+	push ZL						; Z is in use by A
+	push ZH
+
+	movw ZL, XL
+	lpm	rcntr, Z+				; load polynom power (3 in our example)
+	sts .L_saveZ, ZL			; save pointer to table
+	sts .L_saveZ+1, ZH
+
 	; rcall __fp64_saveABC
 	pop ZH
 	pop ZL	
+#endif
+
 	rcall	.Load10				; load first factor into B (in our example C3)
 	
 	rjmp 1f
@@ -125,18 +145,21 @@ ENTRY __fp64_powser
 	ret
 
 	; load an unpacked 10 byte number from program memory
-	; location will be retrieved from .L_saveZ and .L_saveZ+1
+	; location will be retrieved from .L_saveZ, .L_saveZ+1 (and .L_saveZ+2 for ATMEGA2560)
+	; preservers RAMPZ
 .Load10:
+
+#ifdef ARDUINO_AVR_MEGA2560
 	push ZL
 	push ZH
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi zl, byte3(.L_saveZ)
+	in ZL, RAMPZ
+	push ZL
+	
+	lds ZL, .L_saveZ+2
 	out  RAMPZ, ZL
-#endif
 	lds ZL, .L_saveZ			; load table pointer
 	lds ZH, .L_saveZ+1
 
-#ifdef ARDUINO_AVR_MEGA2560
 	elpm	rB7, Z+				; load next constant from program memory
 	elpm	rB6, Z+
 	elpm	rB5, Z+
@@ -147,7 +170,23 @@ ENTRY __fp64_powser
 	elpm	rB0, Z+
 	elpm	rBE1, Z+
 	elpm	rBE0, Z+
+
+	sts .L_saveZ, ZL			; save table pointer, now pointing to the next constant
+	sts .L_saveZ+1, ZH
+	in ZL, RAMPZ
+	sts .L_saveZ+2, ZL
+
+	pop ZL
+	out RAMPZ, ZL
+	pop ZH
+	pop ZL
 #else
+	push ZL
+	push ZH
+
+	lds ZL, .L_saveZ			; load table pointer
+	lds ZH, .L_saveZ+1
+
 	lpm	rB7, Z+				; load next constant from program memory
 	lpm	rB6, Z+
 	lpm	rB5, Z+
@@ -158,16 +197,25 @@ ENTRY __fp64_powser
 	lpm	rB0, Z+
 	lpm	rBE1, Z+
 	lpm	rBE0, Z+
-#endif
 
 	sts .L_saveZ, ZL			; save table pointer, now pointing to the next constant
 	sts .L_saveZ+1, ZH
+
 	pop ZH
 	pop ZL
+#endif
+
 	ret
 
 #ifdef CHECK_POWSER
 .L_nf:	
+#ifdef ARDUINO_AVR_MEGA2560
+	pop r0
+	out  RAMPZ, r0	; restore RAMPZ
+#endif	
+	pop XH
+	pop XL
+	
 	brne	.L_nan			; +/-Inf? No --> return NaN
 .L_inf:
 	XJMP	_U(__fp64_inf)	; No, case 2 --> return Inf
@@ -182,7 +230,9 @@ ENTRY __fp64_check_powser3
 	push XL
 	push XH
 #ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L_expxTable)
+	in XL, RAMPZ
+	push XL
+	ldi XL, byte3(__testTablex3)
 	out  RAMPZ, XL
 #endif
 	ldi XL, lo8(__testTablex3)
@@ -196,13 +246,18 @@ ENTRY __fp64_check_powsern
 	XCALL _U(__fp64_pushCB) ; preserve register set
 	push YL
 	push YH
-	XCALL _U(__fp64_powser)
+  XCALL _U(__fp64_powser)
+
 	; rcall __fp64_saveABC
 
 	pop YH
 	pop YL
 	XCALL _U(__fp64_popBC)	; restore register set
 
+#ifdef ARDUINO_AVR_MEGA2560
+	pop r0
+	out  RAMPZ, r0	; restore RAMPZ
+#endif	
 	pop XH
 	pop XL
 	brcs 99f
@@ -218,12 +273,19 @@ __testTablex3: ; f(x) = ((x/3-0,5)*x+1.0)*x+0 = x^3/3-x^2/2+x
 	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	; 0x0000000000000000 = 0.0
 	.byte 0x00												; byte needed for code alignment to even adresses!
 #endif	
+
 ENTRY __fp64_check_powser2
 #ifndef CHECK_POWSER
 	ret
 #else
 	push XL
 	push XH
+#ifdef ARDUINO_AVR_MEGA2560
+	in XL, RAMPZ
+	push XL
+	ldi XL, byte3(__testTablex2)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(__testTablex2)
 	ldi XH, hi8(__testTablex2)
 	rjmp 98b
@@ -235,12 +297,19 @@ __testTablex2: ; f(x) = (x*-0,5+1.0)*x+0 = -x^2/2 + x
 	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	; 0x0000000000000000 = 0.0
 	.byte 0x00												; byte needed for code alignment to even adresses!
 #endif	
+
 ENTRY __fp64_check_powser1
 #ifndef CHECK_POWSER
 	ret
 #else
 	push XL
 	push XH
+#ifdef ARDUINO_AVR_MEGA2560
+	in XL, RAMPZ
+	push XL
+	ldi XL, byte3(__testTablex1)
+	out  RAMPZ, XL
+#endif
 	ldi XL, lo8(__testTablex1)
 	ldi XH, hi8(__testTablex1)
 	rjmp 98b
@@ -255,5 +324,9 @@ ENDFUNC
 
 .data
 ENTRY __fp64_saveZ
+#ifdef ARDUINO_AVR_MEGA2560
+.L_saveZ:	.skip 3			; scratch area to save pointer to table
+#else
 .L_saveZ:	.skip 2			; scratch area to save pointer to table
+#endif 
 #endif /* !defined(__AVR_TINY__) */

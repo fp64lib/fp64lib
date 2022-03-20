@@ -42,7 +42,7 @@
 
    Notes:
      * In case 'A == B' subtraction is called to save flash space.
-     Contrary it is needed to check 'Inf - Inf'.  And the __fp64_subsd3()
+     Contrary it is needed to check 'Inf - Inf'.  And the fp64_sub()
      is fast if both arguments are equal.
  */
 
@@ -57,7 +57,7 @@ ENTRY fp64_fdim
 	XCALL _U(__fp64_cpcAB)	; is B > A ? (or: is A-B < 0?)
 	cpc	rA7, rB7
 	brcs 	3f			; yes, check for NaN
-1:	XJMP _U(__fp64_subsd3)	; no ---> A-B > 0, return A-B
+1:	XJMP _U(fp64_sub)	; no ---> A-B > 0, return A-B
 
 	; A < 0 or B < 0 or both < 0
 2:	XCALL _U(__fp64_cpcBA)	; is A > B?

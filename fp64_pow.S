@@ -81,7 +81,7 @@ GCC_ENTRY __pow
 
 	; preliminary check for significand of A == 0
 	ldi	ZL, 0x3f
-	; rcall __fp64_saveAB
+	XCALL __fp64_saveAB
 
 	XCALL _U(__fp64_cpc0A5)
 	brne 0f						; skip a bit of comparisons
@@ -183,14 +183,34 @@ GCC_ENTRY __pow
 5:	; rcall __fp64_saveAB
 	andi rBE1, 0xf8				; truncate lower 3 bits
 	  					        ; --> index = (exp/8)*8 as 8 byte are used for mov, mov, and, rjmp
+
+#ifdef ARDUINO_AVR_MEGA2560
+	push r0
+	ldi ZL, byte3(.L_mask)
+	mov r0, ZL
+	;XCALL __fp64_saveAB
+#endif
+
 	ldi ZL, lo8(.L_mask)		; add 8*offset to jump table
 	add ZL, rBE1		
 	ldi ZH, hi8(.L_mask)
 	adc ZH, r1					; take care of any overflows
+
+#ifdef ARDUINO_AVR_MEGA2560
+	adc r0, r1					; extend to 256MB address calculation
+	lsr r0							; PC addresses words, so divide target address by 2
+	ror ZH	 						
+	ror ZL
+	out EIND, r0
+	pop r0
+	eijmp						; and clear out the bits top to bottom
+#else
 	; rcall __fp64_saveAB
 	lsr ZH						; PC addresses words, so divide target address by 2
 	ror ZL
 	ijmp						; and clear out the bits top to bottom
+#endif
+
 
 	; return NaN
 .L_nan2:
@@ -276,6 +296,9 @@ GCC_ENTRY __pow
 .L_a0:
 	or r0, rB0
 .L_check:
+#ifdef ARDUINO_AVR_MEGA2560
+	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+#endif	
 	; here Z is set if r0<>0 --> y has a fraction
 	brne .L_nan2				; if y has a fraction, then x^y is not defined
 

@@ -136,11 +136,14 @@ GCC_ENTRY __log
 
 #ifdef ARDUINO_AVR_MEGA2560
 	ldi XL, byte3(.L__tableLog)
-	out  RAMPZ, XL
+	out RAMPZ, XL
 #endif
 	ldi XL, lo8(.L__tableLog)
 	ldi XH, hi8(.L__tableLog)
 	XCALL _U(__fp64_powsodd)	; approximate log(y) = log((x-1)/(x+1)) by power series
+#ifdef ARDUINO_AVR_MEGA2560
+	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+#endif
 	; rcall __fp64_saveAB
 23:	
 	pop r0						; restore normalization exponent
