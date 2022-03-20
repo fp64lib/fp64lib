@@ -87,7 +87,7 @@ ENTRY __fp64_ftoa_nan
 	breq 3f					; handle Inf differently
 #ifdef ARDUINO_AVR_MEGA2560
 	ldi zl, byte3(.L_nan)
-  rcall __fp64_saveAB
+  ; rcall __fp64_saveAB
 	out  RAMPZ, ZL
 #endif
 	ldi ZL, lo8(.L_nan)
@@ -111,7 +111,7 @@ ENTRY __fp64_ftoa_nan
 3:	; handle +/-Inf
 #ifdef ARDUINO_AVR_MEGA2560
 	ldi zl, byte3(.L_inf)
-  rcall __fp64_saveAB
+  ; rcall __fp64_saveAB
 	out  RAMPZ, ZL
 #endif
 	ldi ZL, lo8(.L_inf)
