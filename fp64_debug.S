@@ -302,3 +302,6 @@ ENTRY __before
 ENTRY __after
 			.skip	32
 __function:	.skip	2
+#ifdef CHECK_BIGMEM
+			.skip 0x280
+#endif

@@ -147,8 +147,10 @@ ENTRY __fp64_getExp10int
 	; greater than the biggest exponent
 	movw rB4, rExp2L	; save exponent
 #ifdef ARDUINO_AVR_MEGA2560
-	ldi zl, byte3(.L_exc)
-	out  RAMPZ, ZL
+	in ZL, RAMPZ
+	push ZL
+	ldi ZL, byte3(.L_exc)
+	out RAMPZ, ZL
 #endif
 	ldi ZL, lo8(.L_exc)
 	ldi ZH, hi8(.L_exc)
@@ -179,7 +181,8 @@ ENTRY __fp64_getExp10int
 5:	
 	; now exp10H.exp10L contains result, return to caller
 #ifdef ARDUINO_AVR_MEGA2560
-	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+	pop ZL
+	out RAMPZ, ZL	; reset RAMPZ as required by gcc calling conventions
 #endif
 	ret	
 

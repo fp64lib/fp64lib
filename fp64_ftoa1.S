@@ -84,27 +84,36 @@ ENTRY __fp64_ftoa_nan
 	push rB7
 	
 0:	; handle NaN and +/-Inf
-	breq 3f					; handle Inf differently
+	
 #ifdef ARDUINO_AVR_MEGA2560
-	ldi zl, byte3(.L_nan)
+	in ZL, RAMPZ						; save previous content of RAMPZ
+	push ZL
+	breq 3f					; handle Inf differently
+	ldi zl, byte3(.L_nan)		; load upper byte of 24-bit address
   ; rcall __fp64_saveAB
 	out  RAMPZ, ZL
-#endif
 	ldi ZL, lo8(.L_nan)
 	ldi ZH, hi8(.L_nan)		; return "NaN"
 
-#ifdef ARDUINO_AVR_MEGA2560
 1:	elpm rA7, Z+				; copy string into buffer
+
 #else
+	breq 3f					; handle Inf differently
+
 1:	lpm rA7, Z+				; copy string into buffer
-#endif
+#endif		
+
 2:	st X+, rA7
 	tst rA7
 	brne 1b
+
 	st X+, rA7				; store additional '\0' to terminate exponent string
+
 #ifdef ARDUINO_AVR_MEGA2560
-	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+	pop ZL
+	out  RAMPZ, ZL		; restore RAMPZ
 #endif
+
 	sec						; flag for special case
 	rjmp .L_ret
 
@@ -122,6 +131,10 @@ ENTRY __fp64_ftoa_nan
 	rjmp 2b
 	
 4:	; handle 0
+#ifdef ARDUINO_AVR_MEGA2560
+	in rA7, RAMPZ						; save previous content of RAMPZ
+	push rA7
+#endif
 	ldi rA7, '0'			; return "0"
 	st X+, rA7
 	clr rA7
@@ -380,7 +393,7 @@ ENTRY __fp64_ftoa_pse
 
 	push rExp10H				; save exp10
 	push rExp10L
-	call __itoa_ncheck
+	XCALL __itoa_ncheck
 	pop rExp10L
 	pop rExp10H 
 

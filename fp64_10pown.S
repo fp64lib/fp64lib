@@ -49,11 +49,12 @@ ENTRY __fp64_10pown
 	clr YH
 
 #ifdef ARDUINO_AVR_MEGA2560
-	ldi zl, byte3(.L_10)
-	out RAMPZ, ZL
-#endif
+	in ZL, RAMPZ		; get and save previous RAMPZ
+	push ZL
+#endif 
 	ldi ZL, lo8(.L_10)	; pot = 10 << 60
 	ldi ZH, hi8(.L_10)
+	
 	bst XH, 7			; neg = 0
 	brtc 0f				; if( n < 0 ) {
 	neg XH				;	neg = 1; n = -n
@@ -62,6 +63,10 @@ ENTRY __fp64_10pown
 	adiw ZL, 8			; 	pot = 0.1 << 63
 
 #ifdef ARDUINO_AVR_MEGA2560
+	ldi rB6, byte3(.L_10)
+	adc rB6, r1			; conside carry over at 16bit address to 24bit address
+	out RAMPZ, rB6
+
 0:	elpm rB7, Z+			; load pot with 10.0 or 0.1
 	elpm rB6, Z+
 	elpm rB5, Z+
@@ -70,7 +75,9 @@ ENTRY __fp64_10pown
 	elpm rB2, Z+
 	elpm rB1, Z+
 	elpm rB0, Z+
-	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+	
+	pop ZL
+	out  RAMPZ, ZL	; restore RAMPZ
 #else	
 0:	lpm rB7, Z+			; load pot with 10.0 or 0.1
 	lpm rB6, Z+

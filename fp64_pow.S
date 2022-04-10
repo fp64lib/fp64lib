@@ -201,14 +201,18 @@ GCC_ENTRY __pow
 	lsr r0							; PC addresses words, so divide target address by 2
 	ror ZH	 						
 	ror ZL
-	out EIND, r0
+	;in r1, EIND					; save previous content of EIND
+	;push r1
+	;clr r1
+	out EIND, r0				; set upper byte of 24-bit address
 	pop r0
-	eijmp						; and clear out the bits top to bottom
+	
+	eijmp							; and clear out the bits top to bottom
 #else
 	; rcall __fp64_saveAB
 	lsr ZH						; PC addresses words, so divide target address by 2
 	ror ZL
-	ijmp						; and clear out the bits top to bottom
+	ijmp							; and clear out the bits top to bottom
 #endif
 
 
@@ -297,7 +301,8 @@ GCC_ENTRY __pow
 	or r0, rB0
 .L_check:
 #ifdef ARDUINO_AVR_MEGA2560
-	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+	;pop ZH						; reset EIND to previous content 
+	;out EIND, ZH				
 #endif	
 	; here Z is set if r0<>0 --> y has a fraction
 	brne .L_nan2				; if y has a fraction, then x^y is not defined

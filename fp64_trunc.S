@@ -165,7 +165,7 @@ ENTRY   fp64_cut_noninteger_fraction
 
 .L_ret:
 #ifdef ARDUINO_AVR_MEGA2560
-	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
+	; out  EIND, r1	; reset EIND
 #endif	
 
 	subi rAE0, -0xff			; add base 1023
