@@ -51,11 +51,11 @@
 	  6 | exponent(x)+exp<-1023  | x*2^exp as subnormal number
 	  7 | exponent(x)+exp>=-1023 | x*2^exp
 	  
-
+   float64_t fp64_scalbn (float64_t x, int n)
+   fp64_scalbn is an alias to fp64_ldexp(), see there
  */
 
 FUNCTION fp64_ldexp
-
 	; handle NaN and +/-Inf
 .L_NaN:
 	breq .L_Inf					; handle Inf differently
@@ -67,8 +67,14 @@ FUNCTION fp64_ldexp
 .L_zr:
 	XJMP _U(__fp64_szero)		; case 3: return +0
 
+/* float64_t fp64_ldexp (float64_t x, int exp)
+   The fp64_ldexp() function returns the result of multiplying the
+   floating-point number x by 2 raised to the power exp.
+*/
 ENTRY fp64_ldexp
+ENTRY fp64_scalbn
 GCC_ENTRY __ldexp
+GCC_ENTRY __scalbn
 	XCALL _U(__fp64_splitA)
 	brcs .L_NaN					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0
@@ -105,9 +111,10 @@ GCC_ENTRY __ldexp
 	inc rAE0
 	brmi 1b
 	
-	clr rAE0
-	clr rAE1
-
+	mov rAE0, r1
+	mov rAE1, r1
+	XJMP _U(__fp64_rcpretA)		; round, pack and return x
+	
 	; case 7: return x
 .L_norm:
 	XJMP _U(__fp64_pretA)		; pack and return x

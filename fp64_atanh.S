@@ -1,7 +1,4 @@
-/* Copyright (c) 2019-2022  Uwe Bissinger
-   Based on 32bit floating point arithmetic routines which are:
-   Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
-   Copyright (c) 2006  Dmitry Xmelkov
+/* Copyright (c) 2022  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -34,44 +31,60 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-/* float64_t fp64_sinh (float64_t x);
-     The fp64_sinh() function returns the hyperbolic sine of x, which is
-     defined mathematically as (exp(x) - exp(-x)) / 2.
+/* float64_t fp64_atanh(float64_t x);
+     The fp64_atanh() function returns the inverse hyperbolic tangent 
+	 (a.k.a. area hyperbolic tangent) of x, which is defined mathematically as 
+	 artanh(x) = 0.5*ln((1+x)/(1-x)) for |x| < 1. If x is >= 1, NaN is returned.
  */
 
-FUNCTION fp64_cosh
-ENTRY fp64_sinh
-GCC_ENTRY __sinh
-	ldi XL, 0x80
-	rjmp .L_common
+FUNCTION fp64_atanh
+ENTRY fp64_atanh
+GCC_ENTRY __atanh
+	; check for |x| < 1
+	push rA7
+	andi rA7, 0x7f				; get rid of sign
+	cpi rA7, 0x3f				; is x < 2^(-15) ?
+	brlo .L_ok					; yes --> compute artanh
+	brne .L_NaN					; x > 2^0 --> return 1
 	
+	cpi rA6, 0xf0				; is x < 2^0 ?
+	brlo .L_ok					; yes --> return artanh
 
-/* float64_t fp64_cosh (float64_t x);
-     The fp64_cosh() function returns the hyperbolic cosine of x, which is
-     defined mathematically as (exp(x) + exp(-x)) / 2.
- */
+.L_NaN:							; return NaN for |x| >= 1
+	pop rA7						; cleanup stack
+	XJMP	_U(__fp64_nan)		; return NaN
 
-ENTRY fp64_cosh
-GCC_ENTRY __cosh
-	clr XL
-	
-.L_common:						; calculate sinh or cosh, depending on XL
-	; A = exp(x))
-	sts .L_sign, XL
-	XCALL	_U(fp64_exp)
+
+.L_ok:	
+	; x is now < 1
+	pop rA7						; get back sign of x
+
+	XCALL _U(__fp64_pushCB)		; preserve used registers
+	XCALL _U(__fp64_movBA)		; put x in B
+	XCALL _U(__fp64_one)		; and 1 in A
+
+	XCALL _U(__fp64_pushA)		; save x and 1
 	XCALL _U(__fp64_pushB)		; preserve registers
+	XCALL _U(fp64_add)			; compute 1+x
+	
+	XCALL _U(__fp64_movCA)		; save 1+x in C
+	XCALL _U(__fp64_popB)		; restore x and 1
+	XCALL _U(__fp64_popA)
+	XCALL _U(fp64_sub)			; compute 1-x
 
-	XCALL _U(__fp64_movBA)		; save exp(-fabs(x))
+	XCALL _U(__fp64_movBA)		; save 1-x in B
+	XCALL _U(__fp64_movAC)		; restore 1+x from C
+	XCALL _U(fp64_div)			;  (1+x) / (1-x)
 	
-	XCALL _U(fp64_inverse)		; calculate exp(fabs(x)) 
-	lds XL, .L_sign				; retrieve sign
-	sub rA7, XL					; for sinh, exp(-x) becomes -exp(-x)
-	XCALL _U(fp64_add)			; exp(x) +/- exp(-x)
-	ldi rB7, hi8(-1)
-	ldi rB6, lo8(-1)
-	XCALL _U(fp64_ldexp)		; (exp(x) +/- exp(-x))*(2^-1)
-	
-	XJMP _U(__fp64_popBret)		; restore registers and return
+	XCALL _U(fp64_log)			; ln( sqrt( x*x +/- 1 ) + x ) 
+	ldi rB7, 0x3f				; move 0.5 into B
+	ldi rB6, 0xe0
+	mov rB5, r1
+	mov rB4, r1
+	movw rB2, rB4
+	movw rB0, rB4
+	XCALL _U(fp64_mul)			; 1/2 * ln( sqrt( x*x +/- 1 ) + x ) 
+
+	XCALL _U(__fp64_popBC)		; restore used registers
+	ret							; and return
 ENDFUNC
-.data
-.L_sign:	.skip 1				; storage for saving sign

@@ -66,6 +66,9 @@ Registers
 #define MAX_SIGNIFICAND		17
 #define	MAX_EXPONENT		3
 
+#define FP_ILOGB0		(0x8800)
+#define FP_ILOGBNAN		(0x87ff)
+
 // general pointer registers
 #define XL  r26
 #define XH  r27

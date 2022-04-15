@@ -1,4 +1,4 @@
-/* Copyright (c) 2020  Uwe Bissinger
+/* Copyright (c) 2022  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,26 +33,26 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
-/* float64_t fp64_exp10 (float64_t x);
-     The fp64_exp10() function returns the value of 10
-     raised to the power of x, i.e. 10^x. 
+/* float64_t fp64_exp2 (float64_t x);
+     The fp64_exp2() function returns the value of 2
+     raised to the power of x, i.e. 2^x. 
  */
  
-FUNCTION fp64_exp10
-ENTRY fp64_exp10
-ENTRY fp64_pow10
-GCC_ENTRY __exp10
-GCC_ENTRY __pow10
+FUNCTION fp64_exp2
+ENTRY fp64_exp2
+ENTRY fp64_pow2
+GCC_ENTRY __exp2
+GCC_ENTRY __pow2
 	XCALL _U(__fp64_pushB)		; preserve registers
 	
 #ifdef ARDUINO_AVR_MEGA2560
 	in ZL, RAMPZ
 	push ZL
-	ldi ZL, byte3(.L_log10)
+	ldi ZL, byte3(.L_log2)
 	out RAMPZ, ZL
 #endif
-	ldi ZL, lo8(.L_log10)
-	ldi ZH, hi8(.L_log10)
+	ldi ZL, lo8(.L_log2)
+	ldi ZH, hi8(.L_log2)
 	XCALL _U(__fp64_ldb8_const)
 #ifdef ARDUINO_AVR_MEGA2560
 	pop r0
@@ -64,8 +64,8 @@ GCC_ENTRY __pow10
 
 	XJMP _U(fp64_exp)			; return with exp(x*ln10) = 10^x
 
-.L_log10: ; log(10) = 0x40026BB1BBB55516 = 2.302585092994045684017994549539580913123
-	.byte 0x40, 0x02, 0x6B, 0xB1, 0xBB, 0xB5, 0x55, 0x16
+.L_log2: ; log(2) = 0x3FE62E42FEFA39EF = 0.6931471805599452862267639829951804131269
+	.byte 0x3F, 0xE6, 0x2E, 0x42, 0xFE, 0xFA, 0x39, 0xEF
 
 ENDFUNC
 

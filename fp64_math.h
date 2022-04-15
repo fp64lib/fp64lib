@@ -119,8 +119,9 @@ typedef float    float32_t;     /* IEEE 754 single precision floating point numb
 #define FP_SUBNORMAL	3
 #define FP_ZERO			0
 
-#define FP_ILOGB0 <integer constant expression> [added with C99]
-#define FP_ILOGBNAN <integer constant expression> [added with C99]
+/* return values for ilogb */
+#define FP_ILOGB0		(0x8800)
+#define FP_ILOGBNAN		(0x87ff)
 
 #define MATH_ERRNO       1
 #define MATH_ERREXCEPT   2
@@ -164,7 +165,7 @@ float64_t fp64_atan2(float64_t y, float64_t x);
 float64_t fp64_cbrt(float64_t x); [all added with C99]
 float64_t fp64_ceil(float64_t x);
 int8_t fp64_compare( float64_t x, float64_t b);
-float64_t fp64_copysign(float64_t x, float64_t y); [all added with C99]
+float64_t fp64_copysign(float64_t x, float64_t y); // [all added with C99]
 float64_t fp64_cos(float64_t x);
 float64_t fp64_cosh(float64_t x);
 float64_t fp64_cotan(float64_t x);
@@ -175,20 +176,24 @@ float64_t fp64_fabs(float64_t x);
 float64_t fp64_fdim(float64_t x, float64_t y);
 float64_t fp64_floor(float64_t x);
 float64_t fp64_fma(float64_t x, float64_t y, float64_t z);
-float64_t fp64_fmax(float64_t x, float64_t y); [all added with C99]
-float64_t fp64_fmin(float64_t x, float64_t y); [all added with C99]
+float64_t fp64_fmax(float64_t x, float64_t y); // [all added with C99]
+float64_t fp64_fmin(float64_t x, float64_t y); // [all added with C99]
 float64_t fp64_fmod(float64_t x, float64_t y);
 float64_t fp64_frexp(float64_t x, int *pexp);
-float64_t fp64_hypot(float64_t x, float64_t y); [all added with C99]
+float64_t fp64_hypot(float64_t x, float64_t y); // [all added with C99]
+int fp64_ilogb(float64_t x); 					// [all added with C99]
 float64_t fp64_ldexp(float64_t x, int ex);
 long fp64_lrint(float64_t x);
 long fp64_lround(float64_t x);
 float64_t fp64_log(float64_t x);
 float64_t fp64_log10(float64_t x);
-float64_t fp64_log2(float64_t x);
+float64_t fp64_log2(float64_t x);				// [all added with C99]
+float64_t fp64_logb(float64_t x); 				// [all added with C99]
 float64_t fp64_modf(float64_t x, float64_t *pint);
 float64_t fp64_pow(float64_t x, float64_t y);
 float64_t fp64_round(float64_t x);
+float64_t fp64_scalbln(float64_t x, long n); 	// [all added with C99]
+float64_t fp64_scalbn(float64_t x, int n); 	// [all added with C99]
 float64_t fp64_sin(float64_t x);
 float64_t fp64_sinh(float64_t x);
 float64_t fp64_square( float64_t x );
@@ -196,31 +201,26 @@ float64_t fp64_sqrt(float64_t x);
 float64_t fp64_tan(float64_t x);
 float64_t fp64_tanh(float64_t x);
 float64_t fp64_trunc(float64_t x);
+float64_t fp64_asinh( float64_t x ); 			// [all added with C99]
+float64_t fp64_acosh( float64_t x );			// [all added with C99]
+float64_t fp64_atanh(float64_t x); 				// [all added with C99]
+float64_t fp64_exp2(float64_t x); 				// [all added with C99]
+// float64_t fp64_remquo(float64_t x, float64_t y, unsigned long *pquo); // [all added with C99]
 
 /* FUNCTIONS of C99 standard, not supported by fp64lib */
-// float64_t acosh(float64_t x); [all added with C99]
-// float64_t asinh(float64_t x); [all added with C99]
-// float64_t atanh(float64_t x); [all added with C99]
 // float64_t erf(float64_t x); [all added with C99]
 // float64_t erfc(float64_t x); [all added with C99]
-// float64_t exp2(float64_t x); [all added with C99]
 // float64_t expm1(float64_t x); [all added with C99]
-// int ilogb(float64_t x); [all added with C99]
 // float64_t lgamma(float64_t x); [all added with C99]
 // long long llrint(float64_t x); [all added with C99]
 // long long llround(float64_t x); [all added with C99]
 // float64_t log1p(float64_t x); [all added with C99]
-// float64_t log2(float64_t x); [all added with C99]
-// float64_t logb(float64_t x); [all added with C99]
 // float64_t nan(const char *str); [all added with C99]
 // float64_t nearbyint(float64_t x); [all added with C99]
 // float64_t nextafter(float64_t x, float64_t y); [all added with C99]
 // float64_t nexttoward(float64_t x, long float64_t y); [all added with C99]
 // float64_t remainder(float64_t x, float64_t y); [all added with C99]
-// float64_t remquo(float64_t x, float64_t y, int *pquo); [all added with C99]
 // float64_t rint(float64_t x); [all added with C99]
-// float64_t scalbln(float64_t x, long ex); [all added with C99]
-// float64_t scalbn(float64_t x, int ex); [all added with C99]
 // float64_t tgamma(float64_t x); [all added with C99]
 #ifdef __cplusplus
 } // extern "C"

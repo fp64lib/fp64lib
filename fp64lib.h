@@ -81,8 +81,9 @@ typedef float    float32_t; /* IEEE 754 single precision floating point number *
 #define float64_NUMBER_PIO2							((float64_t)0x3ff921fb54442d18LLU)  // 3.1415926535897932/2
 #define float64_NUMBER_2PI							((float64_t)0x401921fb54442d18LLU)  // 3.1415926535897932*2
 #define float64_NUMBER_ONE							((float64_t)0x3ff0000000000000LLU)	// 1.0
-#define float64_MINUS_NUMBER_ONE					((float64_t)0xbff0000000000000LLU)	// 1.0
-#define float64_NUMBER_PLUS_ZERO					((float64_t)0x0000000000000000LLU)	// 0.0
+#define float64_NUMBER_MINUS_ONE					((float64_t)0xbff0000000000000LLU)	// -1.0
+#define float64_NUMBER_PLUS_ZERO					((float64_t)0x0000000000000000LLU)	// +0.0
+#define float64_NUMBER_MINUS_ZERO					((float64_t)0x8000000000000000LLU)	// -0.0
 #define float64_ONE_POSSIBLE_NAN_REPRESENTATION		((float64_t)0x7fffffffffffffffLLU)	// NaN
 #define float64_PLUS_INFINITY						((float64_t)0x7ff0000000000000LLU)	// +INF
 #define float64_MINUS_INFINITY						((float64_t)0xfff0000000000000LLU)	// -INF
@@ -94,6 +95,10 @@ typedef float    float32_t; /* IEEE 754 single precision floating point number *
 #define FP_SUBNORMAL	3
 #define FP_ZERO			0
 
+/* return values for ilogb */
+#define FP_ILOGB0		(0x8800)
+#define FP_ILOGBNAN		(0x87ff)
+
 // basic mathematic functions
 float64_t fp64_add( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_sub( float64_t a, float64_t b ) __ATTR_CONST__;
@@ -101,6 +106,7 @@ float64_t fp64_mul( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_div( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_fmod( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_fmodn( float64_t a, float64_t b, unsigned long *np ) __ATTR_CONST__;
+// float64_t fp64_remquo( float64_t a, float64_t b, unsigned long *np ) __ATTR_CONST__;
 
 // isXXX  & compare functions
 int fp64_classify( float64_t x ) __ATTR_CONST__;
@@ -126,6 +132,7 @@ float64_t fp64_round( float64_t x ) __ATTR_CONST__;
 long fp64_lround( float64_t A ) __ATTR_CONST__;
 long fp64_lrint( float64_t A ) __ATTR_CONST__;
 float64_t fp64_cbrt( float64_t x ) __ATTR_CONST__;
+int fp64_ilogb(float64_t x) __ATTR_CONST__; 						// [all added with C99]
 
 // trigonometric functions
 float64_t fp64_sin( float64_t x ) __ATTR_CONST__;
@@ -139,15 +146,22 @@ float64_t fp64_log( float64_t x ) __ATTR_CONST__;
 float64_t fp64_exp( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log10( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log2( float64_t x ) __ATTR_CONST__;
+float64_t fp64_logb( float64_t x ) __ATTR_CONST__;
 float64_t fp64_exp10( float64_t x ) __ATTR_CONST__;
+float64_t fp64_exp2( float64_t x ) __ATTR_CONST__;
 float64_t fp64_pow10( float64_t x ) __ATTR_CONST__;
 float64_t fp64_sinh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_cosh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_tanh( float64_t x ) __ATTR_CONST__;
-float64_t fp64_fmodx_pi2( float64_t x, unsigned long *np ) __ATTR_CONST__;
+float64_t fp64_asinh( float64_t x ) __ATTR_CONST__;
+float64_t fp64_acosh( float64_t x ) __ATTR_CONST__;
+float64_t fp64_atanh( float64_t x ) __ATTR_CONST__;
 
 // functions with 2 arguments
+float64_t fp64_fmodx_pi2( float64_t x, unsigned long *np ) __ATTR_CONST__;
 float64_t fp64_ldexp( float64_t x, int exp ) __ATTR_CONST__;
+float64_t fp64_scalbln(float64_t x, long ex) __ATTR_CONST__; 	// [all added with C99]
+float64_t fp64_scalbn(float64_t x, int ex) __ATTR_CONST__; 		// [all added with C99], alias to ldexp
 float64_t fp64_frexp( float64_t x, int *pexp ) __ATTR_CONST__;
 float64_t fp64_fdim( float64_t A, float64_t B ) __ATTR_CONST__;
 float64_t fp64_pow( float64_t x, float64_t y ) __ATTR_CONST__;

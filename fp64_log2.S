@@ -34,14 +34,25 @@
 #include "fp64def.h"
 #include "asmdef.h"
 
+
+FUNCTION fp64_log2
+
+/* float64_t fp64_logb(float64_t x);
+   The fp64_logb() function returns the base 2 logarithm of |x|.
+   logb(A) = log2(|x|) = log(|x|) / log(2)
+ */
+ENTRY fp64_logb
+GCC_ENTRY __logb
+	andi rA7, 0x80				; clear sign
+	; let log2 do the rest
+
 /* float64_t fp64_log2(float64_t A);
    The fp64_log2() function returns the base 2 logarithm of A.
    log2(A) = log(A) / log(2)
  */
-
-FUNCTION fp64_log2
 ENTRY fp64_log2
 GCC_ENTRY __log2
+
 	XCALL _U(fp64_log)
 	
 	XCALL _U(__fp64_pushB)		; preserve registers
