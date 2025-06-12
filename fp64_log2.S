@@ -71,7 +71,7 @@ GCC_ENTRY __log2
 	out RAMPZ, r0	; restore RAMPZ
 #endif	
 	
-	XCALL _U(fp64_mul)
+	XCALL _U(fp64_div)
 	
 	XJMP _U(__fp64_popBret)		; restore registers and return
 
