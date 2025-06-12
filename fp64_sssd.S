@@ -1,4 +1,4 @@
-/* Copyright (c) 2020  Uwe Bissinger
+/* Copyright (c) 2020-2025  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,8 @@ FUNCTION __fp64sssd
 ENTRY fp64_uint16_to_float64
 ENTRY   __fp64unsssd
 	clt
-	rjmp .L_common
+	rcall .L_common
+	XJMP _U(__fp64_pretA)
 	
 /* float64_t __fp64sssd ( int16_t x );
    float64_t fp64_int16_to_float64 ( short x );
