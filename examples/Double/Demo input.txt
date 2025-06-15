@@ -1,0 +1,198 @@
+Do's and Don'ts
+
+1. Why ist that library neccessary, if I need more precision, I just use double
+
+The C-compiler for the MegaAVR-Architecture will treat double and float the same.
+Both are 4 bytes and only offer single precision, i.e. 5-7 digits
+
+Try:
+
+float a = 1.234567890123456
+double b = 1.234567890123456
+float64_t c = fp64_atof("1.234567890123456" );
+
+Serial.println( "double is the same as float" );
+Serial.print( "sizeof(float)" ); Serial.println( sizeof(float) );
+Serial.print( "sizeof(double)" ); Serial.println( sizeof(double) );
+Serial.print( "sizeof(float64_t)" ); Serial.println( sizeof(float64_t) );
+Serial.println( "Result should be 1.234567890123456" );
+Serial.println( a, 15 );
+Serial.println( b, 15 );
+Serial.println( fp64_to_string(c,17,15) );
+Serial.println( "Add 1e-6 = 0.000001\nResult should be 1.234568890123456" );
+a += 1e-6
+b += 1e-6
+c = fp64_add( c, fp64_atof("1e-6") );
+Serial.println( a, 15 );
+Serial.println( b, 15 );
+Serial.println( fp64_to_string(c,17,15) );
+
+How to get precise numbers into variables?
+
+// 1. What does not(!) work?
+float64_t x = 1.234567890123456; 
+//will lead to truncation as compiler will coerce constant to an integer
+Serial.println( "float64_t x = 1.234567890123456;" );
+Serial.println( fp64_to_string(x,17,15) );
+
+x = fp64_sd( 1.234567890123456 );
+// will lead to missing precision, as compiler converts all numbers to "float" precision
+// and float and double are the same
+Serial.println( "x = fp64_sd( 1.234567890123456 );" );
+Serial.println( fp64_to_string(x,17,15) );
+
+double d = 1.234567890123456;
+x = fp64_sd( d );
+// same as above, double is the same as float on MegaAVR-Architecture
+Serial.println( "double d = 1.234567890123456; x = fp64_sd( d );" );
+Serial.println( fp64_to_string(x,17,15) );
+
+// 2. What does work?
+x = fp64_atof("1.234567890123456" );
+// conversion from string will conserve full precision
+Serial.println( "x = fp64_atof(\"1.234567890123456\" );" );
+Serial.println( fp64_to_string(x,17,15) );
+
+x = 0x3FF3C0CA428C59F8ULL
+// using internal 64-bit representation as an unsigned long long
+// but don't forget ULL at the end of the digit string!
+// constants can be converted e.g. on https://numeral-systems.com/ieee-754-converter/
+Serial.println( "x = 0x3FF3C0CA428C59F8ULL" );
+Serial.println( fp64_to_string(x,17,15) );
+
+
+
+// using avr-gcc on linux
+// if you compile your arduino sketches with -mdouble=64, then
+// double will be different from float and fp64lib can be used
+// organically as the 64bit math library
+
+
+
+// all these library calls are cumbersome, I fell my code is not very good readable.
+// isn't there an easier choice
+// try using the Double.cpp wrapper library.
+
+
+// Example code
+// gamma function (lanczos approximation) 
+// sources: https://en.wikipedia.org/wiki/Lanczos_approximation
+//          https://rosettacode.org/wiki/Gamma_function
+// using native fp64-calls
+float64_t f_gamma1(float64_t zpar) {
+  const static float64_t par[9] = {
+    ((float64_t)0x3feffffffffff950LLU), //    0.99999999999980993
+    ((float64_t)0x40852429b6c30b05LLU), //  676.5203681218851
+    ((float64_t)0xc093ac8e8ed4171bLLU), //-1259.1392167224028
+    ((float64_t)0x40881a9661d3b4d8LLU), //  771.32342877765313
+    ((float64_t)0xc06613ae51a32f5dLLU), // -176.61502916214059
+    ((float64_t)0x402903c27f8b9c81LLU), //   12.507343278686905
+    ((float64_t)0xbfc1bcb2992b2855LLU), //   -0.13857109526572012
+    ((float64_t)0x3ee4f0514e4e324fLLU), //    9.9843695780195716E-6
+    ((float64_t)0x3e8435508f3faeefLLU)  //    1.5056327351493116E-7
+  };
+  const static float64_t sqrt2pi =     ((float64_t)0x40040d931ff62705LLU);    // sqrt(2*pi) = 2.5066282746310002
+  const static float64_t f_NUMBER_05 = ((float64_t)0x3fe0000000000000LLU);   //0.5
+  const static float64_t f_NUMBER_65 = ((float64_t)0x401a000000000000LLU);   //6.5
+
+  float64_t tt = fp64_add(zpar,f_NUMBER_65);
+  dummy = par[0];
+  dummy2 = zpar;
+  for( byte i = 1; i < 9; i++ ) {
+    dummy = fp64_add(dummy,fp64_div(par[i],dummy2));
+    dummy2 = fp64_add(dummy2, float64_NUMBER_ONE);
+  }
+  dummy = fp64_mul(dummy, fp64_mul(sqrt2pi, fp64_mul(fp64_pow(tt,fp64_sub(zpar,f_NUMBER_05)),fp64_exp(fp64_neg(tt)))));
+
+  return dummy;
+}
+
+// gamma function (lanczos approximation) 
+// sources: https://en.wikipedia.org/wiki/Lanczos_approximation
+//          https://rosettacode.org/wiki/Gamma_function
+// Using Double wrapper class
+Double f_gamma2(Double zpar) {
+  const static Double par[9] = {
+    Double("0.99999999999980993"),
+    Double("676.5203681218851"),
+    Double("-1259.1392167224028"),
+    Double("771.32342877765313"),
+    Double("-176.61502916214059"),
+    Double("12.507343278686905"),
+    Double("-0.13857109526572012"),
+    Double("9.9843695780195716E-6"),
+    Double("1.5056327351493116E-7")
+  };
+
+  Double tt = zpar + Double(6.5);
+  Double res = par[0];
+  Double dummy2 = zpar;
+  for( byte i = 1; i < 9; i++ ) {
+    res += par[i] / dummy2;
+    dummy2 += Double(1);
+  }
+  res *= (Double(2)*Double.pi()).sqrt();
+  res *= tt.pow(zpar-Double(0.5)) * (-tt).exp();
+
+  return res;
+}
+
+
+// convert local date and time into julien day, a unique numbers
+// e.g. used in astronomical calculations
+#define TIMEZONE	2			// delta in hours to UTC / Greenwich time
+#define LOCALDATE	20250613	// date in YYYYMMDD
+#define LOCALTIME	180000		// time in HHMMSS (24 hours clock)
+
+// convert date to julien date
+float64_t fp64_julienDate( int32_t date, int32_t timezone, uint32_t time ) {
+	int32_t date = LOCALDATE;
+	int day = date % 100; date /= 100;
+	int month = date % 100;
+	int year = date / 100;
+	if( month <= 2 ) {
+		month += 12;
+		year--;
+	}
+	float64_t fday = fp64_uint32_to_float( day );
+	float64_t fmonth = fp64_add( fp64_uint32_to_float( month ), float64_NUMBER_ONE	);
+	float64_t fyear = fp64_uint32_to_float( year );
+	float64_t res1 = fp64_floor( fp64_mul( fyear, ftoa("365.25" ) ) );
+	float64_t res2 = fp64_floor( fp64_mul( fmonth, ftoa("30.6001") ) );
+	float64_t res3 = fp64_add( fday, ftoa("1720981.5") );
+	float64_t res4 = fp64_div( fp64_uint32_to_float( time ), fp64_uint32_to_float(10000));
+	float64_t res4 = fp64_div( fp64_sub( res4, fp64_uint32_to_float( TIMEZONE )), fp64_uint32_to_float(24));
+	float64_t res  = fp64_add(fp64_add(fp64_add(res1, res2),res3),res4);
+	return res;
+	}
+
+double dbl_julienDate( int32_t date, int32_t timezone, uint32_t time ) {
+	int32_t date = LOCALDATE;
+	int day = date % 100; date /= 100;
+	int month = date % 100;
+	int year = date / 100;
+	if( month <= 2 ) {
+		month += 12;
+		year--;
+	}
+	int res1 = year * 365.25;
+	int res2 = (month+1) * 30.6001;
+	double res3 = day + 1720981.5;
+	double res4 = (time / 10000.0 - TIMEZONE) / 24.0;
+	double res  = res1 + res2 + res3 + res4;
+	return res;
+	}
+
+
+float64_t fp64_jul = fp64_julienDate( LOCALDATE, TIMEZONE, LOCALTIME );
+double 	  dbl_jul  = dbl_julienDate( LOCALDATE, TIMEZONE, LOCALTIME );
+Serial.print( "Julien date of" ); Serial.print( LOCALDATE ); Serial.println( TIMEZONE );
+Serial.println( fp64_to_string( fp64_jul, 17, 15 ) );
+Serial.println( dbl_jul, 15 );
+
+float64_t diff = fp64_sub( fp64_jul, fp64_sd(dbl_jul) );
+Serial.print( "Difference" ); 
+Serial.print( fp64_to_string( diff, 17, 15 ) );
+float64_t diffSec = fp64_mul( diff, fp64_uint32_to_float(24*60) );
+Serial.print( " = " ); Serial.print( fp64_to_string( diff, 17, 4 ) );
+Serial.print( "minutes!" );
