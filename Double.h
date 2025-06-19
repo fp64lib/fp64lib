@@ -30,19 +30,20 @@
 /*
  * Simple C++ wrapper class to ease use of fp64lib.
  * 
- * Usage: Do "#include <Double.cpp>" instead of "#include <fp64lib.h>"
+ * Usage: Do "#include <Double.h>" instead of "#include <fp64lib.h>"
  * Now variables can be declared by "Double x,y,z;" (Notice the uppercase "D"!)
  * and usual operations can be done similar to "normal" double or int variables,
  * like:
  * Double a = Double("1.234567890123456");
- * Double b = a * Double(3.14)
+ * Double b = a * Double(3.14);
+ * b *= Double(2);
  *
  * For more see online documentation at https://fp64lib.org or in the provided
  * demo programs for fp64lib.
  */
 
-#ifndef DOUBLE_CPP
-#define DOUBLE_CPP
+#ifndef DOUBLE_H
+#define DOUBLE_H
 #include <fp64lib.h>
 
 class Double {

@@ -28,8 +28,7 @@
 
 /* $Id$ */
 
-#include <Double.cpp>
-// #include "Double.cpp"
+#include <Double.h>
 	
 /* 
  * Example on how to use the Double wrapper class and compare it to the
