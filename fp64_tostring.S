@@ -84,7 +84,7 @@ FUNCTION fp64_to_string
 	XJMP _U(__fp64_ftoa_nan)	; return string as from ftoa
 
 ENTRY   fp64_to_string
-  push rPrec					; ABI requires anything below r18 to be saved
+	push rPrec					; ABI requires anything below r18 to be saved
 	push rNrd
 	push rFlags
 	clr rFlags
@@ -301,8 +301,8 @@ ENTRY   fp64_to_string
 	push ZH						; save original value for later use
 	push ZL
 	
-	sbrc rFlags, fZero			; if( x == 0.0 )
-	rjmp .L_ret					;	return( s  ); // no more processing necessary
+	sbrc rFlags, fZero			; if( x == 0.0 ) {
+	rjmp .L_zero				;	s[1] = '\0'; return( s  ); }
 	
 	sbrc rFlags, fSign			; if( sign )
 	adiw ZL, 1					;		s++;
@@ -463,6 +463,13 @@ ENTRY   fp64_to_string
 
 	movw r24, ZL				; return( s )
 	ret
+	
+.L_zero:						; handle zero 
+	adiw ZL, 1
+	st Z, r1					; terminate "0.000...0E0" at "."
+	sbiw ZL,1
+	rjmp .L_ret
+	
 ENDFUNC
 .data	
 L_exp10L:	.skip 1

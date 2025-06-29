@@ -99,6 +99,8 @@ ENTRY __fp64_ftoa_nan
 
 #else
 	breq 3f					; handle Inf differently
+	ldi ZL, lo8(.L_nan)
+	ldi ZH, hi8(.L_nan)		; return "NaN"
 
 1:	lpm rA7, Z+				; copy string into buffer
 #endif		
@@ -115,6 +117,7 @@ ENTRY __fp64_ftoa_nan
 #endif
 
 	sec						; flag for special case
+21:	; common return entry for all special cases
 	rjmp .L_ret
 
 3:	; handle +/-Inf
@@ -132,19 +135,58 @@ ENTRY __fp64_ftoa_nan
 	
 4:	; handle 0
 #ifdef ARDUINO_AVR_MEGA2560
-	in rA7, RAMPZ						; save previous content of RAMPZ
+	in rA7, RAMPZ			; save previous content of RAMPZ
 	push rA7
+	ldi zl, byte3(.L_nan)
 #endif
-	ldi rA7, '0'			; return "0"
+
+	ldi ZL, lo8(.L_zero)
+	ldi ZH, hi8(.L_zero)
+
+	; copy "0."
+#ifdef ARDUINO_AVR_MEGA2560
+	elpm rA7, Z+
 	st X+, rA7
-	clr rA7
+	elpm rA7, Z+
+	st X+, rA7
+	elpm rA7, Z+
+#else
+	lpm rA7, Z+
+	st X+, rA7
+	lpm rA7, Z+
+	st X+, rA7
+	lpm rA7, Z+
+#endif
+
+	; add as many "0" as needed for filling up the precision
+40:	dec rB6					
+	breq 41f
+	st X+, rA7
+	rjmp 40b
+
+41:	; now add the "E0"
+#ifdef ARDUINO_AVR_MEGA2560
+	elpm rA7, Z+
+	st X+, rA7
+	elpm rA7, Z+
+	st X+, rA7
+	elpm rA7, Z+
+	st X+, rA7
+#else
+	lpm rA7, Z+
+	st X+, rA7
+	lpm rA7, Z+
+	st X+, rA7
+	lpm rA7, Z+
+	st X+, rA7
+#endif	
 
 	movw ZL, rB2			; if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0
-	breq 2b
-	st Z+, r1				; exponent is 0
+	breq 21b				; return with C = 0, i.e. normal result
+	st Z+, r1				; store exponent = 0
 	st Z+, r1
-	rjmp 2b
+	rjmp 21b				; return with C = 0, i.e. normal result
 	
 /* char *__fp64_ftoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 )
    char *fp64_to_decimalExp( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 )
@@ -450,8 +492,9 @@ ENTRY __fp64_ftoa_pse
 	ret
 	
 
-.L_nan:	.asciz "NaN"
-.L_inf:	.asciz "INF"
+.L_nan:		.asciz "NaN"
+.L_inf:		.asciz "INF"
+.L_zero:	.asciz "0.0E0"
 ENDFUNC
 
 .data
