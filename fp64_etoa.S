@@ -36,13 +36,13 @@
 	i.e. exponent is a multiple of 3
 	function and parameters are fully compatible to __fp64_ftoa
 	input:	rA7..rA0:	number x to convert in float64_t format
-			rA6:		maximum number of digits in significand
+			rB6:		maximum number of digits in significand
 						NOTE: this function supports conversion of up to 17 digits
 							  however, accuracy of IEEE754 is only 52 bit which is 15-16 decimal digits
 			rB4:		flag to store significand and exponent seperately
 			rB2:		int16_t *Exp10 // if != NULL, store exponent base 10 here
 	output: rA7..rA6	pointer to result, '\0' terminated C-string
-	modfies: rAE1.rAE0
+	modfies: rAx
 	
 	WARNING: 	function returns a pointer to a static temporary scratch area which might be used
 				also for other functions. The returned string might become invalid/scrambled
@@ -54,14 +54,23 @@
 FUNCTION fp64_etoa
 
 // assign aliases to registers for easier reading
-#define rChar	rA7		/* actual char */
-#define rDot	rA6		/* "." */
-#define rExp	rA5		/* "E" or "\0", delimiter for exponent  */
-#define rChr0	rA4		/* "0" */
-#define rMod	rA3		/* exponent mod 3 */
+// phase 1, ftoa and division by 3
+#define rRes	rA6		/* register pair for pointer to result buffer */
+#define rMulH	rA5		/* high byte of exp * 512/3 */
+#define rMulL	rA4		/* low byte of exp * 512/3 */
+#define rF171	rA3		/* register for factor 512/3 = 171 */
+
+// phase 2, scanning and modifying ftoa result
+#define rChar	rA5		/* actual char */
+#define rDot	rA4		/* "." */
+#define rExp	rA3		/* "E" or "\0", delimiter for exponent  */
+#define rChr0	rA2		/* "0" */
+#define rMod	rA1		/* exponent mod 3 */
 
 .L_OK:
-	jmp .L_ret	// label too far away for relative jump
+	ret								; everything fine, just return
+									; added 2nd exit as .L_ret is too far away for relative jump
+									; so, this code is shorter 
 
 ENTRY   fp64_etoa
 	XCALL _U(__fp64_splitA)
@@ -72,10 +81,11 @@ ENTRY   fp64_etoa
 	pop rAE0
 	pop rAE1
 	brcs .L_OK						; no treatment needed for Inf/NaN
+	
+	movw X, rRes					; is *res == "0", i.e. is x == 0.0?
 	call __fp64_saveAB
-	ret
-	ld rA7, x
-	cpi rA7, '0'
+	ld rChar, X
+	cpi rChar, '0'
 	breq .L_OK						; no treatment needed for 0
 	
 	; now get "exponent mod 3" for shifting the "."
@@ -98,9 +108,6 @@ ENTRY   fp64_etoa
 	;			
 
 	; fast mod 3 for exponent
-	push rAE1				; save exponent for later
-	push rAE0
-
 	subi rAE0, lo8(1023)	; remove exponent bias: exp -= 1023
 	sbci rAE1, hi8(1023)
 	bst rAE1,7				; save sign into t flag
@@ -121,44 +128,44 @@ ENTRY   fp64_etoa
 	; due to >>9, the lowbyte of rAE0*171 is irrelevant
 	;     = lowbyte(rAE1 * 171) >> 1 + highbyte(rAE0*171) >> 1
 	;     = (lowbyte(rAE1*171)+highbyte(rAE0*171)) >> 1
-	ldi rA5, 171
-	mul rAE1, rA5	; rAE1 * 171
-	mov rA6, r0		; rA6 = lowbyte(rAE1*171)
-	mul rAE0, rA5	; rAE0 * 171
-	add rA6, r1		; rA6 = lowbyte(rAE1*171)+highbyte(rAE0*171)
-	asr rA6			; >> 1
-	 
-	 ; rA6 is now the result of rAE1.0 / 3
-	 ; for modulo multiply result now by 3
-	mov r0, rA6		; save x = rAE1.0 / 3
-	eor rA7, rA7	; clear high byte
-	mov r1, rA7		; restore zero register (used by MUL)
-	add rA6, rA6
-	adc rA7, r1		; x + x = 2*x
-	add rA6, r0
-	adc rA7, r1		; rA7.6 = x + x + x = 3 * x
+	ldi rF171, 171
+	mul rAE1, rF171		; rAE1 * 171
+	mov rMulL, r0		; rMulL = lowbyte(rAE1*171)
+	mul rAE0, rF171		; rAE0 * 171
+	add rMulL, r1		; rMulL = lowbyte(rAE1*171)+highbyte(rAE0*171)
+	ror rMulL			; >> 1
+	; rMulL is now the result of rAE1.0 / 3, range 0 - 170
+
+	; for modulo calc exp - (exp div 3)*3
+	; first multiply result by 3
+	mov r0, rMulL		; save x = rAE1.0 / 3
+	eor rMulH, rMulH	; clear high byte
+	mov r1, rMulH		; restore zero register (used by MUL)
+	add rMulL, rMulL
+	adc rMulH, r1		; rMulH.L = x + x = 2*x
+	add rMulL, r0
+	adc rMulH, r1		; rMulH.L = (x + x) + x = 3 * x
 	
-	sub rAE0, rA6
-	sbc rAE1, rA7	; rRAE1.0 = rAE1.0 mod 3
-	brtc 1f			; that's all for positive x
+	sub rAE0, rMulL
+	sbc rAE1, rMulH		; rRAE1.0 = rAE1.0 mod 3
+	brtc 1f				; that's all for positive x
 	tst rAE0
 	brne 1f
-	ldi rA7, 3		; calc 3-(x mod 3) for x!=0
+	ldi rA7, 3			; calc 3-(x mod 3) for x!=0
 	sub rA7, rAE0
 	mov rAE0, rA7
 
 1:	; rAE0 contains "exponent mod 3"
-	mov rMod, rAE0	; save exponent mod 3
+	mov rMod, rAE0		; save exponent mod 3
 	tst rMod
 	; rcall __fp64_saveAB
-	breq .L_retp	; nothing to do for mod 3 = 0
+	breq .L_ret			; nothing to do for mod 3 = 0
 	
 	ldi rExp, 'E'
 	ldi rDot, '.'
 	ldi rChr0, '0'
 
-	pop rAE0		; restore exponent
-	pop rAE1
+	movw rAE0, rA2	; restore exponent
 	
 	push XL			; save pointer to start of string
 	push XH
@@ -225,7 +232,6 @@ ENTRY   fp64_etoa
 	sbc rAE1, r1
 	XCALL __itoa_ncheck	; and convert it to string
 
-.L_retp:
 	pop XH			; restore pointer to start of string
 	pop XL
 	
