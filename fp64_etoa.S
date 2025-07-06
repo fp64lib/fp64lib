@@ -33,7 +33,8 @@
 
 /* char *__fp64_etoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 )
 	converts a number to a string with maxDigits of significand in engineering format,
-	i.e. exponent is a multiple of 3
+	i.e. exponent is a multiple of 3, the exponent has always a sign except for 0,
+	and the mantissa is shifted to match the exponent.
 	function and parameters are fully compatible to __fp64_ftoa
 	input:	rA7..rA0:	number x to convert in float64_t format
 			rB6:		maximum number of digits in significand
@@ -55,7 +56,8 @@ FUNCTION fp64_etoa
 
 // assign aliases to registers for easier reading
 // phase 1, ftoa and division by 3
-#define rRes	rA6		/* register pair for pointer to result buffer */
+#define rResH	rA7		/* register pair for pointer to result buffer */
+#define rResL	rA6		
 #define rMulH	rA5		/* high byte of exp * 512/3 */
 #define rMulL	rA4		/* low byte of exp * 512/3 */
 #define rF171	rA3		/* register for factor 512/3 = 171 */
@@ -68,25 +70,42 @@ FUNCTION fp64_etoa
 #define rMod	rA1		/* exponent mod 3 */
 
 .L_OK:
-	ret								; everything fine, just return
-									; added 2nd exit as .L_ret is too far away for relative jump
-									; so, this code is shorter 
+	ret								; just return for NaN/Inf	
+	
+.L_zero:
+	rjmp .L_saveExp					; store the exponent and return for 0.0			
 
 ENTRY   fp64_etoa
 	XCALL _U(__fp64_splitA)
 	
-	push rAE1						; save exponent for later
-	push rAE0
-	XCALL _U(__fp64_ftoa_pse)		; get an result in scientific format
-	pop rAE0
-	pop rAE1
-	brcs .L_OK						; no treatment needed for Inf/NaN
+	push rB2						; save pointer to result exponent
+	push rB3
+
+	push rB7
+	ldi rB7,lo8(.L_exp10)			; let's use our own pointer to get exponent base 10
+	mov rB2, rB7
+	ldi rB7,hi8(.L_exp10)
+	mov rB3, rB7
+	pop rB7
 	
-	movw X, rRes					; is *res == "0", i.e. is x == 0.0?
-	call __fp64_saveAB
+9:	XCALL _U(__fp64_ftoa_pse)		; get an result in scientific format
+	
+	lds rAE0, .L_exp10				; get exponent base 10
+	lds rAE1, .L_exp10+1
+
+	pop rB3							; and restore previous result pointer
+	pop rB2
+
+	brcs .L_OK						; no treatment needed for Inf/NaN
+
+	push XL							; save X
+	push XH
+
+	movw X, rResL					; is *res == "0", i.e. is x == 0.0?
+	; call __fp64_saveAB
 	ld rChar, X
 	cpi rChar, '0'
-	breq .L_OK						; no treatment needed for 0
+	breq .L_zero						; no treatment needed for 0
 	
 	; now get "exponent mod 3" for shifting the "."
 	; get x = abs(rAE1.0) mod 3
@@ -108,10 +127,9 @@ ENTRY   fp64_etoa
 	;			
 
 	; fast mod 3 for exponent
-	subi rAE0, lo8(1023)	; remove exponent bias: exp -= 1023
-	sbci rAE1, hi8(1023)
-	bst rAE1,7				; save sign into t flag
+	bst rAE1,7				; save sign of exponent into t flag
 	brtc 0f
+
 	neg rAE1				; calc abs(rAE1.0)
 	neg rAE0
 	sbc rAE1, r1
@@ -128,6 +146,8 @@ ENTRY   fp64_etoa
 	; due to >>9, the lowbyte of rAE0*171 is irrelevant
 	;     = lowbyte(rAE1 * 171) >> 1 + highbyte(rAE0*171) >> 1
 	;     = (lowbyte(rAE1*171)+highbyte(rAE0*171)) >> 1
+	; call __fp64_saveAB
+
 	ldi rF171, 171
 	mul rAE1, rF171		; rAE1 * 171
 	mov rMulL, r0		; rMulL = lowbyte(rAE1*171)
@@ -148,28 +168,29 @@ ENTRY   fp64_etoa
 	
 	sub rAE0, rMulL
 	sbc rAE1, rMulH		; rRAE1.0 = rAE1.0 mod 3
+	mov rMod, rAE0		; rMod = rAE1.0 mod 3
 	brtc 1f				; that's all for positive x
-	tst rAE0
-	brne 1f
-	ldi rA7, 3			; calc 3-(x mod 3) for x!=0
-	sub rA7, rAE0
-	mov rAE0, rA7
 
-1:	; rAE0 contains "exponent mod 3"
-	mov rMod, rAE0		; save exponent mod 3
 	tst rMod
-	; rcall __fp64_saveAB
-	breq .L_ret			; nothing to do for mod 3 = 0
-	
+	breq 1f
+
+	ldi rMod, 3			; calc 3-(x mod 3) for x!=0
+	sub rMod, rAE0
+
+1:	; rMod contains "exponent mod 3"
+	rcall __fp64_saveAB
+	tst rMod
+	brne 10f
+
+	lds rAE0, .L_exp10	; for mod 3 == 0, restore exponent, save and return
+	lds rAE1, .L_exp10+1
+	rjmp .L_saveExp
+
+10:	; mod 3 > 0, so we have to shift by 1 or 2 places
 	ldi rExp, 'E'
 	ldi rDot, '.'
 	ldi rChr0, '0'
-
-	movw rAE0, rA2	; restore exponent
 	
-	push XL			; save pointer to start of string
-	push XH
-
 	ld rChar, X+	; check for sign and skip it
 	cpi rChar, '-'
 	breq 2f
@@ -224,21 +245,8 @@ ENTRY   fp64_etoa
 	breq .L_decE	; exponent found, increment it
 	tst rChar
 	brne .L_case3
+	rjmp .L_decE
 
-	; decrease the exponent and store it
-	; X points to first character of exponent
-.L_decE:
-	sub rAE0, rMod	
-	sbc rAE1, r1
-	XCALL __itoa_ncheck	; and convert it to string
-
-	pop XH			; restore pointer to start of string
-	pop XL
-	
-.L_ret:
-	ret
-
-	
 .L_case1a:	; 1a) "aEeee"		--> "a0Ee-1"
 	; rChar is "E" or "\0"
 	; X points to first digit of exponent
@@ -259,8 +267,54 @@ ENTRY   fp64_etoa
 
 	sbiw XL, 1			; let X point to "."
 	st X+, rChar		; overwrite "." with "E" or "\0"
-	rjmp .L_decE		; increase and store the exponent
+	; rjmp .L_decE		; increase and store the exponent
 
+	; decrease the exponent and store it
+	; X points to first character of exponent
+.L_decE:
+	lds rAE0, .L_exp10
+	lds rAE1, .L_exp10+1
+	; rcall __fp64_saveAB
+	sub rAE0, rMod	
+	sbc rAE1, r1
+	
+	tst rAE1	; check for positive numbers
+	brmi 4f		; skip if negative
+	adiw rAE0, 0
+	breq 4f		; and for zero
+	
+	ldi rChar, '+'			; store '+' for positive numbers
+	st X+, rChar
+	
+4:	push rAE0				; save exponent
+	push rAE1
+	push rResL				; and pointer to start of result
+	push rResH
+	
+	ldi r20, 0x0a			; convert to radix 10
+	movw r24, rAE0			; number to convert
+	movw r22, X				; pointer to string
+	XCALL __itoa_ncheck		; and convert exponent it to string
+
+	pop rResH				; restore pointer to string result
+	pop rResL
+	pop rAE1				; restore exponent
+	pop rAE0
+
+.L_saveExp:			; save exp if *exp != 0
+
+	movw XL, rB2	; // if exp10 != NULL, store exponent base 10 here
+	adiw XL, 0
+	; rcall __fp64_saveAB
+	breq .L_retp
+
+	st X+, rAE0
+	st X+, rAE1
+
+.L_retp:
+	pop XH			; restore X and return
+	pop XL
+	ret
 
 .L_two:
 	; shift by 2
@@ -347,3 +401,6 @@ ENTRY   fp64_etoa
 	rjmp .L_decE		; increase and store the exponent
 
 ENDFUNC
+
+.data
+.L_exp10:	.space 2	; save exponent in base 10 here
