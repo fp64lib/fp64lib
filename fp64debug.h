@@ -49,6 +49,7 @@ typedef struct fp64_debug_t {
   uint8_t m[7];		// mantissa
   uint8_t r7;		// content of rA7 or rB7
   uint8_t r0;		// content of r0 or r1
+  uint16_t x;		// content of x
 } fp64_debug_t;
 #define fp64_debug_isC(ptr)	(ptr->sreg & 0x01)
 #define fp64_debug_isZ(ptr)	(ptr->sreg & 0x02)
@@ -99,8 +100,6 @@ float64_t fp64_modff (float64_t x, float64_t *iptr) __ATTR_CONST__;
 float64_t fp64_sqrtf( float64_t x ) __ATTR_CONST__;
 float64_t __fp64disd (long long x) __ATTR_CONST__;				// (signed) long long to float64_t
 float64_t __fp64unsdisd (unsigned long long x) __ATTR_CONST__; 	// unsigned long long to float64_t
-float64_t __fp64sisd ( long x ) __ATTR_CONST__;					// (signed) long to float64
-float64_t __fp64unssisd (unsigned long x) __ATTR_CONST__;		// unsigned long to float64_t
 float64_t __fp64sssd ( uint16_t x ) __ATTR_CONST__;				// (signed) short to float64
 float64_t __fp64unsssd (uint16_t x) __ATTR_CONST__;		        // unsigned short to float64_t
 long long __fp64_fixsddi( float64_t A ) __ATTR_CONST__;			// float64_t to (signed) long long

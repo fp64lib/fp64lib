@@ -88,6 +88,8 @@ ENTRY __fp64_saveB
 	sts __b_m+5, rB1
 	sts __b_m+6, rB0
  	sts __b7, rB7		; only for debugging as exponent is in rBE1.rBE0
+	sts __x, ZL
+	sts __x+1, ZH
 	lds r0, __b_sreg
 	out 0x3f, r0
 	pop r0
@@ -121,6 +123,8 @@ ENTRY __fp64_saveA
 	sts __a_m+6, rA0
 	sts __a7, rA7		; only for debugging as exponent is in rAE1.rAE0
 	lds r0, __a_sreg
+	sts __x, XL
+	sts __x+1, XH
 	out 0x3f, r0
 	pop r0
 	ret
@@ -283,6 +287,7 @@ __a_exp:	.skip	2
 __a_m:		.skip	7
 __a7:		.skip	1
 __ar0:		.skip	1
+__x:		.skip	2
 __b_sreg:	.skip	1
 __b_count:	.skip	1
 __b_sign:	.skip	1
@@ -290,6 +295,7 @@ __b_exp:	.skip	2
 __b_m:		.skip	7
 __b7:		.skip	1
 __br1:		.skip	1
+__z:		.skip	2
 __c_sreg:	.skip	1
 __c_count:	.skip	1
 __c_sign:	.skip	1
@@ -297,6 +303,7 @@ __c_exp:	.skip	2
 __c_m:		.skip	7
 __c7:		.skip	1
 __cr1:		.skip	1
+__y:		.skip	2
 ENTRY __before
 			.skip	32
 ENTRY __after
