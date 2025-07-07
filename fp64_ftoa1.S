@@ -135,9 +135,10 @@ ENTRY __fp64_ftoa_nan
 	
 4:	; handle 0
 #ifdef ARDUINO_AVR_MEGA2560
-	in rA7, RAMPZ			; save previous content of RAMPZ
-	push rA7
-	ldi zl, byte3(.L_nan)
+	in ZL, RAMPZ			; save previous content of RAMPZ
+	push ZL
+	ldi ZL, byte3(.L_zero)
+	out RAMPZ, ZL
 #endif
 
 	ldi ZL, lo8(.L_zero)
@@ -172,6 +173,9 @@ ENTRY __fp64_ftoa_nan
 	st X+, rA7
 	elpm rA7, Z+
 	st X+, rA7
+	
+	pop rA7
+	out RAMPZ, rA7
 #else
 	lpm rA7, Z+
 	st X+, rA7
