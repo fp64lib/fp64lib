@@ -1,0 +1,18 @@
+Examples
+
+double vs. float	see the limited precision of the 
+					built-in types float and double
+					vs. extended precision of fp64lib
+Leibniz Series		One of the most famous ways to calculate
+					Pi, created by historic mathematician
+					Gottfried Leibnis
+Double				Move to a more "natural" way on using
+					fp64lib with normal operations like +, -, *, /,
+					similar to the built-in types float or double
+Julien Date			A base routine, used in astronomy to convert
+					date and time into a continous number,
+					comparing accuracy with internal data types
+rpncalc				Core of an RPN based calculator (like the
+					calculators of Hewlet Packard/HP), that can
+					easily be extended and can be controlled via
+					USB/Serial interface
