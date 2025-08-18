@@ -198,8 +198,9 @@ float fp64_ds( float64_t x ) __ATTR_CONST__;					// float64_t to float
 
 // to and from string
 char *fp64_to_decimalExp( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 );
+char *fp64_etoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 );
 char *fp64_to_string( float64_t x, uint8_t max_nr_chars, uint8_t max_leading_mantisse_zeros );
-float64_t fp64_atof( char *str );
+float64_t fp64_atof( const char *str );
 float64_t fp64_strtod( char *str, char **endptr );
 
 #include "fp64def.h"

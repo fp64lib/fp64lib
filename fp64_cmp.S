@@ -83,7 +83,7 @@ ENTRY	__fp64_cmp
 	sbc	rA1, rB1
 	sbc	rA2, rB2
 	sbc	rA3, rB3
-	sub	rA4, rB4
+	sbc	rA4, rB4
 	sbc	rA5, rB5
 	sbc	rA6, rB6
 	sbc	rA7, rB7	; C is set, if A < B
