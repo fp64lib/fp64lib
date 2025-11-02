@@ -86,16 +86,16 @@ ENTRY __fp64_ftoa_nan
 0:	; handle NaN and +/-Inf
 	
 #ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ						; save previous content of RAMPZ
+	in ZL, RAMPZ			; save previous content of RAMPZ
 	push ZL
 	breq 3f					; handle Inf differently
-	ldi zl, byte3(.L_nan)		; load upper byte of 24-bit address
+	ldi ZL, byte3(.L_nan)	; load upper byte of 24-bit address
   ; rcall __fp64_saveAB
 	out  RAMPZ, ZL
 	ldi ZL, lo8(.L_nan)
 	ldi ZH, hi8(.L_nan)		; return "NaN"
 
-1:	elpm rA7, Z+				; copy string into buffer
+1:	elpm rA7, Z+			; copy string into buffer
 
 #else
 	breq 3f					; handle Inf differently
@@ -113,7 +113,7 @@ ENTRY __fp64_ftoa_nan
 
 #ifdef ARDUINO_AVR_MEGA2560
 	pop ZL
-	out  RAMPZ, ZL		; restore RAMPZ
+	out  RAMPZ, ZL			; restore RAMPZ
 #endif
 
 	sec						; flag for special case
@@ -143,8 +143,11 @@ ENTRY __fp64_ftoa_nan
 
 	ldi ZL, lo8(.L_zero)
 	ldi ZH, hi8(.L_zero)
+	brtc 5f
+	ldi rA7, '-'			; '-0.0E0'
+	st X+, rA7
 
-	; copy "0."
+5:	; copy "0."
 #ifdef ARDUINO_AVR_MEGA2560
 	elpm rA7, Z+
 	st X+, rA7
@@ -502,6 +505,7 @@ ENTRY __fp64_ftoa_pse
 ENDFUNC
 
 .data
+;.L_zero:	.asciz "-0.0E0"
 .L_bufp:		.space 2	; pointer to current location in __fp64_ftoabuf
 .L_maxDigits:	.space 1	; maximum number of digits, working counter
 .L_maxDigits2:	.space 1	; maximum number of digits, original value

@@ -60,7 +60,8 @@ FUNCTION __fp64addsf3x
 	; 3d  | -Inf  | +Inf |  NaN  |  -Inf| -Inf 3c ok
 	; 4	  |	Inf	  |	any	 |	Inf	 | Inf  | Inf ok
 	; 5	  |	any	  |	Inf	 |	Inf  | -Inf | -Inf ok
-	; 6	  |	0	  |	any  |	any  | -any | -any ok
+	; 6a  |	+/-0  |	+/-0 |	+0   | +0   | +0 ok
+	; 6b  |	0	  |	any  |	any  | -any | -any ok
 	; 7	  |	any  |	0	 |	any  | any  | any ok
 
 0:	brne	.L_nan				; as NaN has priority, result will be NaN (cases 1&2)	
@@ -113,7 +114,7 @@ FUNCTION __fp64addsf3x
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A - B
 	*/
 ENTRY fp64_sub
-ENTRY __subdf3
+GCC_ENTRY __subdf3
 	clr r0
 	sec
 	ror r0					; set mode to subtraction = 0x80
@@ -128,7 +129,7 @@ ENTRY __subdf3
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A + B
 	*/
 ENTRY fp64_add
-ENTRY __adddf3
+GCC_ENTRY __adddf3
 ENTRY __fp64_addsd3x
 	clr r0					; set mode to addition
 1:	XCALL _U(__fp64_pushB)
@@ -147,13 +148,18 @@ ENTRY __fp64_addsd3x
 	XCALL _U(__fp64_popB)
 	XJMP _U(__fp64_rpretA)	; round, pack result and return
  
-	; case 11: A is 0 --> result is B, sign depending on B and op
-11:	sub rB7, r0				; reverse sign of B in case of a subtraction
+11:	XCALL _U(__fp64_isBzero)
+	brne 110f  				; case 6a: (+/-0) +/- (+/-0) is always +0
+	clt
+	rjmp 12f
+	
+	; case 6b: A is 0 --> result is B, sign depending on B and op
+110:sub rB7, r0				; reverse sign of B in case of a subtraction
 	bst rB7, 7				; set sign of result = sign(B)
 	; rcall __fp64_saveAB
 	XCALL _U(__fp64_movABx)	; so move B into A and return it
 
-12:	; case 12: B = 0 --> result is A
+12:	; case 7: B = 0 --> result is A
 	XCALL _U(__fp64_popB)
 	sbrc rA6, 7				; is A normal number ?
 	XJMP _U(__fp64_pretA)	; yes: result is already ok
