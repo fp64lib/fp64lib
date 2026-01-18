@@ -69,19 +69,36 @@ FUNCTION fp64_to_string
 */
 #define		rPrec	rB7			// precision for call to f_to_decimalExp
 #define 	rNrd	rB6			// number of digits available, at start max_chars
-#define		rFlags	rB5			// flags: below1, above1
+#define		rFlags	rB5			// flags: below1, above1, ...
 #undef 		rZero
 #define		rZero	rB4			// max_zeroes, use "s0.mmmmmm" when result has less than this # of 0s
 #define		fBelow1	0			// bit 0 of rFlags is set if |x| < 1
 #define		fAbove1	1			// bit 1 of rFlags is set if log10(|x|)<max_chars
-#define		fZero	6			// bit 6 of rFlags is set if x == 0.0
 #define		fSign	7			// bit 1 of rFlags	
 
-0:	; handle NaN and Inf
+.L_nan:	; handle NaN and Inf
 	pop rFlags
 	pop rNrd
 	pop rPrec
 	XJMP _U(__fp64_ftoa_nan)	; return string as from ftoa
+	
+.L_zero: ; handle +/- 0
+	ldi XL, lo8(__fp64_ftoabuf)	; get buffer address
+	ldi XH, hi8(__fp64_ftoabuf)
+	movw r24, XL				; save it as returned result
+
+	ldi rB7, '-'
+	brtc 0f
+	st X+, rB7					; return "-0"
+	
+0:	ldi rB7, '0'				; or "0" depending on argument
+	st X+, rB7
+	st X, r1
+
+	pop rFlags					; restore used registers
+	pop rNrd
+	pop rPrec
+	ret							; and return with r24:r25 pointing to result
 
 ENTRY   fp64_to_string
 	push rPrec					; ABI requires anything below r18 to be saved
@@ -89,65 +106,40 @@ ENTRY   fp64_to_string
 	push rFlags
 	clr rFlags
 	XCALL _U(__fp64_splitA)
-	brcs 0b
-	brne .L_sign
-	sec
-	ror rFlags					; set flag for  x == 0.0
-	ror rFlags
+	brcs .L_nan
+	breq .L_zero
 
 .L_sign:	; sign is stored in T flag
 	; rcall __fp64_saveAB
 	brtc 1f
 	dec rNrd					; nrd = sign ? max_nr_chars-1 : max_nr_chars;
 1:	bld rFlags,fSign			; save sign
-	push rB7					; save used registers
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
 	
-	push rA7					; save x
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushB)		; save used registers
+	XCALL _U(__fp64_pushA)		; save x
 	push rAE1
 	push rAE0
 
-	sbrc rFlags, fZero
-	bset 1						; set Z flag if x was 0.0
-	; rcall __fp64_saveAB
-
-	; do not use clr statement in the following as it will modify the Z flag!!!
+	; use fp64_to_decimalExp to get log10(x)
+	; as fp64_to_decimalExp is used later anyhow, this will 
+	; save memory compared to using log10
+	; do not use clr statement in the following as it will modify the Z flag needed for __fp64_ftoa_pse!!!
 	mov rB5, r1					; rB5.rB4 = 0 --> expSep = 0, no separate storage of exponent
 	mov rB4, r1
-	ldi rB7, hi8(L_exp10L)		; ; rB3.rB2 = pointer to store exponent in L_exp10L/H
+	ldi rB7, hi8(L_exp10L)		; rB3.rB2 = pointer to store exponent in L_exp10L/H
 	mov rB3, rB7
 	ldi rB7, lo8(L_exp10L)
 	mov rB2, rB7
 	mov rB7, r1					; rB7.rB6 = prec = 1
 	ldi rB6, 0x01				
 	; rcall __fp64_saveB
-	XCALL _U(__fp64_ftoa_pse)	; 	s = fp64_to_decimalExp(x, prec, 0, NULL); // get number
+	XCALL _U(__fp64_ftoa_pse)	; s = fp64_to_decimalExp(x, prec, 0, NULL); // get number
 	lds rExp10L, L_exp10L		; retrieve exp10
 	lds rExp10H, L_exp10H
 
 	pop rAE0					; restore x
 	pop rAE1
-	pop rA0	
-	pop rA1	
-	pop rA2
-	pop rA3
-	pop rA4
-	pop rA5
-	pop rA6
-	pop rA7
+	XCALL _U(__fp64_popA)
 	
 	pop rB0						; restore saved registers
 	pop rB1	
@@ -156,13 +148,9 @@ ENTRY   fp64_to_string
 	pop rB4
 	pop rB5
 	pop rB6
-	; pop rB7					; keep previous content of rB7 on stack
+								; rB7 is restored at very end
 	bst rFlags, fSign			; restore sign
 
-	; rcall __fp64_saveAB
-	; movw r24, ZL
-	; ret
-	
 	; check for |x| < 1 --> representation "s0.mmmmmm" without exponent
 	cpi rAE1, 0x3				; if( exp2 < 0 ) {
 	brlo .L_below1
@@ -202,14 +190,13 @@ ENTRY   fp64_to_string
 	cp rExp10L, rNrd
 	brcc .L_exp
 	
-	; yes, number does not have too many digits before "."#
+	; yes, number does not have too many digits before "."
 	ror rFlags
 	ror rFlags
 	sec
 	rol rFlags
 	rol rFlags					; 	above1 = true
-	; sbr rFlags, fabove1			;	above1 = true;
-	mov rPrec, rNrd				;	
+	mov rPrec, rNrd	
 	dec rPrec
 	cp rExp10L, rPrec			; 	if( exp10 != nrd - 1 )
 	brne .L_get					; 		prec = nrd - 1;	// we can store "mmmm.mm", -1 for "."
@@ -268,10 +255,7 @@ ENTRY   fp64_to_string
 	push rB1
 	push rB0
 	
-	sbrc rFlags, fZero
-	bset 1						; set Z flag if x was 0.0
-
-	; do not use clr statement in the following as it will modify the Z flag!!!
+	; do not use clr statement in the following as it will modify the Z flag needed for __fp64_ftoa_pse!!!
 	mov rB6, rB7				; rB7.rB6 = prec
 	mov rB5, r1					; rB5.rB4 = 0 --> expSep = 0, no separate storage of exponent
 	mov rB4, r1
@@ -300,9 +284,6 @@ ENTRY   fp64_to_string
 	push YL
 	push ZH						; save original value for later use
 	push ZL
-	
-	sbrc rFlags, fZero			; if( x == 0.0 ) {
-	rjmp .L_zero				;	s[1] = '\0'; return( s  ); }
 	
 	sbrc rFlags, fSign			; if( sign )
 	adiw ZL, 1					;		s++;
@@ -361,7 +342,7 @@ ENTRY   fp64_to_string
 	dec rExp10L
 	rjmp 72b
 73:	sbiw ZL, 1
-	st Z, rExp10H			; s[pos--] = '.'; s[pos--] = '0';
+	st Z, rExp10H				; s[pos--] = '.'; s[pos--] = '0';
 	ldi rExp10H, '.'
 	std Z+1, rExp10H
 	
@@ -421,11 +402,6 @@ ENTRY   fp64_to_string
 	; ZH.ZL points to s[endPos]
 	; XH.XL points to s[pos] if exponential format
 
-	; adiw ZL, 0
-	; cp ´ZL, r1					; check whether endPos is set
-	; cpc ZH, r1
-	; breq .L_ret
-
 90:	ld rA7, -Z					; while( s[--endPos] == '0' )
 	cpi rA7, '0'				;		;
 	breq 90b
@@ -463,12 +439,6 @@ ENTRY   fp64_to_string
 
 	movw r24, ZL				; return( s )
 	ret
-	
-.L_zero:						; handle zero 
-	adiw ZL, 1
-	st Z, r1					; terminate "0.000...0E0" at "."
-	sbiw ZL,1
-	rjmp .L_ret
 	
 ENDFUNC
 .data	

@@ -257,15 +257,7 @@ ENTRY __fp64_ftoa_pse
 	sbci rAE1, 0x03			; remove base from exponent
 
 	XCALL _U(__fp64_pushCB) ; save registers used by 10pown
-
-	push rA7				; save registers used by 10pown
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)	; save registers used by 10pown
 
 	push rExp2L				; save exponent of A
 	push rExp2H
@@ -510,6 +502,7 @@ ENDFUNC
 .L_maxDigits:	.space 1	; maximum number of digits, working counter
 .L_maxDigits2:	.space 1	; maximum number of digits, original value
 .L_sepExp:		.space 1	; flag to seperate significand and exponent
+ENTRY __fp64_ftoabuf
 __fp64_ftoabuf:	.space 2+MAX_SIGNIFICAND+3+MAX_EXPONENT, 0	; max 26 bytes needed:
 														; 1 for sign
 														; 1 for leading digit
