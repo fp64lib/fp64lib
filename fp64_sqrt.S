@@ -125,18 +125,12 @@ ENTRY __fp64_sqrt_pse
 	subi rA6, 0x40	; Initial remainder for even exponent, C=0
 
   ; Loop for all 53 bits + 3 safety bits
-.Loop:	brcc	2f		; NC --> nope, bit is 0
-	cp	msk6, tv	; Only needed to get the proper rounding
-					;   for ffffff
-	sbc	rA0, rB0	; Prepare remainder argument for next bits
-	sbc	rA1, rB1
-	sbc	rA2, rB2
-	sbc	rA3, rB3
-	sbc	rA4, rB4
-	sbc	rA5, rB5
-	sbc	rA6, rB6
+.Loop:	brcc	2f			; NC --> nope, bit is 0
+	cp	msk6, tv			; Only needed to get the proper rounding
+							;   for ffffff
+	XCALL _U(__fp64_subAB)	; Prepare remainder argument for next bits
 	
-	or	rB0, msk0	; Set developing bit to 1
+	or	rB0, msk0			; Set developing bit to 1
 	or	rB1, msk1
 	or	rB2, msk2
 	or	rB3, msk3
@@ -144,7 +138,7 @@ ENTRY __fp64_sqrt_pse
 	or	rB5, msk5
 	or	rB6, msk6
 	
-2:	lsr	msk6		; Shift right mask, C --> end loop
+2:	lsr	msk6				; Shift right mask, C --> end loop
 	ror	msk5
 	ror	msk4
 	ror	msk3

@@ -74,4 +74,14 @@ ENTRY	__fp64_rorA5
 	ror rA0
 	ret
 	
+# ENTRY __fp64_lsr8A
+	# mov rA0, rA1		; ; A >>= 8
+	# mov rA1, rA2
+	# mov rA2, rA3
+	# mov rA3, rA4
+	# mov rA4, rA5
+	# mov rA5, rA6
+	# mov rA6, rA7
+	# ret
+	
 ENDFUNC

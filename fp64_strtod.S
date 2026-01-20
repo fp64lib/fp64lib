@@ -201,23 +201,8 @@ ENTRY   fp64_strtod
 	ldi rExp2L, 3			; exp2 = 3 ( a digit 0-9 occupies bits 0-3
 	clr rPoint				; rPoint = 0			
 	
-	push rC7				; save registers used by __fp64_10pown
-	push rC6
-	push rC5
-	push rC4
-	push rC3
-	push rC2
-	push rC1
-	push rC0
-	
-	push rB7				; save registers used by __fp64_10pown
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
+
+	XCALL _U(__fp64_pushCB)	; save registers used by __fp64_10pown
 
 	; skip any leading 0
 19:
@@ -480,14 +465,7 @@ ENTRY   fp64_strtod
 	; now we have the significand in A
 	; and the exponent in Exp10
 	; now build our number = A * 10^Exp10
-	push rA7				; save registers used by 10pown
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+	XCALL _U(__fp64_pushA)	; save registers used by 10pown
 
 	push rExp2L				; save exponent of A
 	push rExp2H
@@ -504,14 +482,7 @@ ENTRY   fp64_strtod
 	adc rExp2H, rB7			; exponent2 += 1 + exponent2 of 10^exp10
 	adiw rExp2L, 1
 	
-	pop rB0					; restore significand of A into B
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)	; restore significand of A into B
 
 	; rcall __fp64_saveAB
 
@@ -558,23 +529,7 @@ ENTRY   fp64_strtod
 .L_cleanup:
 	; rcall __fp64_saveAB
 
-	pop rB0					; restore saved registers
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
-	
-	pop rC0					; restore saved registers
-	pop rC1
-	pop rC2
-	pop rC3
-	pop rC4
-	pop rC5
-	pop rC6
-	pop rC7
+	XCALL _U(__fp64_popBC)	; restore saved registers
 	
 	; check whether exponent is in range
 	subi rAE0, lo8(-(0x3ff))		; exp += 1023 (exponent base)

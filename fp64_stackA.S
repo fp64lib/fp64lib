@@ -92,7 +92,7 @@ ENTRY   __fp64_popA
 	pop r0
 #endif
 
-	pop rA0				; restore B
+	pop rA0				; restore A
 	pop rA1
 	pop rA2
 	pop rA3

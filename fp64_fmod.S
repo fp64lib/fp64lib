@@ -261,29 +261,16 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	adc rC5, r1
 	adc rC6, r1
 	adc rC7, r1
-	sub	rA0, rB0	; try to subtract B, A -= B
-	sbc	rA1, rB1
-	sbc	rA2, rB2
-	sbc	rA3, rB3
-	sbc	rA4, rB4
-	sbc	rA5, rB5
-	sbc	rA6, rB6
+	XCALL _U(__fp64_subAB)	; try to subtract B, A -= B
 	sbc	rA7, rB7
-	; breq .L_sz		; result is 0
-	breq 66f		; result is 0
-	brpl 6f			; if A > B, success
-	; dec r0
-	sub rC4, r0	; counter--
+	breq 66f				; result is 0
+	brpl 6f					; if A > B, success
+
+	sub rC4, r0				; counter--
 	sbc rC5, r1
 	sbc rC6, r1
 	sbc rC7, r1
-	add	rA0, rB0	; else undo the sub, A += B
-	adc	rA1, rB1
-	adc	rA2, rB2
-	adc	rA3, rB3
-	adc	rA4, rB4
-	adc	rA5, rB5
-	adc	rA6, rB6
+	XCALL _U(__fp64_addAB)	; else undo the sub, A += B
 	adc	rA7, rB7
 6:	sbiw rAE0,1		; exponent(A)--
 	brmi 7f			; if exponent < 0, everything is calculated

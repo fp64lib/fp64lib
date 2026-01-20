@@ -246,14 +246,7 @@ ENTRY   fp64_to_string
 	ldi rPrec, MAX_SIGNIFICAND
 7:	cpi rPrec, 1					; limit precision to be >= 1
 	adc rPrec, r1
-	push rB7					; save used registers
-	push rB6
-	push rB5
-	push rB4
-	push rB3
-	push rB2
-	push rB1
-	push rB0
+	XCALL _U(__fp64_pushB)			; save used registers
 	
 	; do not use clr statement in the following as it will modify the Z flag needed for __fp64_ftoa_pse!!!
 	mov rB6, rB7				; rB7.rB6 = prec
@@ -270,14 +263,7 @@ ENTRY   fp64_to_string
 	
 	lds rExp10L, L_exp10L		; retrieve exp10
 	lds rExp10H, L_exp10H
-	pop rB0						; restore saved registers
-	pop rB1	
-	pop rB2
-	pop rB3
-	pop rB4
-	pop rB5
-	pop rB6
-	pop rB7
+	XCALL _U(__fp64_popB)		; restore saved registers
 	bst rFlags, fSign			; restore sign
 	
 	push YH

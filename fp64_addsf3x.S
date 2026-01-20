@@ -291,15 +291,9 @@ __fp64_add_pse_r0:
 
 6:	; B is now properly shifted for addition --> start real add or sub action
 	; call __fp64_saveAB
-	sbrs r0, 7	  	; operation = sub?
-	rjmp	.L_add	; no, goto addition
-	sub rA0, rB0	; yes, compute A -= B
-	sbc	rA1, rB1
-	sbc	rA2, rB2
-	sbc	rA3, rB3
-	sbc	rA4, rB4
-	sbc	rA5, rB5
-	sbc	rA6, rB6
+	sbrs r0, 7	  			; operation = sub?
+	rjmp	.L_add			; no, goto addition
+	XCALL _U(__fp64_subAB)	; yes, compute A -= B
 7:
 	; call __fp64_saveAB
 	brmi	.L_ret	; topmost bit is still set, so in A is the final result,
@@ -336,16 +330,10 @@ __fp64_add_pse_r0:
 
 .L_add:
 	;call __fp64_saveAB
-	add rA0, rB0	; add B to A
-	adc	rA1, rB1
-	adc	rA2, rB2
-	adc	rA3, rB3
-	adc	rA4, rB4
-	adc	rA5, rB5
-	adc	rA6, rB6
-	brcc	.L_ret	; no overflow occured, so A is already the final result, including subnormals
+	XCALL _U(__fp64_addAB)	; add B to A
+	brcc	.L_ret			; no overflow occured, so A is already the final result, including subnormals
 	ror  rA6
-	XCALL _U(__fp64_rorA5) 		; overflow --> shift mantissa of result with 1st bit set (could be discarded)
+	XCALL _U(__fp64_rorA5) 	; overflow --> shift mantissa of result with 1st bit set (could be discarded)
 	
 	adiw rAE0, 1	; increase exponent by 1
 	cpi	rAE0, 0xff	; did we get overflow (exp == 0x7ff) ?

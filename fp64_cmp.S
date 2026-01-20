@@ -58,7 +58,7 @@ ENTRY	__fp64_cmp
 	sbc	r0, r0		; r0 = (A < 0) ? -1 : 0
 	lsl	rB7
 	sbc	rBE0, rBE0	; rBE0 = (B < 0) ? -1 : 0
-	;call __fp64_saveAB
+	; call __fp64_saveAB
 	; isnan(A) ? i.e. exponent(A) = 0x7ff
 	cpi rA7, (0x7f << 1)	; check first 7 bit of exponent
 	brne 1f			; not 0x7f --> normal number
@@ -69,7 +69,6 @@ ENTRY	__fp64_cmp
 	brlo	9f		; 0 < mantissa --> NaN
 
 1:	; A is normal number or INF, isnan(B) ?
-	;call __fp64_saveAB
 	cpi rB7, (0x7f << 1)	; check first 7 bit of exponent
 	brne 2f			; not 0x7f --> normal number
 	cpi rB6, 0xf0	; we have to check lower 4 bits of exponent
@@ -79,14 +78,9 @@ ENTRY	__fp64_cmp
 	brlo	9f		; 0 < mantissa --> NaN
 
 2:	; both A & B are normal numbers or INF	
-	sub	rA0, rB0	; compare A & B
-	sbc	rA1, rB1
-	sbc	rA2, rB2
-	sbc	rA3, rB3
-	sbc	rA4, rB4
-	sbc	rA5, rB5
-	sbc	rA6, rB6
-	sbc	rA7, rB7	; C is set, if A < B
+	XCALL _U(__fp64_subAB)	; compare A & B
+	sbc	rA7, rB7			; C is set, if A < B
+	; call __fp64_saveAB
 	brne	3f
 
 	; absolute values are equal, check signs
@@ -100,6 +94,7 @@ ENTRY	__fp64_cmp
 	or	rB0, rB4
 	or	rB0, rB5
 	or	rB0, rB6
+	or	rB0, rB7
 	brne	4f		; evaluate sign(B)
 	ret
 	

@@ -120,14 +120,7 @@ ENTRY __fp64_10pown
 11:	add rAE0, r0		; else
 	adc rAE1, r1		;	exp2 += shiftLeft(res)
 	
-2:	push rA7			; save res
-	push rA6
-	push rA5
-	push rA4
-	push rA3
-	push rA2
-	push rA1
-	push rA0
+2:	XCALL _U(__fp64_pushA)		; save res
 	
 	XCALL _U(__fp64_movAB)		; B = A = pot
 	XCALL _U(__fp64_mul64AB)	; pot = pot * pot
@@ -145,15 +138,7 @@ ENTRY __fp64_10pown
 12:	add YL, r0				; else
 	adc YH, r1				;	pot_exp2 += shiftLeft(pot)
 
-13:	pop rA0					; restore res
-	pop rA1
-	pop rA2
-	pop rA3
-	pop rA4
-	pop rA5
-	pop rA6
-	pop rA7
-
+13:	XCALL _U(__fp64_popA)	; restore res
 	; rcall __fp64_saveAB
 	
 	lsr XH					; n >>= 1

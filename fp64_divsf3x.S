@@ -265,19 +265,13 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	rol rA7
 	XCALL _U(__fp64_cpcAB)	; is A > B
 	cpc	rA7, rB7
-	brcs	2f		; no, skip subtraction
-	sub	rA0, rB0	; yes, A -= B
-	sbc	rA1, rB1
-	sbc	rA2, rB2
-	sbc	rA3, rB3
-	sbc	rA4, rB4
-	sbc	rA5, rB5
-	sbc	rA6, rB6	; as A > B, C will be 0 after this operation
-	sbc	rA7, rB7	; as A > B, C will be 0 after this operation
-2:	rol	r0			; register result of operation, move C into r0
-	brcc	.L_div1	; continue up to 8 times
+	brcs	2f				; no, skip subtraction
+	XCALL _U(__fp64_subAB)	; yes, A -= B
+	sbc	rA7, rB7			; as A > B, C will be 0 after this operation
+2:	rol	r0					; register result of operation, move C into r0
+	brcc	.L_div1			; continue up to 8 times
 
-	com	r0			; convert result to positive logic
+	com	r0					; convert result to positive logic
 	ret
 	
 ENDFUNC
