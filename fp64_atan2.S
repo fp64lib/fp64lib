@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020  Uwe Bissinger
+/* Copyright (c) 2019-2026  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002, Reiner Patommel
    Copyright (c) 2006  Dmitry Xmelkov
@@ -211,35 +211,38 @@ GCC_ENTRY __atan2
 	;   bit 7 of r0  == 1 --> subtract displacement
 	
 	; sector II, III, VI, VII: add +/- PI/2
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi zl, byte3(.L_pi_o_2)
-	out RAMPZ, ZL
-#endif
-	ldi ZL, lo8(.L_pi_o_2)
-	ldi ZH, hi8(.L_pi_o_2)
-	sbrs rB7, 0		; indicator = 0x81?
-	adiw ZL, 0x08	; no: sector IV, V: add PI
+	
+	; PI/2 = 1.5707963267948966
+	; .byte 0x3f, 0xf9, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18
+#define L_expPI2	0x3ff9
+	; PI = 3.1415926535897932
+	; .byte 0x40, 0x09, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18
+#define L_expPI	0x4009
 
-#ifdef ARDUINO_AVR_MEGA2560
-	elpm rB7, Z+
-	elpm rB6, Z+
-	elpm rB5, Z+
-	elpm rB4, Z+
-	elpm rB3, Z+
-	elpm rB2, Z+
-	elpm rB1, Z+
-	elpm rB0, Z+
-	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
-#else	
-	lpm rB7, Z+
-	lpm rB6, Z+
-	lpm rB5, Z+
-	lpm rB4, Z+
-	lpm rB3, Z+
-	lpm rB2, Z+
-	lpm rB1, Z+
-	lpm rB0, Z+
-#endif
+	; Load constant directly to avoid previously bogus address arithmetic.
+	; Thanks to sprintersb for raising issue #26
+	
+	; firstly, load the correct exponent into ZL
+	ldi ZH, hi8(L_expPI2)
+	ldi ZL, lo8(L_expPI2)
+	sbrs rB7, 0						; indicator = 0x81?
+	adiw ZL, L_expPI - L_expPI2		; no: sector IV, V: add PI
+
+	; now load the remaining digits
+	ldi rB7, 0x2d
+	ldi rB6, 0x18
+	X_movw rB0, rB6
+	
+	ldi rB7, 0x54
+	ldi rB6, 0x44
+	X_movw rB2, rB6
+
+	ldi rB7, 0x21
+	ldi rB6, 0xfb
+	X_movw rB4, rB6
+
+	; finally get the exponent
+	X_movw rB6, ZL
 	
 	sbrc r0, 7		; y < 0?
 	subi rB7, 0x80	; yes: Sector V, VI, VII: change sign of displacement
@@ -266,10 +269,6 @@ GCC_ENTRY __atan2
 	eor rB7, rA7			; restore rB7
 	rjmp .L_div
 
-.L_pi_o_2:	; PI/2 = 1.5707963267948966
-	.byte 0x3f, 0xf9, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18
-.L_pi:		; PI = 3.1415926535897932
-	.byte 0x40, 0x09, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */
