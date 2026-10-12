@@ -136,6 +136,11 @@ class Double {
 		bool operator!=( const Double &y ) {
 			return fp64_compare( this->x, y.x ) != 0;
 		}
+		static Double abs( const Double &x ) {
+			Double res;
+			res.x = fp64_abs( x.x );
+			return res;
+		}
 		static Double pow( const Double &x, const Double &y ) {
 			Double res;
 			res.x = fp64_pow( x.x, y.x );
