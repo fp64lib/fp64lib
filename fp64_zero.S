@@ -41,7 +41,7 @@
 
 FUNCTION __fp64_zero 
 ENTRY __fp64_one
-	XCALL _U(__fp64_zero)
+	XCALL _U(__fp64_szero)
 	ldi rA7, 0x3f
 	ldi rA6, 0xf0
 	ret
