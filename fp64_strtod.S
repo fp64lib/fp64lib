@@ -108,6 +108,7 @@ ENTRY   fp64_strtod
 	sts .L_sign, r1		; per default sign = 0 (positive number)
 	push YH				; Y is used for pointing to actual position in str
 	push YL
+	clr rPoint			; rPoint = 0			
 	movw YL, rA6
 	adiw YL, 0			; if( (s = str) == NULL )
 	breq 90b				;	return( 0 );
@@ -170,7 +171,11 @@ ENTRY   fp64_strtod
 	cpi rCh, 'F'
 	breq 13f				; InF successfully detected
 	cpi rCh, 'f'
-	breq 13f				
+	breq 13f
+	rjmp .L_NaN
+
+.L_NaN2:
+	XCALL _U(__fp64_popBC)	; restore registers used by __fp64_10pown
 	
 	; incorrect string starting with "IN", return NaN
 .L_NaN:
@@ -199,8 +204,6 @@ ENTRY   fp64_strtod
 	sts .L_exp10H, r1
 	clr rExp2H
 	ldi rExp2L, 3			; exp2 = 3 ( a digit 0-9 occupies bits 0-3
-	clr rPoint				; rPoint = 0			
-	
 
 	XCALL _U(__fp64_pushCB)	; save registers used by __fp64_10pown
 
@@ -239,7 +242,7 @@ ENTRY   fp64_strtod
 	cpi rCh, '.'		; if( ch == '.' ) {		
 	brne 20f
 	tst rPoint			;	if( point ) 
-	brne .L_NaN			;		return NaN // we already had a decimal pointer
+	brne .L_NaN2		;		return NaN // we already had a decimal pointer
 	inc rPoint			;	point = 1;		// set flag for decimal point
 						; } // and advance to next character
 	rjmp .L_nextDigit
