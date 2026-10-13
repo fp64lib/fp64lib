@@ -43,14 +43,13 @@
 	-----+------+------+------+------+------+------+------+------+------+------+
 	NaN  |      |      |      | +1  a|      | NaN c|      |      |      |      |
 	+Inf |      |      |      | +1  a|      |+Inf c|      |      |      |      |
+	-Inf |     f|     f|     f| +1  a|     f|-Inf c|     f|     f|     f|     f|
 	+0.0 |      |      |      | +1  a|      |+0.0 c|      |      |      |      |
+	-0.0 |     d|     d|     d| +1  a|     d|-0.0 c|     d|     d|     d|     d|
 	+1.0 | +1  b| +1  b| +1  b| +1  a| +1  b| +1  c| +1  b| +1  b| +1  b| +1  b|
+	-1.0 |     e|     e|     e| +1  a|     e|-1.0 c|     e|     e|     e|     e|
 	> 0  | NaN L|+Inf L| +0  L| +1  L| +1  L|  A  c|  n/a | x^y L| n/a  | x^y L|
 	<=-0 | NaN  | NaN  | NaN  | +1  a| NaN  |  A  c| NaN  | NaN  | NaN  | NaN  |
-	Not yet implemented:                     
-	-0.0 |     d|     d|     d| +1  a|     d|-0.0 c|     d|     d|     d|     d|
-	-1.0 |     e|     e|     e| +1  a|     e|-1.0 c|     e|     e|     e|     e|
-	-Inf |     f|     f|     f| +1  a|     f|-Inf c|     f|     f|     f|     f|
 
 	remark | method to calculate result
 	-------+----------------------------
@@ -81,8 +80,6 @@ GCC_ENTRY __pow
 
 	; preliminary check for significand of A == 0
 	ldi	ZL, 0x3f
-	XCALL __fp64_saveAB
-
 	XCALL _U(__fp64_cpc0A5)
 	brne 0f						; skip a bit of comparisons
 	
@@ -93,7 +90,6 @@ GCC_ENTRY __pow
 	
 	; y == 1.0 ?
 0:	cpi rB6, 0xf0
-	; rcall __fp64_saveAB
 	cpc rB7, ZL
 	cpc	rB0, r1
 	cpc	rB1, r1
@@ -101,36 +97,36 @@ GCC_ENTRY __pow
 	cpc	rB3, r1
 	cpc	rB4, r1
 	cpc	rB5, r1
-	;rcall __fp64_saveAB
 	breq .L_ret					; y == +1.0? Yes, case c: return any^1 = any
 	
 	; x >= 0 ?
 	tst	rA7
 	brpl .L_pow					; yes, compute x^y via exp(log(x)*y)
     
-    ; x < 0, now check if y is an odd/even integer
-    ; if y is an odd integer, then pow(x,y) = -pow(abs(x),y)
-    ; if y is an even integer, then pow(x,y) = pow(abs(x),y)
-    ; for y to be an integer, it has to be in the range of 1 <= y < 2^52
-	; currently, negative integers for x AND y (e.g. pow(-2,-2) are not yet supported
-    tst rB7
-	brmi .L_nan					; y < 0 --> x^y result undefined
+    ; x < 0, now check if |y| is an odd/even integer
+    ; if |y| is an odd integer, then pow(x,y) = -pow(abs(x),y)
+    ; if |y| is an even integer, then pow(x,y) = pow(abs(x),y)
+    ; for |y| to be an integer, it has to be in the range of 1 <= |y| < 2^52
+	push rB7					; save sign of y
+	andi rB7, 0x7f				; continue with |y|
+	
 	cpi rB7, 0x3f
-	brlo .L_nan					; y < 1 --> x^y result undefined
-	brne 7f						; y >= 2, check for y < 2^52
+	brlo .L_nan					; |y| < 1 --> x^y result undefined
+	brne 7f						; |y| >= 2, check for |y| < 2^52
 	cpi rB6, 0xf0				
-	brlo .L_nan					; y < 1 --> x^y result undefined
+	brlo .L_nan					; |y| < 1 --> x^y result undefined
+	brne .L_nan					; |y| > 1 --> x^y result undefined
 
 7:	cpi rB7, 0x43
-	brlo 1f						; y < 2^52, ok
-	brne .L_nan					; y > 2^59, not an integer
+	brlo 1f						; |y| < 2^52, ok
+	brne .L_nan					; |y| > 2^59, not an integer
 	cpi rB6, 0x40
-	brlo 1f						; 2^49 < y < 2^53, ok
-	rjmp .L_nan					; y >= 2^53, not an integer
+	brlo 1f						; 2^49 < |y| < 2^53, ok
+	rjmp .L_nan					; |y| >= 2^53, not an integer
 
-1:	; here y/B is between 1 and 2^52
-	; now check, whether y is an integer
-	; first get the exponent of y
+1:	; here |y|/B is between 1 and 2^52
+	; now check, whether |y| is an integer
+	; first get the exponent of |y|
 	movw rBE0, rB6 				; get exponent from rB7.rB6 into rBE1.rBE0
     andi rBE0, 0xf0 			; get rid of mantissa bits in exponent
   
@@ -145,13 +141,11 @@ GCC_ENTRY __pow
 	
 	subi rBE0, lo8(1023)		; remove exponent bias: exp -= 1023
 	sbci rBE1, hi8(1023)
-	; rcall __fp64_saveAB
 
 	; now rBE1.rBE0 is < 53 --> rBE0 is < 53, rBE1 can be used
 	mov rBE1, rBE0 				; save the exponent
 	
 	; we have to separate between rBE0 < 4 and >=4
-	push rB7 					; rB7 will now be used as a bitmask for the fraction bits
 	ldi rB7, 0x0f				; load mask to be used on rB6 for 0 <= exponent < 4
 	cpi rBE0, 4
 	brlo 3f
@@ -181,15 +175,13 @@ GCC_ENTRY __pow
 	brlo 5f						; exp < 4 --> start with rB6
 	subi rBE1, (-4)				; round up to next group (exp=4 will get exp=8)
 
-5:	; rcall __fp64_saveAB
-	andi rBE1, 0xf8				; truncate lower 3 bits
+5:	andi rBE1, 0xf8				; truncate lower 3 bits
 	  					        ; --> index = (exp/8)*8 as 8 byte are used for mov, mov, and, rjmp
 
 #ifdef ARDUINO_AVR_MEGA2560
 	push r0
 	ldi ZL, byte3(.L_mask)
 	mov r0, ZL
-	;XCALL __fp64_saveAB
 #endif
 
 	ldi ZL, lo8(.L_mask)		; add 8*offset to jump table
@@ -199,18 +191,15 @@ GCC_ENTRY __pow
 
 #ifdef ARDUINO_AVR_MEGA2560
 	adc r0, r1					; extend to 256MB address calculation
-	lsr r0							; PC addresses words, so divide target address by 2
+	lsr r0						; PC addresses words, so divide target address by 2
 	ror ZH	 						
 	ror ZL
-	;in r1, EIND					; save previous content of EIND
-	;push r1
-	;clr r1
+
 	out EIND, r0				; set upper byte of 24-bit address
 	pop r0
 	
-	eijmp							; and clear out the bits top to bottom
+	eijmp						; and clear out the bits top to bottom
 #else
-	; rcall __fp64_saveAB
 	lsr ZH						; PC addresses words, so divide target address by 2
 	ror ZL
 	ijmp							; and clear out the bits top to bottom
@@ -218,21 +207,17 @@ GCC_ENTRY __pow
 
 
 	; return NaN
-.L_nan2:
+.L_nan:
 	pop rB7						; restore used register
-	; ldi rBE0, 0xff
-
-.L_nan:							
-	; rcall __fp64_saveAB
 	XJMP	_U(__fp64_nan)
 
 	; routine for calculating pow(abs(A),B) = abs(A)^B = exp(log(abs(A))*B)
 	; inserted here to keep other jumps in reach for rjmp
 .L_pow:
 	andi	rA7, 0x7f			; convert x to abs(x)
-	XCALL _U(__fp64_pushB)
+	XCALL	_U(__fp64_pushB)
 	XCALL	_U(fp64_log)		; log(abs(x))
-	XCALL _U(__fp64_popB)
+	XCALL 	_U(__fp64_popB)
 	XCALL	_U(fp64_mul)		; log(abs(x))*y
 	XJMP	_U(fp64_exp)		; exp(log(abs(x)))*y = abs(x)^y
 	
@@ -301,15 +286,10 @@ GCC_ENTRY __pow
 .L_a0:
 	or r0, rB0
 .L_check:
-#ifdef ARDUINO_AVR_MEGA2560
-	;pop ZH						; reset EIND to previous content 
-	;out EIND, ZH				
-#endif	
 	; here Z is set if r0<>0 --> y has a fraction
-	brne .L_nan2				; if y has a fraction, then x^y is not defined
+	brne .L_nan					; if |y| has a fraction, then x^y is not defined
 
 	; so we have no fraction, now determine whether the number is odd or even
-	; rcall __fp64_saveAB
 	lsl rB7	   					; goto from the fraction to lower most bit of integer
 	brcs 3f						; we have to check the byte above
 
