@@ -11,11 +11,11 @@ XCC     = avr-gcc
 OBJDUMP = avr-objdump
 OBJCOPY = avr-objcopy
 OBJSIZE = avr-size
-OBJNM   = avr.nm
+OBJNM   = avr-nm
 AR      = avr-gcc-ar
 RANLIB  = avr-gcc-ranlib
 
-FP64_ASM_PARTS = fp64_10pown fp64_abs fp64_addsf3x fp64_asinx fp64_atan2 fp64_atanx
+FP64_ASM_PARTS  = fp64_10pown fp64_abs fp64_addsf3x fp64_addsubAB fp64_asinx fp64_atan2 fp64_atanx
 FP64_ASM_PARTS += fp64_cbrt fp64_ceil fp64_classify fp64_cmp_1 fp64_cmpA fp64_cmp fp64_cmpsd2 fp64_copysign 
 FP64_ASM_PARTS += fp64_cosh fp64_cotan fp64_debug fp64_disd fp64_divsf3x fp64_ds fp64_expx fp64_exp10
 FP64_ASM_PARTS += fp64_fdim fp64_fixxdfsi fp64_floor fp64_fma fp64_fmax fp64_fmod fp64_fmodx
