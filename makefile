@@ -35,13 +35,13 @@ FP64_ASM_PARTS += fp64_log2 fp64_logx fp64_lrint fp64_lround fp64_lshift64
 FP64_ASM_PARTS += fp64_min fp64_minMag fp64_minNumber fp64_minNumMag
 FP64_ASM_PARTS += fp64_modf fp64_movAB fp64_movAC fp64_movBA fp64_movBC 
 FP64_ASM_PARTS += fp64_movCA fp64_mul64AB fp64_mulsd3x 
-FP64_ASM_PARTS += fp64_nan fp64_negdf2 fp64_norm2 
+FP64_ASM_PARTS += fp64_nan fp64_negdf2 fp64_nextUp fp64_norm2 
 FP64_ASM_PARTS += fp64_pi2 fp64_pow fp64_powserx fp64_powsoddx fp64_pretA
 FP64_ASM_PARTS += fp64_pscA fp64_pscB 
 FP64_ASM_PARTS += fp64_round
-FP64_ASM_PARTS += fp64_sd fp64_shift fp64_sidf fp64_signbit fp64_sinx fp64_sqrt
-FP64_ASM_PARTS += fp64_square fp64_sssd fp64_stackA fp64_stackB fp64_stackC
-FP64_ASM_PARTS += fp64_strtod fp64_swapAB 
+FP64_ASM_PARTS += fp64_scalbln fp64_sd fp64_shift fp64_sidf fp64_signbit
+FP64_ASM_PARTS += fp64_sinx fp64_sqrt fp64_square fp64_sssd fp64_stackA
+FP64_ASM_PARTS += fp64_stackB fp64_stackC fp64_strtod fp64_swapAB 
 FP64_ASM_PARTS += fp64_tanh fp64_tanx fp64_tostring fp64_totalOrder fp64_trunc
 FP64_ASM_PARTS += fp64_zero
 

@@ -118,6 +118,43 @@ int fp64_signbit (float64_t x) __ATTR_CONST__;
 float64_t fp64_fmin(float64_t x, float64_t y) __ATTR_CONST__;
 float64_t fp64_fmax(float64_t x, float64_t y) __ATTR_CONST__;
 
+// additional general operations from IEEE754-2019, chapter 5.7.2
+typedef enum {
+	signalingNaN,
+	quietNaN,
+	negativeInfinity,
+	negativeNormal,
+	negativeSubnormal,
+	negativeZero,
+	positiveZero,
+	positiveSubnormal,
+	positiveNormal,
+	positiveInfinity
+} float64_t_class;
+float64_t_class fp64_class(float64_t x) __ATTR_CONST__;
+bool fp64_isSignMinus(float64_t x) __ATTR_CONST__;
+bool fp64_isNormal(float64_t x) __ATTR_CONST__;
+#define fp64_isFinite(x)	((bool)fp64_isfinite(x))
+bool fp64_isZero(float64_t x) __ATTR_CONST__;
+bool fp64_isSubnormal(float64_t x) __ATTR_CONST__;
+#define fp64_isInfinite(x)	((bool)fp64_isinf(x))
+#define fp64_isNaN(x)		((bool)fp64_isnan(x))
+#define fp64_isSignaling(x) (false)
+#define fp64_isCanonical(x)	(true)
+#define fp64_radix(x)		(2)
+bool fp64_totalOrder(float64_t x, float64_t y) __ATTR_CONST__;
+bool fp64_totalOrderMag(float64_t x, float64_t y) __ATTR_CONST__;
+
+// minimum and maximum operations from IEEE754-2019, chapter 9.6
+float64_t fp64_minimum(float64_t x, float64_t y) __ATTR_CONST__;
+float64_t fp64_minimumNumber(float64_t x, float64_t y) __ATTR_CONST__;
+float64_t fp64_maximum(float64_t x, float64_t y) __ATTR_CONST__;
+float64_t fp64_maximumNumber(float64_t x, float64_t y) __ATTR_CONST__;
+float64_t fp64_minimumMagnitude(float64_t x, float64_t y) __ATTR_CONST__;
+float64_t fp64_minimumMagnitudeNumber(float64_t x, float64_t y) __ATTR_CONST__;
+float64_t fp64_maximumMagnitude(float64_t x, float64_t y) __ATTR_CONST__;
+float64_t fp64_maximumMagnitudeNumber(float64_t x, float64_t y) __ATTR_CONST__;
+
 // basic functions with 1 argument
 float64_t fp64_neg( float64_t x ) __ATTR_CONST__;
 float64_t fp64_abs( float64_t x ) __ATTR_CONST__;
@@ -134,6 +171,9 @@ long fp64_lrint( float64_t A ) __ATTR_CONST__;
 float64_t fp64_cbrt( float64_t x ) __ATTR_CONST__;
 int fp64_ilogb(float64_t x) __ATTR_CONST__; 						// [all added with C99]
 
+float64_t fp64_nextUp( float64_t x ) __ATTR_CONST__;
+float64_t fp64_nextDown( float64_t x ) __ATTR_CONST__;
+
 // trigonometric functions
 float64_t fp64_sin( float64_t x ) __ATTR_CONST__;
 float64_t fp64_cos( float64_t x ) __ATTR_CONST__;
@@ -145,11 +185,11 @@ float64_t fp64_acos( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log( float64_t x ) __ATTR_CONST__;
 float64_t fp64_exp( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log10( float64_t x ) __ATTR_CONST__;
-float64_t fp64_log2( float64_t x ) __ATTR_CONST__;
-float64_t fp64_logb( float64_t x ) __ATTR_CONST__;
 float64_t fp64_exp10( float64_t x ) __ATTR_CONST__;
-float64_t fp64_exp2( float64_t x ) __ATTR_CONST__;
 float64_t fp64_pow10( float64_t x ) __ATTR_CONST__;
+float64_t fp64_log2( float64_t x ) __ATTR_CONST__;
+float64_t fp64_exp2( float64_t x ) __ATTR_CONST__;
+float64_t fp64_logb( float64_t x ) __ATTR_CONST__;
 float64_t fp64_sinh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_cosh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_tanh( float64_t x ) __ATTR_CONST__;
