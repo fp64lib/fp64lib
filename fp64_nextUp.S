@@ -103,7 +103,7 @@ GCC_ENTRY __nextUp
 	adc rA7, r1
 	
 .L_done:
-	rcall __fp64_saveAB
+	; rcall __fp64_saveAB
 	ret
 
 .L_negative:
