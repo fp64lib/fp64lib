@@ -2,7 +2,7 @@
    Based on code of avr_f64.h with:
    Original Code by Detlef_a (Nickname in the www.mikrocontroller.net forum).
    Extensions (trigonometric functions et al.) und changes by Florian Kï¿½nigstein, mail@virgusta.eu .
-  
+
   The following copyright information refers to the code developed by Florian Kï¿½nigstein.
 
 ; //*********************************************************************************************************** //
@@ -38,7 +38,7 @@
 ; //                                                                                                           //
 ; //*********************************************************************************************************** //
 ; //*********************************************************************************************************** //
-   
+
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@
 // This file contains definitions to easily port code based on avr_f64.h / avr_f64.c
 // to using fp64lib.
 //
-// Instead of 
+// Instead of
 // 	#include "avr_f64.h"
 // use
 //  #include "avr_fp64.h"
@@ -84,9 +84,9 @@
 //	 code is already significandly smaller AND faster as it is written in assembly
 //   language, taking advantage of the AVR microprocessor architecture as much as possible.
 // fp64_lib fully supports IEEE754 denormalized numbers, avr_f64 interprets them as zero
-// fp64_lib handles and returns all kindes of IEEE NaNs (Not a Number), avr_64 returns 
+// fp64_lib handles and returns all kindes of IEEE NaNs (Not a Number), avr_64 returns
 //    always/only 0x7fffffffffffffff as NaN.
-// fp64_lib always and properly handles +INF and -INF, avr_f64 supports +/-INF only if 
+// fp64_lib always and properly handles +INF and -INF, avr_f64 supports +/-INF only if
 //    F_ONLY_NAN_NO_INFINITY is NOT defined.
 // fp64_lib uses different algorithms for sin/cos/tan, so the results will differ slightly
 //    from avr_f64.
@@ -111,7 +111,7 @@
 
 #ifdef __cplusplus
 extern "C"{
-#endif 
+#endif
 
 #define	f_long_to_float64(n)			fp64_long_to_float64(x)
 #define f_float64_to_long(x)			fp64_float64_to_long(x)
@@ -125,7 +125,7 @@ extern "C"{
 
 #define f_abs(x)						fp64_abs(x)
 #define f_cut_noninteger_fraction(x)	fp64_cut_noninteger_fraction(x)
-#define f_mod(x, y, ganz)				
+#define f_mod(x, y, ganz)
 
 
 #define f_isnan(x)						fp64_isnan(x)

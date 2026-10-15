@@ -6,14 +6,14 @@
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -33,12 +33,12 @@
 #include "asmdef.h"
 
 /* struct fp64_debug* __fp64_debug (special)
-     return sisgn, exponent and mantissa from internal registers
+	 return sisgn, exponent and mantissa from internal registers
  */
- 
+
 FUNCTION __fp64_debug
 #ifdef CHECK_BIGMEM
-	.skip 65000			; force programs to exceed >64kb for testing proper handling of page registers
+	.skip 65000					; force programs to exceed >64kb for testing proper handling of page registers
 #endif
 
 ENTRY __fp64_saveC
@@ -61,7 +61,7 @@ ENTRY __fp64_saveC
 	sts __c_m+4, rC2
 	sts __c_m+5, rC1
 	sts __c_m+6, rC0
- 	sts __c7, rC7		; only for debugging as exponent is in rBE1.rBE0
+	sts __c7, rC7				; only for debugging as exponent is in rBE1.rBE0
 	lds r0, __c_sreg
 	out 0x3f, r0
 	pop r0
@@ -87,7 +87,7 @@ ENTRY __fp64_saveB
 	sts __b_m+4, rB2
 	sts __b_m+5, rB1
 	sts __b_m+6, rB0
- 	sts __b7, rB7		; only for debugging as exponent is in rBE1.rBE0
+	sts __b7, rB7				; only for debugging as exponent is in rBE1.rBE0
 	sts __x, ZL
 	sts __x+1, ZH
 	lds r0, __b_sreg
@@ -97,10 +97,10 @@ ENTRY __fp64_saveB
 
 ENTRY __fp64_saveABC
 	rcall __fp64_saveC
-	
+
 ENTRY __fp64_saveAB
 	rcall __fp64_saveB
-	
+
 ENTRY __fp64_saveA
 	sts __ar0, r0
 	push r0
@@ -121,14 +121,14 @@ ENTRY __fp64_saveA
 	sts __a_m+4, rA2
 	sts __a_m+5, rA1
 	sts __a_m+6, rA0
-	sts __a7, rA7		; only for debugging as exponent is in rAE1.rAE0
+	sts __a7, rA7				; only for debugging as exponent is in rAE1.rAE0
 	lds r0, __a_sreg
 	sts __x, XL
 	sts __x+1, XH
 	out 0x3f, r0
 	pop r0
 	ret
-	
+
 ENTRY __fp64_saveMul
 	sts __ar0, r0
 	sts __br1, r1
@@ -153,7 +153,7 @@ ENTRY __fp64_saveMul
 	out 0x3f, r0
 	pop r0
 	ret
-	
+
 ENTRY __fp64_saveDiv
 	call __fp64_saveA
 	push r0
@@ -176,19 +176,19 @@ ENTRY __fp64_saveDiv
 	out 0x3f, r0
 	pop r0
 	ret
-	
+
 ENTRY __fp64_debugA
 	call __fp64_saveA
-	ldi	r24, lo8(__a_sreg)
+	ldi r24, lo8(__a_sreg)
 	ldi r25, hi8(__a_sreg)
 	ret
 
 ENTRY __fp64_debugAB
 	call __fp64_saveAB
-	ldi	r24, lo8(__a_sreg)
+	ldi r24, lo8(__a_sreg)
 	ldi r25, hi8(__a_sreg)
 	ret
-	
+
 ENTRY __fp64_before
 	sts __before, ZH
 	sts __before+1, ZL
@@ -308,7 +308,7 @@ ENTRY __before
 			.skip	32
 ENTRY __after
 			.skip	32
-__function:	.skip	2
+__function: .skip	2
 #ifdef CHECK_BIGMEM
 			.skip 0x280
 #endif
