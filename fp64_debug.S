@@ -28,7 +28,7 @@
   POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* struct fp64_debug* __fp64_debug (special)
 	 return sisgn, exponent and mantissa from internal registers

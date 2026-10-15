@@ -32,7 +32,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float_64t fp64_fdim (float_64t A, float_64t B);
 	 The fp64_fdim() function  return max(A-B,0). If x or y or both are NaN,

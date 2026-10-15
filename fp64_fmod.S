@@ -32,7 +32,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_fmod (float64_t x, float64_t y);
      The fp64_fmod() function computes the remainder of dividing x by y. The

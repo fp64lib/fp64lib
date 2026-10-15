@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* int fp64_ilogb(float64_t A);
    Returns the integral part of the logarithm of |x| to base 2.

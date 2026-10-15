@@ -27,7 +27,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /*	__fp64_cpcAB() compare A with B
    Input:

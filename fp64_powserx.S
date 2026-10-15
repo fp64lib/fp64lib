@@ -32,7 +32,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t __fp64_powser (float64_t_intern x, float64_t_intern* XH.XL);
      The __fp64_powser() function calculates the polynom using the horner

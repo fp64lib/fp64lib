@@ -27,7 +27,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_cotan (float64_t x);
 	 The fp64_cotan() function returns the cotangent of x, which is

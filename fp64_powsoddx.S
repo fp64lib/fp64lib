@@ -27,7 +27,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t __fp64_powsodd (float64_t_intern x, float64_t_intern* XH.XL);
      The __fp64_powsodd() function calculates a polynom with only odd

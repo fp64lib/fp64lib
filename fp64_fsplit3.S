@@ -29,7 +29,7 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* <non_standard> __fp64_split3 (fp64 A, fp64 B);
 	Splits/Unpacks two 64 bit floating point numbers.

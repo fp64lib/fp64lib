@@ -32,7 +32,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_pow(float64_t x, float64_t y);
      The fp64_pow() function returns the value of x raised to the power of y.

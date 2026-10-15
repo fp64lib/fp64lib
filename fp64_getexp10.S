@@ -27,7 +27,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /*  int16_t __fp64_getExp10(int16_t n);
 	int16_t __fp64_getExp10r(int16_t n);

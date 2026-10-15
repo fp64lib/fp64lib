@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_sinh (float64_t x);
 	 The fp64_sinh() function returns the hyperbolic sine of x, which is

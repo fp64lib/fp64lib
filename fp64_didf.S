@@ -42,7 +42,7 @@
  */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 FUNCTION __fp64disd
 ENTRY fp64_int64_to_float64

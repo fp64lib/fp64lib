@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_square (float64_t A);
      The fp64_square() function returns square of A.

@@ -32,7 +32,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* int fp64_isinf (float64_t x)
      The fp64_isinf() function returns -1 if value represents negative

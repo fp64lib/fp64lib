@@ -27,7 +27,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /*	float64_t_intern __fp64_ldb_log2()
 	load B register with log(2) in internal, unpacked format

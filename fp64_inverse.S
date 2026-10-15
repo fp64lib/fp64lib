@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t inverse (float64_t A);
      The inverse() function returns 1/A value.

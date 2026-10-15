@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /*	int fp64_classify( float64_x );
 	Categorizes floating point value x into the following categories:

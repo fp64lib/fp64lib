@@ -29,7 +29,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_exp10 (float64_t x);
 	 The fp64_exp10() function returns the value of 10

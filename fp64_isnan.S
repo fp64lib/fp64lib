@@ -30,7 +30,7 @@
   POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* int fp64_isnan( float64_t x );
      The fp64_isnan() function returns a non-zero value if value is

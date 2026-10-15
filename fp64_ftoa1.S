@@ -67,7 +67,7 @@
   POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 
 FUNCTION __fp64_ftoa

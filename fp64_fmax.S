@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 FUNCTION fp64_fmin
 /* float64_t fp64_fmin (float64_t A, float64_t B);
