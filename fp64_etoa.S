@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* char *__fp64_etoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 )
 	converts a number to a string with maxDigits of significand in engineering format,

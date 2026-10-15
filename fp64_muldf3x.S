@@ -49,7 +49,7 @@
 #if	defined(__AVR_ENHANCED__) && __AVR_ENHANCED__
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 FUNCTION __fp64_mulsd3x
 

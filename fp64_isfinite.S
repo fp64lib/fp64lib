@@ -30,7 +30,7 @@
   POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* int fp64_isfinite (float64_t x);
      The isfinite() function returns a nonzero value if x is finite: not

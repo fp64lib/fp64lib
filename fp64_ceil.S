@@ -54,7 +54,7 @@
  #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 FUNCTION fp64_ceil
 	; handle NaN and +/-Inf

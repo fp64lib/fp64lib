@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* 64 bit *********************************************************************/
 /* long long __fp64_fixsddi( float64_t A );

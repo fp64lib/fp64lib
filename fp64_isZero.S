@@ -27,7 +27,7 @@
   POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* bool fp64_isZero(float64_t x);
 	 fp64_isZero(x) is true if and only if x is ±0.

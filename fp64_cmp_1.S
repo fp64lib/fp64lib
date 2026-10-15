@@ -27,7 +27,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /*	CZ __fp64_cmp_1(float64_t_intern A)
 	compare whether |A| is < 1, == 1 or > 1

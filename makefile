@@ -17,7 +17,7 @@ RANLIB  = avr-gcc-ranlib
 
 FP64_ASM_SRCS := $(wildcard *.S)
 
-FP64FLAGS= -mmcu=$(strip $(MCU)) -mrelax
+FP64FLAGS= -mmcu=$(strip $(MCU)) -mrelax -I.
 FP64FLAGS += $(CFLAGS)
 
 FP64_ASM_OBJECTS = $(patsubst %.S, %.o, $(FP64_ASM_SRCS))
@@ -27,7 +27,7 @@ OBJS = $(FP64_ASM_OBJECTS)
 # All Target
 all: libfp64-$(MCU).a
 
-$(FP64_ASM_OBJECTS) : asmdef.h fp64def.h sectionname.h
+$(FP64_ASM_OBJECTS) : config.h asmdef.h sectionname.h fp64asm.h fp64def.h
 
 %.o : %.S
 	$(XCC) $< $(FP64FLAGS) -c -o $@

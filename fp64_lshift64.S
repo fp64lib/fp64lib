@@ -27,7 +27,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /*  uint8_t __fp64_lshift64(uint64_t C);
     return number of shifts until top bit of C is set

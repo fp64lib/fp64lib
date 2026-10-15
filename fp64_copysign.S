@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_copysign (float64_t x, float64_t y);
 	 The fp64_copysign() function returns x but with the sign of y.

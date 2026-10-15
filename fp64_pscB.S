@@ -32,7 +32,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* <SREG_flags> __fp64_pscB (fp64_splitted_t B);
      Post split classification.

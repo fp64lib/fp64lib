@@ -29,7 +29,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /*  float64_t fp64_modff (float64_t x, float64_t *iptr);
 	float64_t fp64_modf (float64_t x, float64_t *iptr);

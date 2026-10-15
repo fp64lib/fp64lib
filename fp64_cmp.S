@@ -32,7 +32,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* GCC expects all these functions to return -1/0/1 as for __cmpsf2 -
    compare with gcc/config/fp-bit.c (the only difference is with NaNs

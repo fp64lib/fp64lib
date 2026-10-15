@@ -32,7 +32,7 @@
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_fma (float64_t A, float64_t B, float64_t C)
 	 The `fp64_fma' function performs floating-point multiply-add. This is the

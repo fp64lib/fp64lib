@@ -27,7 +27,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 #include "fp64def.h"
-#include "asmdef.h"
+#include "fp64asm.h"
 
 /* float64_t fp64_acosh (float64_t x);
 	 The fp64_acosh() function returns the inverse hyperbolic cosine
