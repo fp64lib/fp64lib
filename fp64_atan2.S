@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2026	Uwe Bissinger
+/* Copyright (c) 2019-2026  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002, Reiner Patommel
    Copyright (c) 2006  Dmitry Xmelkov
@@ -28,8 +28,6 @@
   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
-
-/* $Id$ */
 
 /* float fp64_atan2 (float A, float B); // A is y coord, B is x coord.
 	 The fp64_atan2() function calculates the arc tangent of the two variables
