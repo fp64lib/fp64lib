@@ -29,22 +29,20 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /* int fp64_ilogb(float64_t A);
    Returns the integral part of the logarithm of |x| to base 2.
-   
+
    This is the exponent used internally to express the floating-point
-   value x, when it uses a significand between 1.0 and 2, so that, 
+   value x, when it uses a significand between 1.0 and 2, so that,
    for a positive x:
 		x = significand * 2^exponent
-   Generally, the value returned by this function is one less than 
-   the exponent obtained with frexp (because of the different significand 
+   Generally, the value returned by this function is one less than
+   the exponent obtained with frexp (because of the different significand
    normalization as [1.0,2.0) instead of [0.5,1.0)).
-   
+
    	The following rules apply:
 
 	case|    x	 | result
@@ -61,24 +59,24 @@ FUNCTION fp64_ilogb
 	; check non-finite numbers
 .L_nf:
 	brne .L_nan					; case 1: NaN  --> return FP_ILOGBNAN
-	
+
 	; case 2: +/-Inf --> return INT_MAX
 	ldi rA7, 0x7f
 	ldi rA6, 0xff
 	ret
-	
+
 	; case 1: NaN  --> return FP_ILOGBNAN
 .L_nan:
 	ldi rA7, hi8(FP_ILOGBNAN)
 	ldi rA6, lo8(FP_ILOGBNAN)
 	ret
-	
+
 	; case 3: +/-0.0 --> return FP_LOGB0
 .L_zero:
 	ldi rA7, hi8(FP_ILOGB0)
 	ldi rA6, lo8(FP_ILOGB0)
 	ret
-	
+
 /*	float64_t fp64_log( float64_t x );
 	returns the natural logarithm ln of x
 */
@@ -88,16 +86,16 @@ GCC_ENTRY __ilogb
 	XCALL _U(__fp64_splitA)
 	brcs .L_nf					; handle cases 1-2 (NaN, Inf)
 	breq .L_zero				; handle case 3 (0.0)
-	
+
 	sbrs rA6, 7				; is x a subnormal number?
 	XCALL _U(__fp64_norm2)	; yes: normalize it
 
 	; subtract base for exponent (0x3ff = 1023)
 	subi rAE0, lo8(1023)
-	sbci rAE1, hi8(1023)	
+	sbci rAE1, hi8(1023)
 
 	movw rA6, rAE0				; and return result
-	; rcall __fp64_saveAB	
+	; rcall __fp64_saveAB
 	ret
-	
+
 ENDFUNC

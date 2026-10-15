@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -42,12 +40,12 @@ GCC_ENTRY __tanh
 	XCALL _U(__fp64_pushB)		; preserve registers
 	XCALL _U(__fp64_pushA)		; save x
 
-	XCALL _U(fp64_sinh)			; calculate sinh(x) 
+	XCALL _U(fp64_sinh)			; calculate sinh(x)
 	XCALL _U(__fp64_movBA)		; save sinh(x)
-	
+
 	XCALL _U(__fp64_popA)		; restore x
-	XCALL _U(fp64_cosh)			; calculate cosh(x) 
+	XCALL _U(fp64_cosh)			; calculate cosh(x)
 	XCALL _U(fp64_div)			; calculate sinh(x)/cosh(x)
-	
+
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC

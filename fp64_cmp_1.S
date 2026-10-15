@@ -26,14 +26,12 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /*	CZ __fp64_cmp_1(float64_t_intern A)
 	compare whether |A| is < 1, == 1 or > 1
-	
+
 	input:		rA7.rA6...rA0.rAE1.rAE0		A in unpacked format
 	output:		sets only flags in SREG
 				Z=1			if |A| == 1.0
@@ -52,7 +50,7 @@ ENTRY __fp64_cmp_1
 
 	; now here: 1 <= |x| < 2
 	; check, whether |x| is == 1.0, i.e. significand = 0x80....0
-	
+
 	XCALL _U(__fp64_cpc0A5)
 	brne .L_ret		; significand != 0 --> |x|>1, return Z=0, C=0
 

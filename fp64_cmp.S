@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -77,7 +75,7 @@ ENTRY	__fp64_cmp
 	XCALL _U(__fp64_cpc0B5)	; check rest of mantissa
 	brlo	9f		; 0 < mantissa --> NaN
 
-2:	; both A & B are normal numbers or INF	
+2:	; both A & B are normal numbers or INF
 	XCALL _U(__fp64_subAB)	; compare A & B
 	sbc	rA7, rB7			; C is set, if A < B
 	; call __fp64_saveAB
@@ -97,7 +95,7 @@ ENTRY	__fp64_cmp
 	or	rB0, rB7
 	brne	4f		; evaluate sign(B)
 	ret
-	
+
    ; A < B (if C=1) or A > B (C=0), view argument signes
 3:	eor	r0, rBE0	; C is not changed
 	brne	4f		; signs are different

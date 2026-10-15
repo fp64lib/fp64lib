@@ -26,14 +26,12 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /* float64_t fp64_acosh (float64_t x);
-     The fp64_acosh() function returns the inverse hyperbolic cosine 
-	 (a.k.a. area hyperbolic cosine) of x, which is defined mathematically as 
+     The fp64_acosh() function returns the inverse hyperbolic cosine
+	 (a.k.a. area hyperbolic cosine) of x, which is defined mathematically as
 	 arcosh(x) = ln(x + sqrt(x*x-1)) for x >= 1. If x is < 1, NaN is returned.
  */
 
@@ -48,21 +46,21 @@ GCC_ENTRY __acosh
 	cpi rA7, 0x3f			; is x < 2^(-15) ?
 	brlo .L_nan				; yes --> return NaN
 	brne 1f					; x > 2^0 --> ok
-	
+
 	cpi rA6, 0xf0			; is x < 2^0 ?
 	brlo .L_nan				; yes --> return NaN
 
-1:	
+1:
 	; x is now >=1
 	ldi XL, 0x80			; set sign bit
 	rjmp .L_common
-	
+
 
 /* float64_t fp64_asinh (float64_t x);
-    The fp64_asinh() function returns the inverse hyperbolic sine 
-	(a.k.a. area hyperbolic sine) of x, which is defined mathematically as 
+    The fp64_asinh() function returns the inverse hyperbolic sine
+	(a.k.a. area hyperbolic sine) of x, which is defined mathematically as
 	arsinh(x) = ln(x + sqrt(x*x+1)).
-	
+
 	The following special cases apply:
 	 case|	 x   | arsinh(x)
 	-----+-------+------
@@ -75,8 +73,8 @@ GCC_ENTRY __acosh
 ENTRY fp64_asinh
 GCC_ENTRY __asinh
 	clr XL						; clear sign bit
-	
-.L_common:						
+
+.L_common:
 	; cases NaN and +Inf are handled properly inside the calculations
 	; but we have to treat -Inf specially
 	cpi rA7, 0xff
@@ -89,7 +87,7 @@ GCC_ENTRY __asinh
 	XCALL _U(__fp64_pushB)		; preserve registers
 	XCALL _U(__fp64_pushA)		; save x
 	push XL						; save sign bit
-	
+
 	XCALL _U(fp64_square)		; calc x*x
 	XCALL _U(__fp64_movBA)		; save x*x
 	XCALL _U(__fp64_one)		; load 1
@@ -98,10 +96,10 @@ GCC_ENTRY __asinh
 	XCALL _U(__fp64_swapAB)		; get operands in right order
 	XCALL _U(fp64_add)			; x*x +/- 1
 	XCALL _U(fp64_sqrt)			; sqrt( x*x +/- 1 )
-	
+
 	XCALL _U(__fp64_popB)		; retrieve x
 	XCALL _U(fp64_add)			; sqrt( x*x +/- 1 ) + x
-	XCALL _U(fp64_log)			; ln( sqrt( x*x +/- 1 ) + x ) 
-	
+	XCALL _U(fp64_log)			; ln( sqrt( x*x +/- 1 ) + x )
+
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC

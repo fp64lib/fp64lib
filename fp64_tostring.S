@@ -26,15 +26,13 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 FUNCTION fp64_to_string
-	
+
 /* char *fp64_to_string(float64_t x, uint8_t max_chars, uint8_t max_zeroes)
-	converts the float64 to the decimal representation of the number x, 
+	converts the float64 to the decimal representation of the number x,
 	based on the following cases for x
 					x	  | result
 	----------------------+-----------------------------------------------------------
@@ -46,16 +44,16 @@ FUNCTION fp64_to_string
 							leading sign s only for x < 0
 							else exponential form is used "sm.mmmmmESnnn"
 	log10(|x|)<max_chars	"smmm.mmm" representation without exponent
-			all other cases	"sm.mmmmmESn" exponential form is used 
+			all other cases	"sm.mmmmmESn" exponential form is used
 							leading sign s only for x < 0
 							exponent "Snnn" has always a sign S ("+" or "-") and
 							one digit to three digits nnn for the exponent
-							
+
 	fp64_to_string adjusts the number of decimal digits so that the result
 	will fit into a string with max_chars characters. However, a longer string
 	will be returned if the minimum representation will not fit into max_chars.
 	Minimum representation is "mESn[nn]" for X > 0 else "-mESn[nn]".
-	
+
 	input:	rA7..rA0:	number x to convert in float64_t format
 			rB6:		max_chars, maximum space for result
 			rB4:		max_zeroes, use "s0.mmmmmm" when result has less than this # of 0s
@@ -74,14 +72,14 @@ FUNCTION fp64_to_string
 #define		rZero	rB4			// max_zeroes, use "s0.mmmmmm" when result has less than this # of 0s
 #define		fBelow1	0			// bit 0 of rFlags is set if |x| < 1
 #define		fAbove1	1			// bit 1 of rFlags is set if log10(|x|)<max_chars
-#define		fSign	7			// bit 1 of rFlags	
+#define		fSign	7			// bit 1 of rFlags
 
 .L_nan:	; handle NaN and Inf
 	pop rFlags
 	pop rNrd
 	pop rPrec
 	XJMP _U(__fp64_ftoa_nan)	; return string as from ftoa
-	
+
 .L_zero: ; handle +/- 0
 	ldi XL, lo8(__fp64_ftoabuf)	; get buffer address
 	ldi XH, hi8(__fp64_ftoabuf)
@@ -90,7 +88,7 @@ FUNCTION fp64_to_string
 	ldi rB7, '-'
 	brtc 0f
 	st X+, rB7					; return "-0"
-	
+
 0:	ldi rB7, '0'				; or "0" depending on argument
 	st X+, rB7
 	st X, r1
@@ -114,14 +112,14 @@ ENTRY   fp64_to_string
 	brtc 1f
 	dec rNrd					; nrd = sign ? max_nr_chars-1 : max_nr_chars;
 1:	bld rFlags,fSign			; save sign
-	
+
 	XCALL _U(__fp64_pushB)		; save used registers
 	XCALL _U(__fp64_pushA)		; save x
 	push rAE1
 	push rAE0
 
 	; use fp64_to_decimalExp to get log10(x)
-	; as fp64_to_decimalExp is used later anyhow, this will 
+	; as fp64_to_decimalExp is used later anyhow, this will
 	; save memory compared to using log10
 	; do not use clr statement in the following as it will modify the Z flag needed for __fp64_ftoa_pse!!!
 	mov rB5, r1					; rB5.rB4 = 0 --> expSep = 0, no separate storage of exponent
@@ -131,7 +129,7 @@ ENTRY   fp64_to_string
 	ldi rB7, lo8(L_exp10L)
 	mov rB2, rB7
 	mov rB7, r1					; rB7.rB6 = prec = 1
-	ldi rB6, 0x01				
+	ldi rB6, 0x01
 	; rcall __fp64_saveB
 	XCALL _U(__fp64_ftoa_pse)	; s = fp64_to_decimalExp(x, prec, 0, NULL); // get number
 	lds rExp10L, L_exp10L		; retrieve exp10
@@ -140,9 +138,9 @@ ENTRY   fp64_to_string
 	pop rAE0					; restore x
 	pop rAE1
 	XCALL _U(__fp64_popA)
-	
+
 	pop rB0						; restore saved registers
-	pop rB1	
+	pop rB1
 	pop rB2
 	pop rB3
 	pop rB4
@@ -158,51 +156,51 @@ ENTRY   fp64_to_string
 	cpi rAE0, 0xff
 	brlo .L_below1
 	rjmp 2f
-	
+
 .L_below1:
 	adiw rExp10L, 0
 	breq 19f
-	cpi rExp10H, 0xff			;	// if the high byte is != 0xff, then -exp10 is definitely > max_zeroes	
+	cpi rExp10H, 0xff			;	// if the high byte is != 0xff, then -exp10 is definitely > max_zeroes
 	brne .L_exp					;	if( - exp10 <= max_zeroes )
 	mov r0, rExp10L
 	neg r0						; // -exp10
 	cp rZero, r0
 	; rcall __fp64_saveAB
 	brcs .L_exp					; // C=1 if -exp10 > rZero --> we have too maxny leading 0s --> exponent form
-	
+
 	; yes, we can use "s0.mmmmmm" representation
 19:	mov rPrec, rNrd				;		prec = nrd + exp10 - 1;
 	add rPrec, rExp10L
 	subi rPrec, 1
-	
+
 	ror rFlags
 	sec
 	rol rFlags					; 		below1 = true;
-	
+
 	adiw rExp10L, 0				;		if( exp10 == 0 )
-	brne .L_get	
+	brne .L_get
 	subi rPrec, 1				;			prec--
 	rjmp .L_get					;	}
-	
+
 2:	; check for log10(|x|)<max_chars --> representation "mmm.mmm" without exponent
-	tst rExp10H					; if( exp10 < nrd ) 
+	tst rExp10H					; if( exp10 < nrd )
 	brne .L_exp
 	cp rExp10L, rNrd
 	brcc .L_exp
-	
+
 	; yes, number does not have too many digits before "."
 	ror rFlags
 	ror rFlags
 	sec
 	rol rFlags
 	rol rFlags					; 	above1 = true
-	mov rPrec, rNrd	
+	mov rPrec, rNrd
 	dec rPrec
 	cp rExp10L, rPrec			; 	if( exp10 != nrd - 1 )
 	brne .L_get					; 		prec = nrd - 1;	// we can store "mmmm.mm", -1 for "."
-	inc rPrec					; 	else 
+	inc rPrec					; 	else
 	rjmp .L_get					; 		prec = nrd;		// not enough space for digit after ".", just store "mmmm"
-	
+
 	; default case, format number with exponent
 .L_exp:
 	; calculate number of digits in exponent
@@ -235,7 +233,7 @@ ENTRY   fp64_to_string
 	sub rPrec, r0
 	sbrc rPrec, 7
 	mov rPrec, r1
-	
+
 	pop rExp10L
 	pop rExp10H
 
@@ -247,7 +245,7 @@ ENTRY   fp64_to_string
 7:	cpi rPrec, 1					; limit precision to be >= 1
 	adc rPrec, r1
 	XCALL _U(__fp64_pushB)			; save used registers
-	
+
 	; do not use clr statement in the following as it will modify the Z flag needed for __fp64_ftoa_pse!!!
 	mov rB6, rB7				; rB7.rB6 = prec
 	mov rB5, r1					; rB5.rB4 = 0 --> expSep = 0, no separate storage of exponent
@@ -256,27 +254,27 @@ ENTRY   fp64_to_string
 	mov rB3, rB7
 	ldi rB7, lo8(L_exp10L)
 	mov rB2, rB7
-	mov rB7, r1					
+	mov rB7, r1
 	; rcall __fp64_saveAB
 	XCALL _U(__fp64_ftoa_pse)	; 	s = fp64_to_decimalExp(x, prec, 0, NULL); // get number
 	movw ZL, r24				; overwrite rExp2/rAE0 which is no longer needed
-	
+
 	lds rExp10L, L_exp10L		; retrieve exp10
 	lds rExp10H, L_exp10H
 	XCALL _U(__fp64_popB)		; restore saved registers
 	bst rFlags, fSign			; restore sign
-	
+
 	push YH
 	push YL
 	push ZH						; save original value for later use
 	push ZL
-	
+
 	sbrc rFlags, fSign			; if( sign )
 	adiw ZL, 1					;		s++;
-	
+
 	sbrs rFlags, fBelow1
 	rjmp 8f
-	
+
 	adiw rExp10L, 0				; 	if( below1 && exp10 == 0 ) {
 	brne 69f
 	; case 0.99999 got rounded to 1.0 --> we are no longer below 1
@@ -285,7 +283,7 @@ ENTRY   fp64_to_string
 	ror rFlags
 	sec							; 	above1 = true
 	rol rFlags
-	rol rFlags					
+	rol rFlags
 	subi rPrec, 1				;	prec--;
 	rjmp 8f
 
@@ -300,7 +298,7 @@ ENTRY   fp64_to_string
 699:
 	ld r0, Z					; create continouse stream of digits
 	std Z+1, r0					; m.mmmmmm -> mmmmmmmm
-	
+
 	add ZL, rPrec				; pos = prec - exp10
 	adc ZH, r1
 	movw YL, ZL					; YH.YL now points to s[prec]
@@ -308,7 +306,7 @@ ENTRY   fp64_to_string
 	sbc ZH, rExp10H				; ZH.ZL now points to s[pos]
 	push ZH						; save pos
 	push ZL
-	
+
 70:	dec rPrec
 	brmi 71f
 	ld r0, Y					;	s[pos--] = s[prec--]
@@ -316,7 +314,7 @@ ENTRY   fp64_to_string
 	sbiw ZL, 1
 	sbiw YL, 1
 	rjmp 70b
-	
+
 71:	; now fill up the the zeroes
 	com rExp10L					; zeroes = -(exp10+1)
 								; as prec is between 1 and 17, only Exp10L needs to be regarded
@@ -331,14 +329,14 @@ ENTRY   fp64_to_string
 	st Z, rExp10H				; s[pos--] = '.'; s[pos--] = '0';
 	ldi rExp10H, '.'
 	std Z+1, rExp10H
-	
+
 	pop ZL						; restore pos
 	pop ZH
 	adiw ZL, 1					; endPos = pos + 1
 								; ZH.ZL now points to s[endPos]
 
 	rjmp .L_cut					; now check for cutting trailing zeroes
-	
+
 	; check for next formatting option
 8:	sbrs rFlags, fAbove1
 	rjmp 9f
@@ -351,10 +349,10 @@ ENTRY   fp64_to_string
 	movw YL, ZL					; endPos = pos + prec;
 	add YL, rPrec
 	adc YH, r1					; YH.YL now points to s[endPos]
-	
+
 	mov rExp10H, rExp10L		; for( int i = 0 ; i < exp10; i++ ) {
-	tst rExp10H	
-	
+	tst rExp10H
+
 80:	breq 81f
 	ldd r0, Z+1					; 	s[pos] = s[pos+1]
 	st Z+, r0
@@ -363,14 +361,14 @@ ENTRY   fp64_to_string
 
 81: ; now insert the ".", but only of the digits after "." still fit into max_nr_chars
 	dec rPrec
-	cp rExp10L, rPrec			; if( exp10 != prec - 1 ) 
+	cp rExp10L, rPrec			; if( exp10 != prec - 1 )
 	breq 82f
 
 	ldi rExp10H, '.'			;	s[pos] = '.';
 	st Z, rExp10H
 
 	movw ZL, YL					; set endpos that was saved in YL
-	rjmp .L_cut					
+	rjmp .L_cut
 
 	; digits after '.' do not fit in, so terminate the string one character earlier
 82:	st Z, r1					; s[pos] = '\0';
@@ -391,11 +389,11 @@ ENTRY   fp64_to_string
 90:	ld rA7, -Z					; while( s[--endPos] == '0' )
 	cpi rA7, '0'				;		;
 	breq 90b
-	
+
 	cpi rA7, '.'				; if( s[endPos] == '.' )
 	brne 91f
 	sbiw ZL, 1					;	endPos--
-91:	
+91:
 	sbrc rFlags, fAbove1		; iif( below1 || above1 )
 	rjmp 92f
 	sbrs rFlags, fBelow1
@@ -414,7 +412,7 @@ ENTRY   fp64_to_string
 .L_ret:
 	pop ZL						; restore s
 	pop ZH
-	
+
 	pop YL						; restore Y
 	pop YH
 
@@ -425,8 +423,8 @@ ENTRY   fp64_to_string
 
 	movw r24, ZL				; return( s )
 	ret
-	
+
 ENDFUNC
-.data	
+.data
 L_exp10L:	.skip 1
 L_exp10H:	.skip 1

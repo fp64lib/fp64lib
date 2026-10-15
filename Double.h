@@ -25,11 +25,10 @@
   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
-/* $Id$ */
 
 /*
  * Simple C++ wrapper class to ease use of fp64lib.
- * 
+ *
  * Usage: Do "#include <Double.h>" instead of "#include <fp64lib.h>"
  * Now variables can be declared by "Double x,y,z;" (Notice the uppercase "D"!)
  * and usual operations can be done similar to "normal" double or int variables,
@@ -57,8 +56,8 @@ class Double {
 		Double( int32_t n )		{ x = fp64_int32_to_float64( n ); }
 		Double( char *s )		{ x = fp64_atof( s ); }
 		Double( const Double& d ) { x = d.x; }
-		
-		const char* toString() { 
+
+		const char* toString() {
 			return fp64_to_string( x, 17, 15);
 			}
 		const char* toString( int prec ) {
@@ -67,7 +66,7 @@ class Double {
 		float64_t data() {
 			return this->x;
 		}
-			
+
 		Double operator+=( const Double& y ) {
 			this->x = fp64_add( this->x, y.x );
 			return *this ;
@@ -163,7 +162,7 @@ class Double {
 			Double res;
 			res.x = fp64_exp( x.x );
 			return res;
-		}	
+		}
    private:
       float64_t x;
 };

@@ -26,12 +26,10 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float64_t fp64_ceil( float64_t A );
     Rounds A upwards to the nearest integer greater or equal A.
 	For A < 0 this is identical to trunc(A).
-	
+
 	The following rules apply:
 
 	case|           A	       | result
@@ -52,7 +50,7 @@
      fp64_ceil(1.9) --> 2.0
      fp64_ceil(-1.9) --> -1.0
  */
- 
+
  #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -85,23 +83,23 @@ GCC_ENTRY __ceil
 	sbci rAE1, hi8(1023)
 	tst rAE1
 	brmi .L_one					; 0 < x < 1, case 5, return 1.0
-	brne .L_ret					; |x| > 2^255, case 4, return x 
+	brne .L_ret					; |x| > 2^255, case 4, return x
 	cpi rAE0, 52
 	brge .L_ret					; |x| >= 2^52, case 4, return x
-	
+
 	; now x is in range 1 <= |x| < 2^52
 	; clear out the fractional bits
-	
+
 	ldi rAE1, 55				; counter = (52 digits + 3 saveguard digits) - exp2(x)
 	sub rAE1, rAE0				; as |x| < 2^52, this is always > 1
 	push rAE1
 	clr r0						; save flag for fraction
-	
+
 0:	XCALL _U(__fp64_lsrA)		; shift number downwards -> this clears the fraction
 	adc r0, r1					; add all fractional bits
 	dec rAE1
 	brne 0b
-	
+
 	tst r0						; was there a fraction?
 	; rcall __fp64_saveAB
 	breq 1f
@@ -118,7 +116,7 @@ GCC_ENTRY __ceil
 
 1:	pop rAE1					; restore number of shifts
 	; rcall __fp64_saveAB
-	
+
 2:	XCALL _U(__fp64_lslA)		; now shift the number back into position
 	dec rAE1
 	brne 2b

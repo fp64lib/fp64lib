@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 
 #if !defined(__AVR_TINY__)
 
@@ -54,19 +52,19 @@ ENTRY fp64_uint32_to_float64
 GCC_ENTRY __floatunsidf
 	clt
 	rjmp .L_common
-	
+
 /* float64_t __fp64sisd ( long x );
    float64_t fp64_long_to_float64 ( long x );
    float64_t fp64_int32_to_float64 ( long x );
    Convert a signed 32-bit integer (long) to float64_t.
    No overflow will occur, as 32bit long will
    always fit into the 53-bit significand
-   
+
    Input:
      rA7.rA6.rA5.rA4					- an 'x' arg as signed 32-bit long
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754-64 bit format
-*/										  
+*/
 ENTRY fp64_int32_to_float64
 ENTRY fp64_long_to_float64
 GCC_ENTRY __floatsidf
@@ -99,7 +97,7 @@ GCC_ENTRY __floatsidf
 	tst	rA7				; if A >= 2^23
 	breq 2f			; no, check next byte
 	; A >= 2^23m shift to right is needed by 1..8 positions
-	
+
 1:	inc rAE0			; exponent++
 	lsr rA7				; A >>= 1
 	ror rA6
@@ -121,7 +119,7 @@ GCC_ENTRY __floatsidf
 	mov	rA6, rA5
 	mov	rA5, rA4
 	mov	rA4, rA3	; rA3 is 0
-	rjmp 2b		; loop until one bit is set 
+	rjmp 2b		; loop until one bit is set
 					; (loop will terminate, as it is guaranteed that A <> 0)
 
 	; rA6 is not 0.  It is needed shift to left by 0..7 positions.

@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -47,9 +45,9 @@ FUNCTION __fp64_stack
  */
 
 ENTRY __fp64_pushA
-	sts __fp64_saver01, r0		; save r0 & r1 
+	sts __fp64_saver01, r0		; save r0 & r1
 	sts __fp64_saver01+1, r1
-	
+
 	pop r0						; get return address
 	pop r1
 #if defined (ARDUINO_AVR_MEGA2560)
@@ -65,7 +63,7 @@ ENTRY __fp64_pushA
 	push rA2
 	push rA1
 	push rA0
-	
+
 	XJMP _U(__fp64_L_ret)
 
 
@@ -82,9 +80,9 @@ ENTRY __fp64_pushA
 
 ENTRY   __fp64_popA
 	;call __fp64_saveAB
-	sts __fp64_saver01, r0	; save r0 & r1 
+	sts __fp64_saver01, r0	; save r0 & r1
 	sts __fp64_saver01+1, r1
-	
+
 	pop r0				; get return address
 	pop r1
 #if defined (ARDUINO_AVR_MEGA2560)

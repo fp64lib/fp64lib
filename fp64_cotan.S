@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -39,6 +37,6 @@
 FUNCTION fp64_cotan
 ENTRY fp64_cotan
 GCC_ENTRY __cotan
-	XCALL _U(fp64_tan)			; calculate tan(x) 
+	XCALL _U(fp64_tan)			; calculate tan(x)
 	XJMP _U(fp64_inverse)		; cotan(x) = 1 / tan(x)
 ENDFUNC

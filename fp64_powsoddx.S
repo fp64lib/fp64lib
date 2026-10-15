@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -39,7 +37,7 @@
 
 	 Attention: Routine uses all(!) registers, so caller is responsible
 	 for saving content of registers
- 
+
  Input:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0,rAE1.rAE0	- an 'x' arg as float64_t_intern
 												  rA7 must contain sign of A
@@ -62,14 +60,14 @@ ENTRY __fp64_powsodd
 	XCALL _U(__fp64_pushB)		; save x for later use
 	push	YL					; including the exponent
 	push	YH
-	
+
 	push	XH					; save pointer to table for later use
 	push	XL
 
-	X_movw  rBE0, YL		
+	X_movw  rBE0, YL
 	;rcall __fp64_saveAB
 	clt							; clear sign as x^2 is always positive
-	XCALL	_U(__fp64_mulsd3_pse)	; calculate x^2 
+	XCALL	_U(__fp64_mulsd3_pse)	; calculate x^2
 
 	pop	XL						; retrieve pointer to table
 	pop	XH
@@ -87,7 +85,7 @@ ENTRY __fp64_powsodd
 	XJMP	_U(__fp64_mulsd3_pse)	; multiply polynom by x --> polynom is calculated with odd powers of x
 
 #ifdef CHECK_POWSER
-.L_nf:	
+.L_nf:
 	brne	.L_nan			; +/-Inf? No --> return NaN
 .L_inf:
 	XJMP	_U(__fp64_inf)	; No, case 2 --> return Inf
@@ -107,7 +105,7 @@ ENTRY __fp64_check_powsodd3
 #endif
 	ldi XL, lo8(.L__testTable3x)
 	ldi XH, hi8(.L__testTable3x)
-	
+
 ENTRY __fp64_check_powsoddn
 98:
 	XCALL	_U(__fp64_splitA)
@@ -168,7 +166,7 @@ ENTRY __fp64_check_powslog
 	.byte 0x00, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAB, 0x03, 0xfe ; 0x3FE5555555555555 = 0.6666666666666666666666666666666666666667 = 2 / 3
 	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00 ; 0x4000000000000000 = 2.0000000000000000000000000000000000000000 = 2 / 1
 	.byte 0x00												; byte needed for code alignment to even adresses!
-	
-	#endif	
-	
+
+	#endif
+
 ENDFUNC

@@ -26,8 +26,6 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$	*/
-
 #ifndef	_ASMDEF_H
 #define _ASMDEF_H
 
@@ -202,7 +200,7 @@ _U(\name):
 	lpm / mov Rd,r0
 	lpm / adiw ZL,1
 	lpm / mov Rd,r0 / adiw ZL,1
-	
+
    For enhanced chips it is one instruction always.
 
    ATTENTION:  unlike enhanced chips SREG (S,V,N,Z,C) flags are
@@ -216,7 +214,7 @@ _U(\name):
     .exitm	; do not multiply errors
   .endif
 
-  /* src evaluation	*/    
+  /* src evaluation	*/
   .L__lpm_src = -1
   .L__lpm_n = 0
   .irp  reg,  z,Z,z+,Z+
@@ -230,7 +228,7 @@ _U(\name):
     .err	; Invalid src arg of 'X_lpm' macro.
   .endif
 
-  /* instruction(s)	*/    
+  /* instruction(s)	*/
   .if  .L__lpm_src < 2
     .if  .L__lpm_dst == 0
 	lpm
@@ -265,7 +263,7 @@ _U(\name):
 .endm
 
 /* swap two words with the help of r0/r1 */
-.macro _SWAPW	dst, src	
+.macro _SWAPW	dst, src
 	movw r0, \src
 	movw \src, \dst
 	movw \dst, r0

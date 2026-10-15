@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -43,14 +41,14 @@ GCC_ENTRY __tan
 
 	XCALL _U(__fp64_pushA)		; save x
 
-	XCALL _U(fp64_cos)			; calculate cos(x) 
+	XCALL _U(fp64_cos)			; calculate cos(x)
 
 	XCALL _U(__fp64_popB)		; restore x
 	XCALL _U(__fp64_pushA)		; save cos(x)
 	XCALL _U(__fp64_movAB)		; move x into A
 
-	XCALL _U(fp64_sin)			; calculate sin(x) 
-	
+	XCALL _U(fp64_sin)			; calculate sin(x)
+
 	XCALL _U(__fp64_popB)		; restore cos(x)
 	XCALL _U(__fp64_isBzero)	; is cos(x) == 0?
 	sec
@@ -58,7 +56,7 @@ GCC_ENTRY __tan
 
 	XCALL _U(fp64_div)			; calculate sin(x)/cos(x)
 
-1:	
+1:
 	XJMP _U(__fp64_popBret)		; restore registers and return
 
 ENDFUNC

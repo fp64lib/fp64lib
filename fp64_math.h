@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* standard header for using 64-bit IEEE-754 compatible fp64lib
    should be included instead of math.h
    created for cooperation with math.h
@@ -38,7 +36,7 @@
 
 #ifdef __cplusplus
 extern "C"{
-#endif 
+#endif
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -105,9 +103,9 @@ typedef float    float32_t;     /* IEEE 754 single precision floating point numb
 /* MACROS */
 #define FP64_HUGE_VAL 			((float64_t)0x7ff0000000000000LLU)	/* +INF */
 #define FP64_INFINITY 			((float64_t)0x7ff0000000000000LLU)	/* +INF */
-#define FP64_NAN 				((float64_t)0x7fffffffffffffffLLU)	/* NaN, be aware that there are also other 
-															  representations of NaN, 
-															  use if( fp64_isnan(x) ) to check for NaN, 
+#define FP64_NAN 				((float64_t)0x7fffffffffffffffLLU)	/* NaN, be aware that there are also other
+															  representations of NaN,
+															  use if( fp64_isnan(x) ) to check for NaN,
 															  !!! never use if( x == NaN )!!! */
 
 #define FP_FAST_FMA 	1	// fp64_fma executes about as fast as the expression x * y + z
@@ -128,7 +126,7 @@ typedef float    float32_t;     /* IEEE 754 single precision floating point numb
 #define math_errhandling 0	/* fp64lib uses silent signalling, errno is not used */
 
 /* GENERIC FUNCTION MACROS */
-// unfortunately, math.h defined functions for the is... macros, 
+// unfortunately, math.h defined functions for the is... macros,
 // we can only overload the is...f macros so
 #undef signbitf
 #undef isfinitef
@@ -224,5 +222,5 @@ float64_t fp64_exp2(float64_t x); 				// [all added with C99]
 // float64_t tgamma(float64_t x); [all added with C99]
 #ifdef __cplusplus
 } // extern "C"
-#endif 
-#endif 
+#endif
+#endif

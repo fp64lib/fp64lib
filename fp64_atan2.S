@@ -29,19 +29,17 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float fp64_atan2 (float A, float B);	// A is y coord, B is x coord.
      The fp64_atan2() function calculates the arc tangent of the two variables
      A and B. It is similar to calculating the arc tangent of A/B, except
      that the signs of both arguments are used to determine the quadrant
      of the result. The fp64_atan2() function returns the result in radians,
      which is between -PI and PI (inclusive).
-     
+
    Note:
      Unlike the 32bit floating library, this implementation respects all four
 	 cases of 0/0, like x86 (GCC/Glibc): +0/+0, +0/-0, -0/+0 and -0/-0.
-	 
+
 	Overview:
 	Sector|  x   |  y   | |y|<=|x| | result algorithm | result range
 	------+------+------+----------+------------------+-----------------
@@ -71,7 +69,7 @@
 	;  4  | |y|<=|x| |    >= 0   | see sector I & VIII: atan(y/x)+0
 	;  5  | |y|<=|x| |     < 0   | see sector IV & V:   atan(y/x)+/-PI
 	;  6  |    >= 0  | |y| > |x| | see sector II & III:	-atan(x/y)+PI/2
-	;  7  |     < 0  | |y| > |x| | see sector VI & VII: -atan(x/y)-PI/2 
+	;  7  |     < 0  | |y| > |x| | see sector VI & VII: -atan(x/y)-PI/2
 	;  8a |   +any   |   +/-0    | +PI/2
 	;  8b |   -any   |   +/-0    | -PI/2
  */
@@ -88,19 +86,19 @@ FUNCTION fp64_atan2
 	;	+/-Inf | C=1 Z=0 a| C=1 Z=1 b| C=1 Z=1 b| C=1 Z=1 b
 	;	0	   | C=1 Z=0 a| C=1 Z=1 b| C=0 Z=1 c| C=0 Z=0 d
 	;	finite | C=1 Z=0 a| C=1 Z=1 b| C=0 Z=1 c| C=0 Z=0 d
-	
+
 	brne .L_nan		; case 1a&1b, a C=1 Z=0: A or B is NaN --> return NaN
-	
+
 	; b C=1 Z=1: now either A is +/-Inf and B is any != NaN
 	;      		  or A is 0 or finite and B is +/- Inf
 	XCALL _U(__fp64_pscA)
 	brne .L_0orPI		; case 3a-3d: A is finite, B is +/-Inf --> atan(A/B) = +0 or +PI
-	
+
 	; case 3b&3c: A is +/-Inf, B is any != NaN
 	; is B also +/- Inf?
 	XCALL _U(__fp64_pscB)
 	brcs .L_nan			; yes, case 3b: A = +/-Inf, B = +/-Inf --> atan2(A,B) = NaN
-	
+
 	; no: case 3c: A= +/- Inf, B is finite --> atan2(A,B) will be handled via atan(A/B)
 	sbrc rB7, 7			; is B negative?
 	subi rA7, 0x80		; yes: restore original sign of A
@@ -113,7 +111,7 @@ FUNCTION fp64_atan2
 
 	; cases 1a & 1b: A  or B  is NaN    --> atan2(A,B) == NaN
 	; also case 3b:  A and B are +/-Inf --> atan2(A,B) == NaN
-.L_nan:				
+.L_nan:
 	XJMP	_U(__fp64_nanp)
 
 	; return 0 or PI for
@@ -134,10 +132,10 @@ FUNCTION fp64_atan2
 	ldi rB7, 0x80  			; set indicator to "add PI"
 	rjmp .L_addPi
 
-	; case 2a: A is +0,      B is +finite --> atan(A,B) == +0	
-	; case 2c: A is -0,      B is +finite --> atan(A,B) == -0	
-	; case 3a: A is +finite, B is +Inf    --> atan(A,B) == +0	
-	; case 3c: A is -finite, B is +Inf    --> atan(A,B) == -0	
+	; case 2a: A is +0,      B is +finite --> atan(A,B) == +0
+	; case 2c: A is -0,      B is +finite --> atan(A,B) == -0
+	; case 3a: A is +finite, B is +Inf    --> atan(A,B) == +0
+	; case 3c: A is -finite, B is +Inf    --> atan(A,B) == -0
 .L_zr:
 	XCALL _U(__fp64_popB)
 	XJMP _U(__fp64_szero)
@@ -173,13 +171,13 @@ GCC_ENTRY __atan2
 	brlo 1f			; fabs(a) > fabs(B)
 
 	; cases 4&5: fabs(A) <= fabs(B) --> no swapping needed
-	mov r0, r1		
+	mov r0, r1
 	sec
 	sbrc rB7,7		; copy sign of x into r0
 	ror r0			; r0 becomes 0x80
-	
+
 	push rA7		; save sign of y
-	
+
 .L_div:
 	push r0			; push post processing indicator
 					; r0 = 0x00 --> add nothing
@@ -199,7 +197,7 @@ GCC_ENTRY __atan2
 
 	sbrc rB7, 7		; indicator >= 0x80?
 	rjmp .L_addPi	; yes, case 5-7, add +/- PI or +/- PI/2
-    				
+
 	; no: case 4, return atan(y/x)
 	XJMP _U(__fp64_popBret)		; restore registers and return
 
@@ -209,9 +207,9 @@ GCC_ENTRY __atan2
 	; 	bit 0 of rB7 == 1 --> use PI/2 as displacement
 	;	bit 7 of r0  == 0 --> add displacement
 	;   bit 7 of r0  == 1 --> subtract displacement
-	
+
 	; sector II, III, VI, VII: add +/- PI/2
-	
+
 	; PI/2 = 1.5707963267948966
 	; .byte 0x3f, 0xf9, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18
 #define L_expPI2	0x3ff9
@@ -221,7 +219,7 @@ GCC_ENTRY __atan2
 
 	; Load constant directly to avoid previously bogus address arithmetic.
 	; Thanks to sprintersb for raising issue #26
-	
+
 	; firstly, load the correct exponent into ZL
 	ldi ZH, hi8(L_expPI2)
 	ldi ZL, lo8(L_expPI2)
@@ -232,7 +230,7 @@ GCC_ENTRY __atan2
 	ldi rB7, 0x2d
 	ldi rB6, 0x18
 	X_movw rB0, rB6
-	
+
 	ldi rB7, 0x54
 	ldi rB6, 0x44
 	X_movw rB2, rB6
@@ -243,7 +241,7 @@ GCC_ENTRY __atan2
 
 	; finally get the exponent
 	X_movw rB6, ZL
-	
+
 	sbrc r0, 7		; y < 0?
 	subi rB7, 0x80	; yes: Sector V, VI, VII: change sign of displacement
 
@@ -251,7 +249,7 @@ GCC_ENTRY __atan2
 	; rcall __fp64_saveAB
 	XCALL _U(fp64_add)
 	XJMP _U(__fp64_popBret)
-	
+
 1:	; cases 6 & 7: fabs(A) > fabs(B) --> swap values and change the atan sign
 	; atan(y/x) = -atan(x/y) +/- PI/2
 	;           = atan(x/-y) +/- PI/2
@@ -261,7 +259,7 @@ GCC_ENTRY __atan2
 	ldi rB7, 0x81			; r0 = 0x81: add pi/2
 	mov r0, rB7
 	pop rB7
-	
+
 	push rB7				; save original sign of y
 	subi rB7, 0x80			; -atan(x/y) = atan(x/-y)
 	eor rB7, rA7			; T must reflext sign(A)^sign(B)

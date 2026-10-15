@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -75,7 +73,7 @@ ENTRY __fp64_cpcBA
 	cpc	rB5, rA5
 	cpc	rB6, rA6
 	ret
-	
+
 /*  __fp64_cpc0A5() compare A with 0
    Input:
 		rA5.rA4.rA3.rA2.rA1.rA0  - A in unpacked format
@@ -95,7 +93,7 @@ ENTRY __fp64_cpc0A5
 	cpc r1, rA4
 	cpc r1, rA5
 	ret
-	
+
 /*  __fp64_cpc0B5() compare B with 0
    Input:
 		rB5.rB4.rB3.rB2.rB1.rB0  - B in unpacked format

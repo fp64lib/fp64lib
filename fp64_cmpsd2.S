@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -40,9 +38,9 @@ FUNCTION fp64_compare
 	based on the following rules:
 	 case|	A	 |	B	 |	fp64_compare(A,B)
 	-----+-------+-------+--------------------
-	 1	 |	NaN	 |	any	 |	1	
-	 2	 |	any	 |	NaN	 |	1 
-	 3	 | A < B |	any  |	-1 
+	 1	 |	NaN	 |	any	 |	1
+	 2	 |	any	 |	NaN	 |	1
+	 3	 | A < B |	any  |	-1
 	 4	 | A == B|	any	 |	0
 	 5	 | A > B |	any  |	1
  */
@@ -50,7 +48,7 @@ FUNCTION fp64_compare
    compare with gcc/config/fp-bit.c (the only difference is with NaNs
    where we should always return nonzero for EQ/NE, -1 for GT/GE,
    1 for LT/LE).  -MM 2000-11-18 */
- 
+
 ENTRY	fp64_compare
 ENTRY   __fp64_cmpsd2
 GCC_ENTRY  __eqdf2

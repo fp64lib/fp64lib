@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -50,8 +48,8 @@ ENTRY fp64_inverse
 	clr rA4
 	X_movw	rA2, rA4
 	X_movw	rA0, rA4
-	
+
 	XCALL	_U(__fp64_divsd3)	; calculate 1.0 / x
-	
+
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC

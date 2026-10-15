@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -52,7 +50,7 @@ ENTRY __fp64_lslA1
 	rol	rA5
 	rol	rA6
 	ret
-	
+
 /*  __fp64_lsrA() shift A 1 bit to the right
    Input:
 		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A
@@ -73,7 +71,7 @@ ENTRY	__fp64_rorA5
 	ror rA1
 	ror rA0
 	ret
-	
+
 # ENTRY __fp64_lsr8A
 	# mov rA0, rA1		; ; A >>= 8
 	# mov rA1, rA2
@@ -83,5 +81,5 @@ ENTRY	__fp64_rorA5
 	# mov rA5, rA6
 	# mov rA6, rA7
 	# ret
-	
+
 ENDFUNC

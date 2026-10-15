@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float64_t __fp64disd (long long x)
    float64_t int64_to_float64( long long x );
    Convert a signed 64-bit integer (long long) to float64_t.
@@ -40,7 +38,7 @@
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- an 'x' arg as signed 64-bit long
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754-64 bit format
-										  
+
  */
 
 #include "fp64def.h"
@@ -58,17 +56,17 @@ ENTRY __fp64disd
    float64_t fp64_uint64_to_float64( unsigned long long x );
    Convert an unsigned 64-bit integer (unsigned long long) to float64_t.
    Overflow cannot occur, but loss of precision, if abs(x) > 2^53
-   
+
    Input:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- an 'x' arg as signed 64-bit long
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754-64 bit format
  */
- 
+
 ENTRY fp64_uint64_to_float64
 ENTRY __fp64unsdisd
 	clt			; result sign = +
-	
+
 __fp64_di2sd:
 	clr rAE0				; exponent = 0
 	clr rAE1
@@ -77,7 +75,7 @@ __fp64_di2sd:
 	cpc r1, rA7
 	brne 0f				; no, convert
 	ret					; yes, result is also 0 in IEEE notation
-	
+
 0:	ldi rAE0, 55		; exponent for 00.80.00.00.00.00.00.00
 	tst rA7				; is A >= 2^55
 	breq 2f				; no, check next byte
@@ -103,9 +101,9 @@ __fp64_di2sd:
 	mov	rA2, rA1
 	mov	rA1, rA0
 	ldi	rA0, 0
-	rjmp 2b			; loop until one bit is set 
+	rjmp 2b			; loop until one bit is set
 					; (loop will terminate, as it is guaranteed that A <> 0)
-	
+
 	; rA6 is not 0.  It is needed shift to left by 0..7 positions.
 4:	brmi	.L_round; stop, if topmost bit is set
 	dec	rAE0		; exponent -= 1
@@ -118,4 +116,3 @@ __fp64_di2sd:
 	sbci rAE1, -0x04
 	XJMP _U(__fp64_rpretA)
 ENDFUNC
-

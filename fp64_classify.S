@@ -29,13 +29,11 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /*	int fp64_classify( float64_x );
-	Categorizes floating point value x into the following categories: 
+	Categorizes floating point value x into the following categories:
 	zero, subnormal, normal, infinite, and NAN.
 	The following cases apply:
 

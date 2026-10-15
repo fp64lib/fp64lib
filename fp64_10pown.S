@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -51,14 +49,14 @@ ENTRY __fp64_10pown
 #ifdef ARDUINO_AVR_MEGA2560
 	in ZL, RAMPZ		; get and save previous RAMPZ
 	push ZL
-#endif 
+#endif
 	ldi ZL, lo8(.L_10)	; pot = 10 << 60
 	ldi ZH, hi8(.L_10)
-	
+
 	bst XH, 7			; neg = 0
 	brtc 0f				; if( n < 0 ) {
 	neg XH				;	neg = 1; n = -n
-	neg XL				; 
+	neg XL				;
 	sbci XH, 0
 	adiw ZL, 8			; 	pot = 0.1 << 63
 
@@ -75,10 +73,10 @@ ENTRY __fp64_10pown
 	elpm rB2, Z+
 	elpm rB1, Z+
 	elpm rB0, Z+
-	
+
 	pop ZL
 	out  RAMPZ, ZL	; restore RAMPZ
-#else	
+#else
 0:	lpm rB7, Z+			; load pot with 10.0 or 0.1
 	lpm rB6, Z+
 	lpm rB5, Z+
@@ -97,14 +95,14 @@ ENTRY __fp64_10pown
 	movw rA4, rAE0
 	movw rA2, rAE0
 	movw rA0, rAE0
-	
+
 1:	adiw XL, 0			; while( 0 != n ) {
 	breq 3f
-	
+
 	sbrs XL, 0					; 	if( 0 != (n & 1) ) {
 	rjmp 2f
 	XCALL _U(__fp64_mul64AB)	;		res = res * pot;
-	XCALL _U(__fp64_lshift64)	;		// align result		
+	XCALL _U(__fp64_lshift64)	;		// align result
 	XCALL _U(__fp64_movAC)		; 		move result of res * pot to res
 								; 	}
 
@@ -116,17 +114,17 @@ ENTRY __fp64_10pown
 	sbc rAE1, r1
 	adiw rAE0, 1
 	rjmp 2f
-	
+
 11:	add rAE0, r0		; else
 	adc rAE1, r1		;	exp2 += shiftLeft(res)
-	
+
 2:	XCALL _U(__fp64_pushA)		; save res
-	
+
 	XCALL _U(__fp64_movAB)		; B = A = pot
 	XCALL _U(__fp64_mul64AB)	; pot = pot * pot
 	XCALL _U(__fp64_lshift64)
 	XCALL _U(__fp64_movBC)
-	
+
 	lsl YL					; pot_exp2 <<= 1
 	rol YH
 	brts 12f				; if( !neg )
@@ -134,27 +132,27 @@ ENTRY __fp64_10pown
 	sub YL, r0
 	sbc YH, r1
 	rjmp 13f
-	
+
 12:	add YL, r0				; else
 	adc YH, r1				;	pot_exp2 += shiftLeft(pot)
 
 13:	XCALL _U(__fp64_popA)	; restore res
 	; rcall __fp64_saveAB
-	
+
 	lsr XH					; n >>= 1
 	ror XL
-	
+
 	rjmp 1b					; repeat until n is 0
 
 3:	brtc 4f					; if( neg )
 	neg rAE1				;	exp2 = -exp2;
 	neg rAE0
 	sbci rAE1, 0
-	
+
 4:	pop YH
 	pop YL
-	ret	
-	
+	ret
+
 .L_10:	; 10.0
 	.byte 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 .L_01:	; 0.1
@@ -173,17 +171,17 @@ ENTRY fp64_10pown
 	movw XL, rA6	; for __fp64_10pown, n has to be in XH.XL
 	push rA4		; save pointer
 	push rA5
-	
+
 	rcall __fp64_10pown
-	
+
 	pop XH
 	pop XL
 	adiw XL, 0
 	breq 1f			; skip NULL pointer
 	st X+, rAE0		; save exp2
 	st X, rAE1
-	
-1:	
+
+1:
 	XCALL _U(__fp64_popBC)	; restore register set
 	nop						; hack to avoid tail call optimization
 	ret

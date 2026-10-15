@@ -26,17 +26,15 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /*	float64_t __fp64_pi2(x)
 	return sign(x)*PI/2
-	
+
 	input:		- none -
 	output:		rA7.rA6...rA0		PI/2 in packed format
-				
+
 */
 
 FUNCTION __fp64_pi2

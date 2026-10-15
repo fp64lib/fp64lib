@@ -26,14 +26,12 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /* float64_t fp64_atanh(float64_t x);
-     The fp64_atanh() function returns the inverse hyperbolic tangent 
-	 (a.k.a. area hyperbolic tangent) of x, which is defined mathematically as 
+     The fp64_atanh() function returns the inverse hyperbolic tangent
+	 (a.k.a. area hyperbolic tangent) of x, which is defined mathematically as
 	 artanh(x) = 0.5*ln((1+x)/(1-x)) for |x| < 1. If x is >= 1, NaN is returned.
  */
 
@@ -46,7 +44,7 @@ GCC_ENTRY __atanh
 	cpi rA7, 0x3f				; is x < 2^(-15) ?
 	brlo .L_ok					; yes --> compute artanh
 	brne .L_NaN					; x > 2^0 --> return 1
-	
+
 	cpi rA6, 0xf0				; is x < 2^0 ?
 	brlo .L_ok					; yes --> return artanh
 
@@ -55,7 +53,7 @@ GCC_ENTRY __atanh
 	XJMP	_U(__fp64_nan)		; return NaN
 
 
-.L_ok:	
+.L_ok:
 	; x is now < 1
 	pop rA7						; get back sign of x
 
@@ -66,7 +64,7 @@ GCC_ENTRY __atanh
 	XCALL _U(__fp64_pushA)		; save x and 1
 	XCALL _U(__fp64_pushB)		; preserve registers
 	XCALL _U(fp64_add)			; compute 1+x
-	
+
 	XCALL _U(__fp64_movCA)		; save 1+x in C
 	XCALL _U(__fp64_popB)		; restore x and 1
 	XCALL _U(__fp64_popA)
@@ -75,15 +73,15 @@ GCC_ENTRY __atanh
 	XCALL _U(__fp64_movBA)		; save 1-x in B
 	XCALL _U(__fp64_movAC)		; restore 1+x from C
 	XCALL _U(fp64_div)			;  (1+x) / (1-x)
-	
-	XCALL _U(fp64_log)			; ln( sqrt( x*x +/- 1 ) + x ) 
+
+	XCALL _U(fp64_log)			; ln( sqrt( x*x +/- 1 ) + x )
 	ldi rB7, 0x3f				; move 0.5 into B
 	ldi rB6, 0xe0
 	mov rB5, r1
 	mov rB4, r1
 	movw rB2, rB4
 	movw rB0, rB4
-	XCALL _U(fp64_mul)			; 1/2 * ln( sqrt( x*x +/- 1 ) + x ) 
+	XCALL _U(fp64_mul)			; 1/2 * ln( sqrt( x*x +/- 1 ) + x )
 
 	XCALL _U(__fp64_popBC)		; restore used registers
 	ret							; and return

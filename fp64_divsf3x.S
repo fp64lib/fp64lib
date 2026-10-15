@@ -29,11 +29,9 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /*
 	float64_t __fp64_divsd3( float64_t A, float64_t B )
-	Divides two 64 bit floating point numbers 
+	Divides two 64 bit floating point numbers
 	and rounds result to a 64bit floating point number
 
 	Input:
@@ -75,7 +73,7 @@ FUNCTION __fp64_divsd3x
 .L_inf:
 	XJMP	_U(__fp64_infp)
 
-1: ; B is +/-Inf, cases 4,5,7	
+1: ; B is +/-Inf, cases 4,5,7
 	XCALL	_U(__fp64_pscA)
 	breq	.L_nan		; A is Inf, case 4: Inf/Inf = NaN
 
@@ -83,12 +81,12 @@ FUNCTION __fp64_divsd3x
 .L_zr:
 	XCALL _U(__fp64_popB)
 	XJMP	_U(__fp64_szero)
-	
+
 	; 0 / B, cases 8, 9
 2:	XCALL	_U(__fp64_pscB)
 	brne .L_zr	; B != 0, case 9, 0 / any = 0
 
-	; cases 1-4 and 8: result is NaN 
+	; cases 1-4 and 8: result is NaN
 .L_nan:
 	XJMP	_U(__fp64_nanp)
 
@@ -102,20 +100,20 @@ ENTRY	__fp64_divsd3
 	breq	2b			; handle = 0 / B
 	XCALL	_U(__fp64_pscB)
 	breq	.L_inf		; finite (!=0) / 0.0 --> Inf
-	
+
 	XCALL _U(__fp64_divsd3_pse)
-	
+
 	XCALL _U(__fp64_popB)
 	brcs 99f				; underflow/overflow --> return already packed result
 	XJMP _U(__fp64_rpretA)	; everything ok --> round, pack result and return
-99:	ret	
+99:	ret
 
 /*
 	float64_t_intern __fp64_divsd3( float64_t_intern A, float64_t_intern B )
-	Internal routine to divide two 64 bit floating point numbers 
+	Internal routine to divide two 64 bit floating point numbers
 	and rounds result to a 64bit floating point number
 	Does not handle special cases NaN, +Inf, -Inf, +/-0 (neither for A or B)
-	
+
 	Input:
 		rA6.rA5.rA4.rA3.rA2.rA1.rA0		significand of A
 		rAE1.rAE0						exponent of A
@@ -136,24 +134,24 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	; exp(result) = exp(A) - exp(B)
 	sub	rAE0, rBE0
 	sbc	rAE1, rBE1
-	
+
 /* Prepare to division:
      A:  rA6.rA5.rA4.rA3.rA2.rA1.rA0	0x00000001..0x8FFFFFF	// we need one bit for overflow
-     B:  rB6.rB5.RB4.rB3.rB2.rB1.rB0	0x00000002..0xFFFFFFE	
+     B:  rB6.rB5.RB4.rB3.rB2.rB1.rB0	0x00000002..0xFFFFFFE
      A < B
  */
 	; clr	rAE
 	; clr	rBE
-	
+
 	; make sure A < B
 	clr rA7
 	clr rB7
 	XCALL	_U(__fp64_lsrA)		; A >>= 1, make room for overflow bit
-	
+
 22:	XCALL _U(__fp64_cpcAB)		; check whether A < B
 	brlo	3f		; A >= B, everything aligned, division can start
-	
-	; as we do allow subnormal numbers, mantissa of B might not start with 
+
+	; as we do allow subnormal numbers, mantissa of B might not start with
 	; a leading 1 bit (A < B)
 	adiw rAE0,1		; increase exponent ( A / B * 2^exp = A / (B/2) * 2^(exp+1) )
 	lsl	rB0			; B <<= 1
@@ -165,7 +163,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	rol	rB6
 	rol rB7
 	breq 22b		; repeat until we have a leading 1 bit or A < B
-	
+
 3:	; from now on A < B
 	; call __fp64_saveAB
 
@@ -173,7 +171,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	push rR6
 	push rR7
 	push rR8
-	
+
 	rcall	.L_div
 	mov	rR5, r0			; save top 8 bits of result
 	brmi 5f
@@ -201,7 +199,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	mov	rBE0, r0		; save result
 	rcall	.L_div
 	; call __fp64_saveDiv
-	
+
 	; now result is in R5.R6.R7.R8.BE1.BE0.r0
 	; move result to A
 	mov rA0, r0
@@ -216,7 +214,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	pop rR7
 	pop rR6
 	pop rR5
-	
+
 	; adjust exponent to base 1023
 	subi rAE0, lo8(-1023)
 	sbci rAE1, hi8(-1023)
@@ -234,7 +232,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	XCALL _U(__fp64_inf)
 	sec					; set carry to indicate overflow
 	ret
-	
+
    ; return 0 for underflow
 12:	XCALL	_U(__fp64_szero)
 	sec					; set carry to indicate packed result
@@ -252,10 +250,10 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	brmi 14b				; exponent still < 0
 	; stops when exponent == 0 --> indicator for subnormal number
 
-15:	; exponent >=0 and < 0x7ff --> return normal result	
+15:	; exponent >=0 and < 0x7ff --> return normal result
 	clc					; clear carry to signal "all ok"
 	ret
-	
+
 	; divide 8 times
 .L_div:
 	clr r0
@@ -273,7 +271,7 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 
 	com	r0					; convert result to positive logic
 	ret
-	
+
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */

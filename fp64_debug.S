@@ -27,15 +27,13 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /* struct fp64_debug* __fp64_debug (special)
      return sisgn, exponent and mantissa from internal registers
  */
- 
+
 FUNCTION __fp64_debug
 #ifdef CHECK_BIGMEM
 	.skip 65000			; force programs to exceed >64kb for testing proper handling of page registers
@@ -97,10 +95,10 @@ ENTRY __fp64_saveB
 
 ENTRY __fp64_saveABC
 	rcall __fp64_saveC
-	
+
 ENTRY __fp64_saveAB
 	rcall __fp64_saveB
-	
+
 ENTRY __fp64_saveA
 	sts __ar0, r0
 	push r0
@@ -128,7 +126,7 @@ ENTRY __fp64_saveA
 	out 0x3f, r0
 	pop r0
 	ret
-	
+
 ENTRY __fp64_saveMul
 	sts __ar0, r0
 	sts __br1, r1
@@ -153,7 +151,7 @@ ENTRY __fp64_saveMul
 	out 0x3f, r0
 	pop r0
 	ret
-	
+
 ENTRY __fp64_saveDiv
 	call __fp64_saveA
 	push r0
@@ -176,7 +174,7 @@ ENTRY __fp64_saveDiv
 	out 0x3f, r0
 	pop r0
 	ret
-	
+
 ENTRY __fp64_debugA
 	call __fp64_saveA
 	ldi	r24, lo8(__a_sreg)
@@ -188,7 +186,7 @@ ENTRY __fp64_debugAB
 	ldi	r24, lo8(__a_sreg)
 	ldi r25, hi8(__a_sreg)
 	ret
-	
+
 ENTRY __fp64_before
 	sts __before, ZH
 	sts __before+1, ZL

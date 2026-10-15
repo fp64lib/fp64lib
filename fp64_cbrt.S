@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -43,7 +41,7 @@ GCC_ENTRY __cbrt
 
 	push rA7					; save original sign
 	andi rA7, 0x7f				; delete sign
-	
+
 	ldi rB7, 0x3f				; load b with 0x3FD555555555555555LLU = 1/3
 	ldi rB6, 0x55
 	mov rB5, rB6
@@ -53,7 +51,7 @@ GCC_ENTRY __cbrt
 	ldi rB6, 0xd5
 
 	XCALL _U(fp64_pow)			; calc x^(1/3) = cbrt(x)
-	
+
 	pop r0						; restore original sign
 	bst r0, 7
 	bld rA7, 7					; and transfer it to result

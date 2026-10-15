@@ -29,15 +29,13 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
 #include "asmdef.h"
 
 /* float64_t fp64_fma (float64_t A, float64_t B, float64_t C)
-     The `fp64_fma' function performs floating-point multiply-add. This is the   
+     The `fp64_fma' function performs floating-point multiply-add. This is the
      operation (A * B) + C.
 	 Current implementation is space optimized, so no effort is taken to
 	 work on internal intermediate result. Only advantage for the caller is to
@@ -49,7 +47,7 @@ ENTRY fp64_fma
 	; rcall __fp64_saveAB
 	XCALL	_U(fp64_mul)
 	XCALL _U(__fp64_pushB)	; save used registers
-	
+
 	; with gcc, only up to 16 bytes of parameters are passed via registers
 	; as 3 float64_t as parameters exceed that limit, the last parameter is
 	; passed via the stack (pushed by the caller), pointed to by the frame pointer Y

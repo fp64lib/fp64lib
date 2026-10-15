@@ -29,21 +29,19 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /* 64 bit *********************************************************************/
 /* long long __fp64_fixsddi( float64_t A );
    long long fp64_to_int64( float64_t A );
-    The fp64_to_int64() function converts A to the signed integer value, 
-	rounding towards 0, the fractional part is lost. No saturation. 
+    The fp64_to_int64() function converts A to the signed integer value,
+	rounding towards 0, the fractional part is lost. No saturation.
 	Besides a normal 64-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output:	rA7..rA0	64-bit signed integer
 			C			carry as flag of error for indicating NaN or overflow
-			
+
 	special case matrix for fp64_to_int64
 	case| A	        | C	| result
 	----+-----------+---+-------------------
@@ -60,17 +58,17 @@ ENTRY fp64_to_int64
 	push rBE0
 	ldi rBE0, 63
 	XJMP _U(__fp64_fixxdfxi)
-	
+
 /* unsigned long long __fp64_fixunssddi( float64_t A );
    unsigned long long fp64_to_uint64( float64_t A );
-    The fp64_to_uint64() function converts A to the unsigned integer value, 
+    The fp64_to_uint64() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
-	Negative input is permissable (like GCC/x86). 
+	Negative input is permissable (like GCC/x86).
 	Besides a normal 64-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output:	rA7..rA0	32-bit unsigned integer
 			C			carry as flag of error fr indicating NaN or overflow
-			
+
 	special case matrix for fp64_to_uint64
 	case| A	        | C	| result
 	----+-----------+---+------------
@@ -87,17 +85,17 @@ ENTRY fp64_to_uint64
 	push rBE0
 	ldi rBE0, 64
 	XJMP _U(__fp64_fixxdfxi)
-	
+
 /* 16 bit *********************************************************************/
 /* int __fp64_fixsdsi( float64_t A );
    int fp64_to_int16( float64_t A );
-    The fp64_to_int16() function converts A to the signed integer value, 
-	rounding towards 0, the fractional part is lost. No saturation. 
+    The fp64_to_int16() function converts A to the signed integer value,
+	rounding towards 0, the fractional part is lost. No saturation.
 	Besides a normal 16-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output:	rA7..rA6	16-bit signed integer
 			C			carry as flag of error for indicating NaN or overflow
-			
+
 	special case matrix for __fp64_fixdfss
 	case| A	        | C	| result
 	----+-----------+---+------------
@@ -113,17 +111,17 @@ ENTRY fp64_to_int16
 	push rBE0
 	ldi rBE0, 15
 	XJMP _U(__fp64_fixxdfxi)
-	
+
 /* unsigned int __fp64_fixunssdsi( float64_t A );
    unsigned int fp64_to_uint16( float64_t A );
-    The fp64_to_uint16() function converts A to the unsigned integer value, 
+    The fp64_to_uint16() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
-	Negative input is permissable (like GCC/x86). 
+	Negative input is permissable (like GCC/x86).
 	Besides a normal 16-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output:	rA7..rA6	16-bit unsigned integer
 			C			carry as flag of error fr indicating NaN or overflow
-			
+
 	special case matrix for __fp64_fixunsdfss
 	case| A	        | C	| result
 	----+-----------+---+------------
@@ -140,17 +138,17 @@ ENTRY fp64_to_uint16
 	push rBE0
 	ldi rBE0, 16
 	XJMP _U(__fp64_fixxdfxi)
-	
+
 /*  8 bit *********************************************************************/
 /* char __fp64_fixsdsc( float64_t A );
    char fp64_to_int8( float64_t A );
-    The fp64_to_int8() function converts A to the signed integer value, 
-	rounding towards 0, the fractional part is lost. No saturation. 
+    The fp64_to_int8() function converts A to the signed integer value,
+	rounding towards 0, the fractional part is lost. No saturation.
 	Besides a normal 8-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output:	rA6	(!)		8-bit signed integer
 			C			carry as flag of error for indicating NaN or overflow
-			
+
 	special case matrix for fp64_to_int8
 	case| A	        | C	| result
 	----+-----------+---+------------
@@ -166,17 +164,17 @@ ENTRY fp64_to_int8
 	push rBE0
 	ldi rBE0, 7
 	XJMP _U(__fp64_fixxdfxi)
-	
+
 /* unsigned char __fp64_fixunssdsc( float64_t A );
    unsigned char fp64_to_uint8( float64_t A );
-    The fp64_to_uint8() function converts A to the unsigned integer value, 
+    The fp64_to_uint8() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
-	Negative input is permissable (like GCC/x86). 
+	Negative input is permissable (like GCC/x86).
 	Besides a normal 8-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output:	rA6	(!)		8-bit unsigned integer
 			C			carry as flag of error fr indicating NaN or overflow
-			
+
 	special case matrix for fp64_to_uint8
 	case| A	        | C	| result
 	----+-----------+---+------------
@@ -193,18 +191,18 @@ ENTRY fp64_to_uint8
 	push rBE0
 	ldi rBE0, 8
 	XJMP _U(__fp64_fixxdfxi)
-	
+
 /* 32 bit *********************************************************************/
 /* long __fp64_fixsdli( float64_t A );
    long fp64_float64_to_long( float64_t A );
    long fp64_to_int32( float64_t A );
-    The fp64_to_int32() function converts A to the signed integer value, 
-	rounding towards 0, the fractional part is lost. No saturation. 
+    The fp64_to_int32() function converts A to the signed integer value,
+	rounding towards 0, the fractional part is lost. No saturation.
 	Besides a normal 32-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output:	rA7..rA4	32-bit unsigned integer
 			C			carry as flag of error for indicating NaN or overflow
-			
+
 	special case matrix for fp64_to_int32
 	case| A	        | C	| result
 	----+-----------+---+------------
@@ -221,17 +219,17 @@ ENTRY fp64_float64_to_long
 	push rBE0
 	ldi rBE0, 31
 	XJMP _U(__fp64_fixxdfxi)
-	
+
 /* unsigned long __fp64_fixunssdli( float64_t A );
    unsigned long fp64_to_uint32( float64_t A );
-    The fp64_to_uint32() function converts A to the unsigned integer value, 
+    The fp64_to_uint32() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
-	Negative input is permissable (like GCC/x86). 
+	Negative input is permissable (like GCC/x86).
 	Besides a normal 32-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output:	rA7..rA4	32-bit unsigned integer
 			C			carry as flag of error fr indicating NaN or overflow
-			
+
 	special case matrix for fp64_to_uint32
 	case| A	        | C	| result
 	----+-----------+---+------------
@@ -253,11 +251,11 @@ ENTRY fp64_to_uint32
 	This is the common subroutine for all conversions from float64_t to integer.
     The __fp64_fixxdfxi() function converts A to the signed/unsigned integer value
 	with given length. rounding towards 0, the fractional part is lost. No saturation.
-	For conversion to unsigned, negative input is permissable (like GCC/x86). 
+	For conversion to unsigned, negative input is permissable (like GCC/x86).
  	input:	rA7..rA0	float64_t number to convert
 			rBE0		bit length of result:	64/63 for unsigned/signed long long
 												32/31 for unsigned/signed long
-												16/15 for unsigned/signed int							
+												16/15 for unsigned/signed int
 												8/7   for unsigned/signed char
 	output:	rA7..rA0	result for unsigned/signed long long (64 bit)
 			rA7..rA4	result for unsigned/signed long (32 bit)
@@ -274,7 +272,7 @@ ENTRY fp64_to_uint32
 	  4 | 0<|x|<1.0   | 0 | 0x00000000
 	  5 | 0<A<2^rBE0  | 0 | (uint_rBE0) A
 	  6 | -2^rBE0<A<0 | 0| -((uint_rBE0) (-A)
-	  
+
 	*** IMPORTANT: The caller must use the following sequence to use this function:
 	push rBE0
 	ldi rBE0, nn	; for valid values of nn see above
@@ -298,7 +296,7 @@ __fp64_fixxdfxi:
 	sub rAE1, rAE0			; rEA1 = maxExp - exp
 	; rcall __fp64_saveAB
 	brmi .L_err				; return 0 and error if exponent > 32
-		
+
 	; after splitting, the significand of x is in rA6..rA0,
 	; so already shifted 8 bits to the right in reference to
 	; rA7..rA0 which will hold the final result. So, with some
@@ -309,7 +307,7 @@ __fp64_fixxdfxi:
 	cpi rAE1, 8				; do we have to make >=8 shifts
 	; rcall __fp64_saveAB
 	brlo 2f					; no, bring number to correct position
-	
+
 1:	mov rA7, r1				; yes, clear top 8 bits
 	subi rAE1, 8			; adjust counter, as 8 shifts are done
 	cpi rAE1, 8				; still more than 8 shifts to be done
@@ -323,13 +321,13 @@ __fp64_fixxdfxi:
 	mov rA6, rA7
 	rjmp 1b					; and continue byte-wise shifting
 
-	; return zero as regular value, error flag not set 
+	; return zero as regular value, error flag not set
 .L_zr:
 	pop rBE0
 	XJMP	_U(__fp_zero)			; return 0x00000000, clear carry
 
 	; on all errors: return 0 and set error flag
-.L_err:	
+.L_err:
 	XCALL	_U(__fp64_zero)			; float64_t zero is also long 0
 	sec								; set error flag
 	pop rBE0
@@ -345,15 +343,15 @@ __fp64_fixxdfxi:
 	mov rA2, rA1
 	mov rA1, rA0
 	mov rA0, r1				; clear bottom 8 bits
-	
+
 3:	tst rAE1				; still any shifts to be done?
-4:	breq .L_sign			; no, set the sign	
+4:	breq .L_sign			; no, set the sign
 	lsr rA7					; yes, shift down 1 bit
 	ror rA6
 	XCALL _U(__fp64_rorA5)
 	dec rAE1
 	rjmp 4b
-	
+
   ; restore the sign and return
 .L_sign:
 	; rcall __fp64_saveAB

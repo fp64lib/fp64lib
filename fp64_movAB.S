@@ -26,14 +26,12 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /*  __fp64_movABx() move B into A
    Input:
-	  rBE1.rBE0.rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B in unpacked format 
+	  rBE1.rBE0.rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B in unpacked format
    Return:
 	  rAE1.rAE0.rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - a copy of B in unpacked format
    Modifies:
@@ -46,7 +44,7 @@ ENTRY __fp64_movABx
 
 /*  __fp64_movAB() move B into A
    Input:
-	  rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B in packed format 
+	  rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - B in packed format
    Return:
 	  rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - a copy of B in packed format
    Modifies:

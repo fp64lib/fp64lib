@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -44,7 +42,7 @@ ENTRY fp64_sinh
 GCC_ENTRY __sinh
 	ldi XL, 0x80
 	rjmp .L_common
-	
+
 
 /* float64_t fp64_cosh (float64_t x);
      The fp64_cosh() function returns the hyperbolic cosine of x, which is
@@ -54,7 +52,7 @@ GCC_ENTRY __sinh
 ENTRY fp64_cosh
 GCC_ENTRY __cosh
 	clr XL
-	
+
 .L_common:						; calculate sinh or cosh, depending on XL
 	; A = exp(x))
 	sts .L_sign, XL
@@ -62,15 +60,15 @@ GCC_ENTRY __cosh
 	XCALL _U(__fp64_pushB)		; preserve registers
 
 	XCALL _U(__fp64_movBA)		; save exp(-fabs(x))
-	
-	XCALL _U(fp64_inverse)		; calculate exp(fabs(x)) 
+
+	XCALL _U(fp64_inverse)		; calculate exp(fabs(x))
 	lds XL, .L_sign				; retrieve sign
 	sub rA7, XL					; for sinh, exp(-x) becomes -exp(-x)
 	XCALL _U(fp64_add)			; exp(x) +/- exp(-x)
 	ldi rB7, hi8(-1)
 	ldi rB6, lo8(-1)
 	XCALL _U(fp64_ldexp)		; (exp(x) +/- exp(-x))*(2^-1)
-	
+
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC
 .data

@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -54,9 +52,9 @@ ENTRY fp64_log2
 GCC_ENTRY __log2
 
 	XCALL _U(fp64_log)
-	
+
 	XCALL _U(__fp64_pushB)		; preserve registers
-	
+
 #ifdef ARDUINO_AVR_MEGA2560
 	in ZL, RAMPZ
 	push ZL
@@ -69,13 +67,13 @@ GCC_ENTRY __log2
 #ifdef ARDUINO_AVR_MEGA2560
 	pop r0
 	out RAMPZ, r0	; restore RAMPZ
-#endif	
-	
+#endif
+
 	XCALL _U(fp64_div)
-	
+
 	XJMP _U(__fp64_popBret)		; restore registers and return
 
 .L_log2: ; log(2) = 0x3FE62E42FEFA39EF = 0.6931471805599453094172321214581790787926
 	.byte 0x3F, 0xE6, 0x2E, 0x42, 0xFE, 0xFA, 0x39, 0xEF
-	
+
 ENDFUNC

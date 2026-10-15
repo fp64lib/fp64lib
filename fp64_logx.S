@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -49,20 +47,20 @@ FUNCTION fp64_log
 	brne .L_nan					; case 2: NaN  --> return NaN
 	brts .L_nan					; case 1: -Inf --> return NaN
 	XJMP _U(__fp64_inf)			; case 3: +Int --> return +Inf
-	
+
 	; cases 1 & 2: return NaN
 .L_nan:
 	XJMP	_U(__fp64_nan)
-	
+
 	; case 4: return -Inf for x = 0
 .L_inf:
 	set
 	XJMP _U(__fp64_inf)
-	
+
 	; case 5: return 0.0 for x = 1.0
 .L_zero:	; return 0.0
 	XJMP _U(__fp64_zero)
-	
+
 /*	float64_t fp64_log( float64_t x );
 	returns the natural logarithm ln of x
 */
@@ -72,15 +70,15 @@ GCC_ENTRY __log
 	brcs .L_nf					; case 1-3: return NaN for x=NaN,-Inf, +Inf for +Inf
 	breq .L_inf					; case 4: return -Inf for x = 0
 	brts .L_nan					; case 1: return NaN for x < 0
-	
+
 	XCALL _U(__fp64_cmp_1)
 	breq .L_zero				; case 5: return 0 for x == 1
 
 	tst rA6						; subnormal number?
 	brmi 2f
 	XCALL _U(__fp64_norm2)		; yes, normalize it
-	
-2:	
+
+2:
 	XCALL _U(__fp64_pushCB)		; as all registers may be used, save them
 	push YH
 	push YL
@@ -99,14 +97,14 @@ GCC_ENTRY __log
 
 22:	; rcall __fp64_saveAB
 	push rAE0					; save exponent for normalization
-	
+
 	XCALL _U(__fp64_movCA)		; save x
 	push rAE1
 	push rAE0
 
 	XCALL _U(__fp64_ldb_1)		; load B with 1.0
 	XCALL _U(__fp64_add_pse)	; x + 1
-	
+
 	_SWAPW rC6, rA6				; save result of x+1 and load A with x
 	_SWAPW rC4, rA4
 	_SWAPW rC2, rA2
@@ -117,16 +115,16 @@ GCC_ENTRY __log
 	push rAE1					; save exponent of x+1 on stack
 	push rAE0
 	movw rAE0, rBE0				; load exponent of x into A
-	
+
 	XCALL _U(__fp64_ldb_1)		; load B with 1.0
 	clt
 	XCALL _U(__fp64_sub_pse)	; x - 1
 	bld rA7, 7					; save sign
-	
+
 	XCALL _U(__fp64_movBC)		; restore b = x + 1
 	pop rBE0					; restore exponent of x+1
 	pop rBE1
-	
+
 	bst rA7, 7					; sign is sign of (x-1), as (x+1) is always > 0
 	tst rA6						; is (x-1) == 0?
 	breq 23f					; yes, (x-1) / (x-1) is also 0 (__fp64_divsd3_pse does not handle 0)
@@ -145,44 +143,44 @@ GCC_ENTRY __log
 	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
 #endif
 	; rcall __fp64_saveAB
-23:	
+23:
 	pop r0						; restore normalization exponent
-	pop rBE0					; restore exponent			
+	pop rBE0					; restore exponent
 	pop rBE1
 
 	bld rA7,7
 	XCALL _U(__fp64_pushA)		; save result of log(y)
 	push rAE1
 	push rAE0
-	
-10:	
+
+10:
 	movw rA6, rBE0				; convert exponent-base into float64_t
 	sub rA6, r0				    ; exponent - base
 	sbci rA7, 0x03
-	
+
 	XCALL _U(__fp64sssd_pse) 	; int16 as a float
 	XCALL _U(__fp64_ldb_log2)	; B = log(2)
 	bld rA7, 7
 	; rcall __fp64_saveAB
-	XCALL _U(__fp64_mulsd3_pse)	
-	
+	XCALL _U(__fp64_mulsd3_pse)
+
 	pop rBE0					; restore B = log(y)
 	pop rBE1
 	XCALL _U(__fp64_popB)
-	
+
 	mov r0, rB7					; T has to be sign(A) ^ sign(B)
 	eor r0, rA7
 	bst r0,7
 	; rcall __fp64_saveAB
 	XCALL _U(__fp64_add_pse)	; log(x*2^n) = log(x)+n*log(2)
 
-99:	
+99:
 	pop XL						; restore all used registers
 	pop XH
 	pop YL
 	pop YH
 	XCALL _U(__fp64_popBC)
-	
+
 	XJMP _U(__fp64_rpretA)		; round, pack and return
 
 .L__tableLog:
@@ -194,8 +192,7 @@ GCC_ENTRY __log
 	.byte 0x00, 0x92, 0x49, 0x24, 0xA4, 0x88, 0x92, 0x50, 0x03, 0xfd ; 0x3FD249249491124A = 0.28571428783860553210658222441345541743520204
 	.byte 0x00, 0xCC, 0xCC, 0xCC, 0xCC, 0xBB, 0x2B, 0xC5, 0x03, 0xfd ; 0x3FD9999999976579 = 0.39999999999198324890372309941486219658990021
 	.byte 0x00, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAD, 0xE9, 0x03, 0xfe ; 0x3FE55555555555BD = 0.66666666666667818373685193388291900221762915
-	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00 ; 0x4000000000000000 = 1.9999999999999999972866132948540368981897486 
+	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00 ; 0x4000000000000000 = 1.9999999999999999972866132948540368981897486
 	.byte 0x00												; byte needed for code alignment to even adresses!
-	
+
 ENDFUNC
-	

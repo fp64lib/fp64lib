@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -43,7 +41,7 @@ FUNCTION __fp64_addsubAB
 		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - (mantissa of) A + B
 		Flags set according to result of last operation
 	Modifies:
-		nothing 
+		nothing
  */
 
 ENTRY __fp64_addAB
@@ -66,7 +64,7 @@ ENTRY __fp64_addAB
 		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - (mantissa of) A - B
 		Flags set according to result of last operation
 	Modifies:
-		nothing 
+		nothing
  */
 
 ENTRY __fp64_subAB

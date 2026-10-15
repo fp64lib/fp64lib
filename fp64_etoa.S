@@ -26,8 +26,6 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -44,7 +42,7 @@
 			rB2:		int16_t *Exp10 // if != NULL, store exponent base 10 here
 	output: rA7..rA6	pointer to result, '\0' terminated C-string
 	modfies: rAx
-	
+
 	WARNING: 	function returns a pointer to a static temporary scratch area which might be used
 				also for other functions. The returned string might become invalid/scrambled
 				if one of the other fp64_ functions will be called. So copy the result to some
@@ -57,7 +55,7 @@ FUNCTION fp64_etoa
 // assign aliases to registers for easier reading
 // phase 1, ftoa and division by 3
 #define rResH	rA7		/* register pair for pointer to result buffer */
-#define rResL	rA6		
+#define rResL	rA6
 #define rMulH	rA5		/* high byte of exp * 512/3 */
 #define rMulL	rA4		/* low byte of exp * 512/3 */
 #define rF171	rA3		/* register for factor 512/3 = 171 */
@@ -70,14 +68,14 @@ FUNCTION fp64_etoa
 #define rMod	rA1		/* exponent mod 3 */
 
 .L_OK:
-	ret								; just return for NaN/Inf	
-	
+	ret								; just return for NaN/Inf
+
 .L_zero:
-	rjmp .L_saveExp					; store the exponent and return for 0.0			
+	rjmp .L_saveExp					; store the exponent and return for 0.0
 
 ENTRY   fp64_etoa
 	XCALL _U(__fp64_splitA)
-	
+
 	push rB2						; save pointer to result exponent
 	push rB3
 
@@ -87,9 +85,9 @@ ENTRY   fp64_etoa
 	ldi rB7,hi8(.L_exp10)
 	mov rB3, rB7
 	pop rB7
-	
+
 9:	XCALL _U(__fp64_ftoa_pse)		; get an result in scientific format
-	
+
 	lds rAE0, .L_exp10				; get exponent base 10
 	lds rAE1, .L_exp10+1
 
@@ -106,16 +104,16 @@ ENTRY   fp64_etoa
 	ld rChar, X
 	cpi rChar, '0'
 	breq .L_zero						; no treatment needed for 0
-	
+
 	; now get "exponent mod 3" for shifting the "."
 	; get x = abs(rAE1.0) mod 3
 	; for positive x
-	; 	move decimal point to the right by x digits 
+	; 	move decimal point to the right by x digits
 	; 	and increase exponent by x
 	;	result:	1.2345E0	-> 1.2345E0	(0 mod 3 = 0)
 	;			1.2345E1	-> 12.345E0	(1 mod 3 = 1)
 	;			1.2345E2	-> 123.45E0 (2 mod 3 = 2)
-	;			1.2345E3	-> 1.2345E3 (3 mod 3 = 0)	
+	;			1.2345E3	-> 1.2345E3 (3 mod 3 = 0)
 	; for negative x
 	;	calc y = (x==0) ? 0 : 3-x
 	;	move decimal point to the right by y digits
@@ -124,7 +122,7 @@ ENTRY   fp64_etoa
 	;			1.2345E-2	-> 12.345E-3 x = 2, y = 3-2 = 1
 	;			1.2345E-3	-> 1.2345E-3 x = 0, y = 0
 	;			1.2345E-4	-> 123.45E-6 x = 1, y = 3-1 = 2
-	;			
+	;
 
 	; fast mod 3 for exponent
 	bst rAE1,7				; save sign of exponent into t flag
@@ -133,12 +131,12 @@ ENTRY   fp64_etoa
 	neg rAE1				; calc abs(rAE1.0)
 	neg rAE0
 	sbc rAE1, r1
-	
-0:	
+
+0:
 	; highly optimized division
 	; assumption: exponent is already normalized and contains abs(exponent)
 	; highest exponent is 385, which fits into 9 bits = 2^9 = 512
-	; x/3 = (x*512/3)/512 = x*171 >> 9 
+	; x/3 = (x*512/3)/512 = x*171 >> 9
 	; x is a 16 bit value, x = rAE1 << 8 + rAE0
 	; and rAE1 is either 0 or 1 (as exponent is 9 bits at max)
 	; --> rAE1*171 is always an 8 bit result (as it is 0 or 171)
@@ -165,7 +163,7 @@ ENTRY   fp64_etoa
 	adc rMulH, r1		; rMulH.L = x + x = 2*x
 	add rMulL, r0
 	adc rMulH, r1		; rMulH.L = (x + x) + x = 3 * x
-	
+
 	sub rAE0, rMulL
 	sbc rAE1, rMulH		; rRAE1.0 = rAE1.0 mod 3
 	mov rMod, rAE0		; rMod = rAE1.0 mod 3
@@ -190,7 +188,7 @@ ENTRY   fp64_etoa
 	ldi rExp, 'E'
 	ldi rDot, '.'
 	ldi rChr0, '0'
-	
+
 	ld rChar, X+	; check for sign and skip it
 	cpi rChar, '-'
 	breq 2f
@@ -201,7 +199,7 @@ ENTRY   fp64_etoa
 
 	cpi rMod, 1		; check for exponent mod 3 == 1
 	brne .L_two
-	
+
 .L_one:
 	; shift by 1
 	; take care of the following cases
@@ -214,11 +212,11 @@ ENTRY   fp64_etoa
 	; instead of "E", "\0" is also possible
 	; "a.E-eee"			--> "a0.E-e+1" and "a0E-e+1"
 
-	cp rChar, rExp	
+	cp rChar, rExp
 	breq .L_case1a	; case 1a "aEeee"
 	tst rChar
 	breq .L_case1a	; case 1a "a\0eee"
-	
+
 	; >= case 1b --> rChar is "."
 	ld rChar, X		; get first character after ".": either E or digit
 	sbiw X, 1		; and position back to "."
@@ -227,16 +225,16 @@ ENTRY   fp64_etoa
 	tst rChar
 	breq .L_case1b	; case 1b "a.\0eee"
 
-	; >= case 2 --> rChar has first decimal digit 
+	; >= case 2 --> rChar has first decimal digit
 	st X+, rChar	; copy first decimal it over the "."
 	st X+, rDot		; and the insert the "." back, "a.b" --> "ab."
-	
+
 	ld rChar, X+	; get either next digit or "E"
 	cp rChar, rExp
 	breq .L_case2	; case 2 "a.bEeee"
 	tst rChar
 	breq .L_case2	; case 2 "a.b\0eee"
-	
+
 	; case 3, normal case "a.bcdEeee", X is pointing to "d"
 	; now scan for end of digits
 .L_case3:
@@ -251,7 +249,7 @@ ENTRY   fp64_etoa
 	; rChar is "E" or "\0"
 	; X points to first digit of exponent
 	sbiw X, 1			; move back to exponent delimiter
-	
+
 .L_case1b:	; 1b) "a.Eeee"		--> "a0Ee-1"
 	; rChar is "E" or "\0"
 	; X points to "." (or exponent delimiter for case 1a)
@@ -275,22 +273,22 @@ ENTRY   fp64_etoa
 	lds rAE0, .L_exp10
 	lds rAE1, .L_exp10+1
 	; rcall __fp64_saveAB
-	sub rAE0, rMod	
+	sub rAE0, rMod
 	sbc rAE1, r1
-	
+
 	tst rAE1	; check for positive numbers
 	brmi 4f		; skip if negative
 	adiw rAE0, 0
 	breq 4f		; and for zero
-	
+
 	ldi rChar, '+'			; store '+' for positive numbers
 	st X+, rChar
-	
+
 4:	push rAE0				; save exponent
 	push rAE1
 	push rResL				; and pointer to start of result
 	push rResH
-	
+
 	ldi r20, 0x0a			; convert to radix 10
 	movw r24, rAE0			; number to convert
 	movw r22, X				; pointer to string
@@ -333,7 +331,7 @@ ENTRY   fp64_etoa
 	breq .L_case21a		; case 21a "aEeee"
 	tst rChar
 	breq .L_case21a		; case 21a "a\0eee"
-	
+
 	; >= case 21b --> rChar now contains "."
 	ld rChar, X			; get first character after ".": either E or digit
 	sbiw XL, 1			; and position back to "."
@@ -352,16 +350,16 @@ ENTRY   fp64_etoa
 	breq .L_case22	; case 22 "a.bEeee"
 	tst rChar
 	breq .L_case22	; case 22 "a.b\0eee"
-	
+
 	st X+, rChar	; copy 2nd decimal digit --> "abcc"
 	st X+, rDot		; and the insert the "." back, "abcc" --> "abc."
-	
+
 	ld rChar, X+	; get either next digit or "E"
 	cp rChar, rExp
 	breq .L_case23	; case 23 "a.bcEeee"
 	tst rChar
 	breq .L_case23	; case 23 "a.bc\0eee"
-	
+
 	; case 24, 'normal' case "a.bcdEeee", X is pointing to "d"
 	; now scan for end of digits = exponent character
 .L_case24:
@@ -371,7 +369,7 @@ ENTRY   fp64_etoa
 	tst rChar
 	brne .L_case24
 	rjmp .L_decE		; done, decrease and store exponent
-	
+
 .L_case21a:	; 21a) "aEeee"		--> "a00Ee-2"
 	; rChar is "E" or "\0"
 	; X points to first digit of exponent
@@ -388,7 +386,7 @@ ENTRY   fp64_etoa
 	; X points to char before rChar, i.e. to second "b"
 	st X+, rChr0
 	st X+, rChar		; and start the exponent
-	
+
 	rjmp .L_decE		; increase and store the exponent
 
 .L_case23: ; 23) "a.bcEeee"		--> "abcEe-2"
@@ -397,7 +395,7 @@ ENTRY   fp64_etoa
 	; X points to first digit of exponent
 	sbiw XL, 1 			; let X point to "."
 	st X+, rChar		; start the exponent, i.e. exponent overwrites "."
-	
+
 	rjmp .L_decE		; increase and store the exponent
 
 ENDFUNC

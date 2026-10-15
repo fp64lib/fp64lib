@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* long fp64_lrint (float64_t A);
      The fp64_lrint() function rounds A to the nearest integer, rounding the
      halfway cases to the even integer direction. (That is both 1.5 and
@@ -40,7 +38,7 @@
    Return:
      The rounded long integer value. If A is infinite, NaN or an overflow
      was, this realization returns the LONG_MIN value (0x80000000).
-	
+
 	The following rules apply:
 
 	case|           A	       | result
@@ -70,7 +68,7 @@
      fp64_lrint(-2.75) --> -3L
      fp64_lrint(-3.5)  --> -4L
  */
- 
+
  #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -99,8 +97,8 @@ FUNCTION fp64_lrint
 	mov rA4, r1
 	mov rA3, r1
 	rjmp .L_round
-	
-.L_one:		
+
+.L_one:
 	mov rA7, r1					; get a zero (can't use __fp_zero as this clears the T flag)
 	mov rA6, r1
 	movw rA4, rA6
@@ -123,16 +121,16 @@ GCC_ENTRY __lrint
 
 	tst rAE1
 	brmi 0b						; |x| < 1, check for cases 5 & 6
-	brne .L_err					; |x| > 2^255, case 4, return LONG_MIN 
+	brne .L_err					; |x| > 2^255, case 4, return LONG_MIN
 	cpi rAE0, 31
 	brge .L_err					; |x| >= 2^31, case 4, return LONG_MIN
-	
+
 	; case 7: now x is in range 1 <= |x| < 2^31
 	; clear out the fractional bits
-	
+
 	ldi rAE1, 31				; counter = 31 digits - exp2(x)
 	sub rAE1, rAE0				; as |x| < 2^31, this is always >= 0
-	
+
 1:	breq .L_round
 	lsr rA6						; shift number downwards -> this clears the fraction
 	ror rA5
@@ -144,7 +142,7 @@ GCC_ENTRY __lrint
 	inc	r0						; no: set lowest bit
 2:	dec rAE1
 	rjmp 1b
-	
+
 	; now round
 .L_round:
 	lsl r0						; get last bit of fraction into carry --> if C==1, fraction >= 0.5
@@ -152,7 +150,7 @@ GCC_ENTRY __lrint
 	brne 3f						; if r0 != 0 --> fraction > 0.5 --> round it
 	sbrs rA3, 0					; is number even?
 	rjmp .L_sign				; no --> already correctly rounded (e.g. 2.5 --> 2L), return
-	
+
 3:	adc rA3, r1					; C = 1 if fraction(x) >= 0.5
 	adc rA4, r1
 	adc rA5, r1
@@ -164,7 +162,7 @@ GCC_ENTRY __lrint
 	mov rA6, rA5
 	mov rA5, rA4
 	mov rA4, rA3
-	
+
   ; restore the sign and return
 	; rcall __fp64_saveAB
 	brtc	.L_ret

@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -37,12 +35,12 @@
      The fp64_exp() function returns the value of e (the base of natural
      logarithms) raised to the power of x.
  */
- 
+
 #define	X2BIG		0x0408
 							; start of biggest argument
 							; ((float64_t)0x40862E42FEFA39EFLLU), //709.78271289338397 res
 							; exp(x) --> ((float64_t)0x7FEFFFFFFFFFFFFFLLU), //1.7976931348623E+308 x
- 
+
 FUNCTION fp64_exp
 
 	; Special cases
@@ -55,7 +53,7 @@ FUNCTION fp64_exp
 	; 5   | >709  | +Inf (Overflow)
 	; 6   | <-744 | 0 (Underflow)
 
-.L_nf:	
+.L_nf:
 	brne	.L_nan			; +/-Inf? No --> return NaN
 .L_tb:
 	brtc	.L_inf			; -Inf? No --> return +Inf
@@ -64,7 +62,7 @@ FUNCTION fp64_exp
 
 .L_nan:	; x = NaN, case 1 --> return NaN
 	XJMP	_U(__fp64_nan)
-	
+
 .L_one:
 	XCALL _U(__fp64_zero)
 	ldi rA7, 0x3f			; return 1
@@ -101,7 +99,7 @@ GCC_ENTRY __exp
 	bld r0, 7				; save sign of x
 	push r0
 
-	
+
 	; calculate fmod(x,ln(2)) = x - n*ln(2)
 	XCALL _U(__fp64_fmodx_ln2_pse)
 	; rcall __fp64_saveABC
@@ -139,7 +137,7 @@ GCC_ENTRY __exp
 	bst r0, 7				; restore saved sign of x
 	; rcall __fp64_saveABC
 	XCALL _U(__fp64_popBC)	; restore register set
-	
+
 	; multiply result by 2^n --> add n to exponent
 	; rcall __fp64_saveAB
 	brts 2f				; if x < 0, subtract n from exponent
@@ -153,19 +151,19 @@ GCC_ENTRY __exp
 	brne .L_retA	; exponent < 0x700 --> normal case, return A
 	cpi rAE0, 0xff
 	brne .L_inf		; exponent == 0x7ff --> overflow
-	
+
 	; normal case, return A
 .L_retA:
 	clt
 	XJMP _U(__fp64_rpretA);
-	
+
 2:	sub rAE0, rBE0		; subtract n from exponent
 	sbc rAE1, rBE1
 	; rcall __fp64_saveAB
 	; check for various underflow conditions
 	brmi 22f		; exponent < 0 --> check range for underflow
 	rjmp .L_retA
-	
+
 	brne .L_retA	; exponent > 0 --> normal case, return A
 	; exponent == 0, check for 0
 	XCALL _U(__fp64_cpc0A5)	; C = 1 if one of Ax > 0
@@ -174,17 +172,17 @@ GCC_ENTRY __exp
 	; A != 0, exponent == 0 --> only one shift is needed to return A as subnormal
 	XCALL _U(__fp64_lsrA)
 	rjmp .L_retA
-	
+
 	; exponent <= 0, check if in range for subnormal number
 22:	cpi rAE1, hi8(-53)
 	brne 6f			; exponent < -255 --> underflow, return 0
 	cpi rAE0, lo8(-53)
 	brlo 6f			; exponent < -53 --> underflow, return 0
-	
+
 3:	; subnormal number, exponent between 0 and -53
 	; shift significand to right until exponent is 0
-	
-	
+
+
 4:	cpi rAE0, -8			; can we fast shift by 8 bits = 1 byte?
 	brsh 5f
 	mov rA0, rA1
@@ -196,7 +194,7 @@ GCC_ENTRY __exp
 	mov rA6, rA7
 	subi rAE0, -8
 	rjmp 4b
-	
+
 5:	tst rAE0
 	breq 6f
 
@@ -230,7 +228,7 @@ ENTRY __fp64_check_powserexp
 	; exp(x) ~ SUM(n = 1 to 16; x^n/n! ) = 1/0!*1 + 1/1!*x + 1/2!*x^2 + 1/3!*x^3 + ... + 1/16!*x^16
 	; the coefficients were computed with python with 40 (decimal) digits precision
 	; and then rounded to 56 Bits
-	; 0xd73f9f399dc0f9p-116  = Decimal(0xd73f9f399dc0f9) / 2**116 
+	; 0xd73f9f399dc0f9p-116  = Decimal(0xd73f9f399dc0f9) / 2**116
 .L_expxTable:
 	.byte 16	; polynom power = 16 --> 17 entries
 	;     rB7   rB6   rB5   rB4   rB3   rB2   rB1   rB0   rBE1  rBE0

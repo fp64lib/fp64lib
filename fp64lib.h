@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* IEEE float format single
    Bit 31: sign 0 = + / 1 = -
    Bits 30-23: exponent -126 <= e <= 127, base 127
@@ -43,14 +41,14 @@
    63   59    55   51    47   43   ... 7    3
    7  4 3  0  7  4 3  0  7  4 3  0 ... 7  4 3  0
    SEEE EEEE  EEEE MMMM  MMMM MMMM ... MMMM MMMM
-   
+
    Interpretations:
    E = 0		M = 0	--> +/- 0 (zero)
    E = 0		M > 0	--> +/- 0,M*2^(-1022)	denormalized numbers
    0<E< 2046	M >= 0	--> +/- 1,M*2^(E-1023)	normal numbers
    E = 2047		M = 0	--> +/- Inf				infinity
    E = 2047		M > 0	--> NaN					not a number
-   
+
    fp64lib functions do not raise exceptions and do not change the
    errno variable. Therefore the majority of them are declared
    with const attribute as "do not examine any values except their
@@ -63,7 +61,7 @@
 
 #ifdef __cplusplus
 extern "C"{
-#endif 
+#endif
 
 #ifndef __ATTR_CONST__
 # define __ATTR_CONST__ __attribute__((__const__))

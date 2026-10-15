@@ -26,14 +26,12 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float __fp64_sdsf (float64_t A);
    float fp64_ds (float64_t A);
     Converts a float64 to the float32 representing the same number.
 	As the range of float is significandly smaller than float64_t,
 	the following rules apply:
-	 
+
 	case|           A	       | result
 	----+----------------------+------------
 	  1 |          NaN         | 0x7fffffff (NaN in float)
@@ -48,7 +46,7 @@
 	 10 |  2^-149 < x < 2^-126 | 0x00mmmmmm (subnormal number with mmmmmm < 0x800000)
 	 11 | -2^-126 < x <-2^-149 | 0x80mmmmmm (subnormal number with mmmmmm < 0x800000)
 	 12 |  2^-126 <|x|< 2^127  | (float) A
-	  
+
 	Significand is rounded up, if bit 25 of significand of A is set
 
    Input:
@@ -56,7 +54,7 @@
    Output:
      rA7.rA6.rA5.rA4  				 - arg. A in IEEE 754 - 32-bit format
  */
- 
+
  #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -86,7 +84,7 @@ ENTRY fp64_ds
 	brge .L_Inf					; return Inf as exponent > 255 (case 6&7)
 	cpi rAE1, 0xff
 	brlt .L_zr					; return 0 as exponent < -255 (case 8&9)
-	
+
 	; now rAE1 is either 0x00 or 0xff -- > exponent is in range -256 < exp < 255
 	tst rAE1
 	brpl 1f
@@ -95,21 +93,21 @@ ENTRY fp64_ds
 	brlo .L_zr					; yes, case 8&9, return 0
 	cpi rAE0, -126				; is A >= 2^-126
 	brsh .L_norm				; yes, it's a normal number
-	
+
 	; handle subnormal numbers
 	subi rAE0, -126				; normalize exponent, exponent will be positive after this
-	
+
 0:	lsr rA6						; create subnormal number (case 10&11)
 	ror rA5
 	ror rA4
 	inc rAE0					; until exponent is no longer positive
 	; rcall __fp64_saveAB
 	brmi 0b
-	
+
 	clr rA7						; clear exponent to identify subnormal number
 	rjmp 2f
-	
-	; check for exponent 
+
+	; check for exponent
 1:	cpi rAE0, 128
 	brsh .L_Inf					; return Inf as exponent is > 127 (case 6&7)
 
@@ -125,7 +123,7 @@ ENTRY fp64_ds
 	; now pack and return the result
 .L_pack:
 	lsl rA6						; get rid of leading 1 bit
-	mov rA7, rAE0				
+	mov rA7, rAE0
 	lsr rA7						; make room for sign bit
 	ror rA6						; and shift bit 0 of exponent into bit 7 of significand
 2:	bld rA7, 7					; place sign bit into sign bit of float
@@ -135,4 +133,3 @@ ENTRY fp64_ds
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */
-

@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -46,7 +44,7 @@ FUNCTION __fp64_swapAB
 ENTRY __fp64_swapAB
 	push r0
 	push r1
-	_SWAPW rAE0, rBE0		
+	_SWAPW rAE0, rBE0
 	_SWAPW rA0, rB0
 	_SWAPW rA2, rB2
 	_SWAPW rA4, rB4

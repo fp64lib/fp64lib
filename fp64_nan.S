@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -42,5 +40,5 @@ ENTRY   __fp64_nanp
 ENTRY   __fp64_nan
 	ldi	rA7, 0x7F
 	ldi	rA6, 0xF8	; space saving implementation, ensure mantissa <> 0
-	ret				; rest of A5..A0 may have any value 
+	ret				; rest of A5..A0 may have any value
 ENDFUNC
