@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -56,7 +54,7 @@ ENTRY __fp64_lshift64
 	cpi XL, 64
 	brlo 1b				; stop after 8 cycles
 	rjmp 9f
-	
+
 2:	inc XL				; shifts++
 	lsl rC0
 	rol rC1

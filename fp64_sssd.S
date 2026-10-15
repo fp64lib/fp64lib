@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -49,24 +47,24 @@ ENTRY   __fp64unsssd
 	clt
 	rcall .L_common
 	XJMP _U(__fp64_pretA)
-	
+
 /* float64_t __fp64sssd ( int16_t x );
    float64_t fp64_int16_to_float64 ( short x );
    Convert a signed 16-bit integer (short) to float64_t.
    No overflow will occur, as 16bit long will
    always fit into the 53-bit significand
-   
+
    Input:
      rA7.rA6							- an 'x' arg as signed 16-bit short
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754-64 bit format
-*/										  
+*/
 ENTRY fp64_int16_to_float64
 ENTRY __fp64sssd
 	rcall __fp64sssd_pse
 	XJMP _U(__fp64_pretA)
-	
-ENTRY __fp64sssd_pse	
+
+ENTRY __fp64sssd_pse
 	bst	rA7, 7			; save sign
 	brtc .L_common		; if x > 0, start conversion
 	; negate A
@@ -80,7 +78,7 @@ ENTRY __fp64sssd_pse
 	movw rA0, rAE0		; set lower 48 bits to 0
 	movw rA2, rAE0
 	movw rA4, rAE0
-	
+
 	adiw rA6, 0			; x == 0?
 	brne 0f				; no, convert
 	ret					; yes, result is also 0 in IEEE notation
@@ -90,7 +88,7 @@ ENTRY __fp64sssd_pse
 
 	tst	rA7				;  A >= 2^8
 	breq 2f				; no, we only need to take care of lower byte
-	
+
 	; A >= 2^8 shift to right is needed by 1..8 positions
 	mov rA5, rA6
 	mov rA6, rA7
@@ -100,7 +98,7 @@ ENTRY __fp64sssd_pse
 	lsl rA5				; x <<= 1
 	rol rA6
 	rjmp 1b				; until  leftmost bit is set
-	
+
 	; A < 2^8, we only need to take car of lower 8 bits already in rA6
 2:	sbiw rAE0, 8		; number is at maximum 2^8-1
 	tst rA6

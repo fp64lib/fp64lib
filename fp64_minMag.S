@@ -26,8 +26,6 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -44,13 +42,13 @@ ENTRY fp64_maximumMagnitude
 	eor rA7, rB7			; do x and y have different sign?
 	bst rA7, 7
 	pop rA7
-	
+
 	ori rA7, 0x80			; now get minimum( -|x|, -|y|) = -maximum( |x|, |y| )
 	ori rB7, 0x80			; but as we saved the original sign, this will return x or y
-	brtc .L_min				; no special handling is sign(x) == sign(y)	
+	brtc .L_min				; no special handling is sign(x) == sign(y)
 
 	XCALL _U(__fp64_cpcAB)	; is y = -x?
-	cpc rA7, rB7			; 
+	cpc rA7, rB7			;
 	brne .L_min				; no, do normal minimum(|x|,|y|)
 
 	; yes, y = -x --> return the one with the positive sign
@@ -70,13 +68,13 @@ ENTRY fp64_minimumMagnitude
 	eor rA7, rB7			; do x and y have different sign?
 	bst rA7, 7
 	pop rA7
-	
+
 	andi rA7, 0x7f			; remove sign, create |x|, |y|
 	andi rB7, 0x7f
 	brtc .L_min				; no special handling is sign(x) == sign(y)
 
 	XCALL _U(__fp64_cpcAB)	; is y = -x?
-	cpc rA7, rB7			; 
+	cpc rA7, rB7			;
 	brne .L_min				; no, do normal minimum(|x|,|y|)
 
 	; yes, y = -x --> return the one with the negative sign

@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float __fp64_sdsf (float64_t A);
    float fp64_ds (float64_t A);
 	Converts a float64 to the float32 representing the same number.

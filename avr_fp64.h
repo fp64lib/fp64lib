@@ -1,9 +1,9 @@
 /* Copyright (c) 2019-2020  Uwe Bissinger
    Based on code of avr_f64.h with:
    Original Code by Detlef_a (Nickname in the www.mikrocontroller.net forum).
-   Extensions (trigonometric functions et al.) und changes by Florian Kï¿½nigstein, mail@virgusta.eu .
+   Extensions (trigonometric functions et al.) und changes by Florian Königstein, mail@virgusta.eu .
 
-  The following copyright information refers to the code developed by Florian Kï¿½nigstein.
+  The following copyright information refers to the code developed by Florian Königstein.
 
 ; //*********************************************************************************************************** //
 ; //*********************************************************************************************************** //
@@ -65,8 +65,6 @@
   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
-
-/* $Id$ */
 
 // This file contains definitions to easily port code based on avr_f64.h / avr_f64.c
 // to using fp64lib.
@@ -155,4 +153,3 @@ extern "C"{
 #endif
 
 #endif //#ifndef avr_f64_h_included
-

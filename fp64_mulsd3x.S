@@ -29,22 +29,20 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /*
 	fp64_mult:
 	Result will be computed with 9*8=72 bit precision, error max of +/-1 LSB
 	R mantissa:	rR13, rR12, rR11, rR10, rR9, rR8, rR7, rR6, rR5	9 registers
-				rB4   rB3   rB2   rB1   rB0, rR8, rR7, rR6, rR5 
+				rB4   rB3   rB2   rB1   rB0, rR8, rR7, rR6, rR5
 				r13,  r14,  r15,  r16,  r17, r6,  r7,  r8,  r9
 	r5:			0
 	Total: 9+9+4 = 22 or 9+9+9 = 27
 	34 multiplications, 33*3 = 99 additions
 
    todo:
-	rA0 und rb0 haben nur die top 4 bits gesetzt, 
+	rA0 und rb0 haben nur die top 4 bits gesetzt,
 	d.h. evtl. kann Multiplikation noch weiter gekürzt werden
-	Algorithmus für Runden und Addition müssen fertig gestellt werden, 
+	Algorithmus für Runden und Addition müssen fertig gestellt werden,
 	die routinen hier runden nicht
  */
 
@@ -65,7 +63,7 @@ FUNCTION __fp64_mulsd3x
 	; 4	  |	0	  |	Inf	 |	NaN
 	; 5	  |	Inf	  |	!= 0 |	Inf
 	; 6	  |	!= 0  |	Inf	 |	Inf
-0:	brne	1f				; as NaN has priority, result will be NaN	
+0:	brne	1f				; as NaN has priority, result will be NaN
 	; from  now on, neither A nor B are NaN
 	; so one or both are +Inf/-Inf
 	; check if one of them is 0
@@ -97,9 +95,9 @@ FUNCTION __fp64_mulsd3x
 	/*
 	fp64 __fp64_mulsd3x( fp64 A, fp64 B )
 	fp64 fp64_mul( fp64 A, fp64 B )
-	Multiplies two 64 bit floating point numbers 
+	Multiplies two 64 bit floating point numbers
 	and rounds result to a 64bit floating point number
-	
+
 	Return:
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A * B
 	*/
@@ -109,7 +107,7 @@ ENTRY   __fp64_mulsd3x
 	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)	; split A and B into parts for exponent and mantissa
 	brcs	0b					; A or B is NaN and/or InF --> manage special result
-	
+
 	push rR5	; save working registers
 	push rR6
 	push rR7
@@ -123,7 +121,7 @@ ENTRY   __fp64_mulsd3x
 	pop rR7
 	pop rR6
 	pop rR5
-	
+
 	; rcall __fp64_saveAB
 	XCALL _U(__fp64_popB)
 	brcs 3f			; overflow?
@@ -135,7 +133,7 @@ ENTRY   __fp64_mulsd3x
 	Multiplies two 64 bit floating point numbers  that are splitted
 	and rounds result to a 64bit floating point integer
 	A and B must not be NaN or +/-Inf --> A and B are both finite
-	
+
 	Return:
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A * B
 	*/
@@ -147,14 +145,14 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	breq	2b				; A = 0 --> A*B = 0
 	XCALL _U(__fp64_pscB)
 	breq 	2b				; B = 0 --> A*B = 0
-	
+
 	; exponent(A*B) = exponent(A)+exponent(B)
 	; base adjustment will be done later
 	add		rAE0, rBE0
 	adc 	rAE1, rBE1
 
 	;call __fp64_saveAB
-	
+
 	; core algorithm for multiplication
 	; multiplication will be computed with 72 bit precision --> max error +/-1 LSB
 	; rB5.rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5 = rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 * rB7.rA6.rA5.rA4.rA3.rA2.rA1.rA0
@@ -166,37 +164,37 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	clr rZero			; as r1 is used for multiplication, rZero will be used as "zero" register
 	clr rR7
 	clr rR8
-	
+
 	;rR7.rR6.rR5	+= rA4 * rB1
 	mul rA4, rB1
 	add rR5, r0
 	adc rR6, r1
 	adc rR7, rZero
-	
+
 	;rR7.rR6.rR5	+= rA3 * rB2
 	mul rA3, rB2
 	add rR5, r0
 	adc rR6, r1
 	adc rR7, rZero
-	
+
 	;rR7.rR6.rR5 += rA2 * rB3
 	mul rA2, rB3
 	add rR5, r0
 	adc rR6, r1
 	adc rR7, rZero
-	
+
 	;rR7.rR6.rR5 += rA1 * rB4
 	mul rA1, rB4
 	add rR5, r0
 	adc rR6, r1
 	adc rR7, rZero
-	
+
 	;rR7.rR6.rR5 += rA0 * rB5	rR5 can be pushed
 	mul rA0, rB5
 	add rR5, r0
 	adc rR6, r1
 	adc rR7, rZero
-	
+
 	;rcall __fp64_saveMul
 
 	;rR8.rR7.rR6	+= rA6 * rB0
@@ -229,7 +227,7 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	adc rR7, r1
 	adc rR8, rZero
 
-	;rR8.rR7.rR6 += rA1 * rB5	
+	;rR8.rR7.rR6 += rA1 * rB5
 	mul rA1, rB5
 	add rR6, r0
 	adc rR7, r1
@@ -248,38 +246,38 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
-	
+
 	;rB0.rR8.rR7 += rA5 * rB2
 	mul rA5, rB2
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
-	
+
 	;rB0.rR8.rR7 += rA4 * rB3
 	mul rA4, rB3
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
-	
+
 	;rB0.rR8.rR7 += rA3 * rB4
 	mul rA3, rB4
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
-	
-	;rB0.rR8.rR7 += rA2 * rB5	
+
+	;rB0.rR8.rR7 += rA2 * rB5
 	mul rA2, rB5
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
-	
+
 	;rB0.rR8.rR7 += rA1 * rB6	rR7 can be pushed, B1 & A0 can be used
 	mul rA1, rB6
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
 	clr rB1
-	
+
 	;rB1.rB0.rR8 += rA6 * rB2
 	mul rA6, rB2
 	add rR8, r0
@@ -367,7 +365,7 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	adc rB3, r1
 	adc rB4, rZero
 
-	;rB4.rB3 += rA6 * rB6	rB3 can be pushed, B6 & A6 can be used	
+	;rB4.rB3 += rA6 * rB6	rB3 can be pushed, B6 & A6 can be used
 	mul rA6, rB6
 	add rB3, r0
 	adc rB4, r1		; this can never overflow, so rB5 is not needed
@@ -392,12 +390,12 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	or		rB5, rR7
 	or		rB5, rR6
 	or		rB5, rR5
-	breq	12f			; all bits in result 0 --> underflow to 0	
+	breq	12f			; all bits in result 0 --> underflow to 0
 
 	; at least one bit is set, shift mantissa left until topmost bit is set
 10:	tst rB4
-101: brmi 	11f			; topmost bit is set --> normalized number 
-	
+101: brmi 	11f			; topmost bit is set --> normalized number
+
 	lsl	rR5				; mantissa <<= 1
 	rol rR6
 	rol rR7
@@ -429,7 +427,7 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	brne 15f			; yes -> normalize number
 	;call __fp64_saveMul
 
-	; exponent >= 0x7ff --> overflow, 
+	; exponent >= 0x7ff --> overflow,
 111:XCALL _U(__fp64_inf)
 	sec					; set carry as flag for error and returning of packed result
 	ret
@@ -440,9 +438,9 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	clc
 	XJMP	_U(__fp64_szero)
 
-131: rcall 16f	
+131: rcall 16f
 	rjmp 15f
-	
+
 	; underflow with exponent < 0, check whether denormalization could work
 13:	cpi rAE0,lo8(-51)	; check if result could fit into remaining 52 bits
 	;call __fp64_saveMul
@@ -456,7 +454,7 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	brmi 14b		; exponent still < 0
 	;call __fp64_saveMul
 
-	; shift mantissa 3 bits to prepare for packing 
+	; shift mantissa 3 bits to prepare for packing
 	; (topmost bit is discarded as it is always 1, therefore only 3 shifts needed instead of 4)
 15: ; call __fp64_saveMul
 	mov rA6,rB4		; move result into A

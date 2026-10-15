@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -41,14 +39,14 @@
 	 scheme. As this function operates on internal unpacked data, it
 	 does not check for special cases like NaN or Inf. These case have
 	 to be handled properly by the caller.
-	 
+
 	 Attention: Routine uses all(!) registers, so caller is responsible
 	 for saving content of registers
 
    Input:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0,rAE1.rAE0	- an 'x' arg as float64_t_intern
 												  rA7 must contain sign of A
-     XH.XL										- table address 
+     XH.XL										- table address
 		 RAMPZ										- segment of table (for CPUs with >64k flash memory)
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0, rAE1.rAE0	- result, rA7 will contain sign of result
@@ -92,17 +90,17 @@ ENTRY __fp64_powser
 
 	; rcall __fp64_saveABC
 	pop ZH
-	pop ZL	
+	pop ZL
 #endif
 
 	rcall	.Load10				; load first factor into B (in our example C3)
-	
+
 	rjmp 1f
 
 .Loop:
 	XCALL _U(__fp64_movBC)		; restore x (was overwritten by loaded constants Cn)
 	X_movw  rBE0, YL
-	
+
 1:
 	push rcntr					; save counter
 
@@ -126,11 +124,11 @@ ENTRY __fp64_powser
 
 	bld rA7, 7					; save sign of result
 	brcs .L_ret					; C is set on overflow and result is already packed
-	
+
 	rcall .Load10
 	mov r0, rB7					; set sign for operation A+B or A-B = sign(A)^sign(B)
 	eor r0, rA7
-	bst r0,7		
+	bst r0,7
 
 	XCALL	_U(__fp64_add_pse)	; create x*Cn + Cn-1 (1st run: x*C3 + C2, 2nd: (x*C3+C2)*x + C1, 3rd: ((x*C3+C2)*x+C1)*x + C0 )
 	bld rA7, 7					; save sign bit
@@ -140,7 +138,7 @@ ENTRY __fp64_powser
 
 	dec	rcntr					; 1st Run: 3-->2, 2nd: 2-->1, 3rd 1-->0 = stop
 	brne	.Loop				; repeat until all constants processed
-	
+
 .L_ret:
 	ret
 
@@ -154,7 +152,7 @@ ENTRY __fp64_powser
 	push ZH
 	in ZL, RAMPZ
 	push ZL
-	
+
 	lds ZL, .L_saveZ+2
 	out  RAMPZ, ZL
 	lds ZL, .L_saveZ			; load table pointer
@@ -208,14 +206,14 @@ ENTRY __fp64_powser
 	ret
 
 #ifdef CHECK_POWSER
-.L_nf:	
+.L_nf:
 #ifdef ARDUINO_AVR_MEGA2560
 	pop r0
 	out  RAMPZ, r0	; restore RAMPZ
-#endif	
+#endif
 	pop XH
 	pop XL
-	
+
 	brne	.L_nan			; +/-Inf? No --> return NaN
 .L_inf:
 	XJMP	_U(__fp64_inf)	; No, case 2 --> return Inf
@@ -257,7 +255,7 @@ ENTRY __fp64_check_powsern
 #ifdef ARDUINO_AVR_MEGA2560
 	pop r0
 	out  RAMPZ, r0	; restore RAMPZ
-#endif	
+#endif
 	pop XH
 	pop XL
 	brcs 99f
@@ -272,7 +270,7 @@ __testTablex3: ; f(x) = ((x/3-0,5)*x+1.0)*x+0 = x^3/3-x^2/2+x
 	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xff	; 0x3ff0000000000000 = 1.0
 	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	; 0x0000000000000000 = 0.0
 	.byte 0x00												; byte needed for code alignment to even adresses!
-#endif	
+#endif
 
 ENTRY __fp64_check_powser2
 #ifndef CHECK_POWSER
@@ -296,7 +294,7 @@ __testTablex2: ; f(x) = (x*-0,5+1.0)*x+0 = -x^2/2 + x
 	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xff	; 0x3ff0000000000000 = 1.0
 	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	; 0x0000000000000000 = 0.0
 	.byte 0x00												; byte needed for code alignment to even adresses!
-#endif	
+#endif
 
 ENTRY __fp64_check_powser1
 #ifndef CHECK_POWSER
@@ -319,7 +317,7 @@ __testTablex1: ; f(x) = x*1+0 = x
 	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xff	; 0x3ff0000000000000 = 1.0
 	.byte 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	; 0x0000000000000000 = 0.0
 	.byte 0x00												; byte needed for code alignment to even adresses!
-#endif	
+#endif
 ENDFUNC
 
 .data
@@ -328,5 +326,5 @@ ENTRY __fp64_saveZ
 .L_saveZ:	.skip 3			; scratch area to save pointer to table
 #else
 .L_saveZ:	.skip 2			; scratch area to save pointer to table
-#endif 
+#endif
 #endif /* !defined(__AVR_TINY__) */

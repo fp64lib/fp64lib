@@ -1,9 +1,9 @@
 /* Copyright (c) 2019-2020  Uwe Bissinger
    Algorithm is based on code of avr_f64.c with:
    Original Code by Detlef_a (Nickname in the www.mikrocontroller.net forum).
-   Extensions (trigonometric functions et al.) und changes by Florian Kï¿½nigstein, mail@virgusta.eu .
-  
-  The following copyright information refers to the code developed by Florian Kï¿½nigstein.
+   Extensions (trigonometric functions et al.) und changes by Florian Königstein, mail@virgusta.eu .
+
+  The following copyright information refers to the code developed by Florian Königstein.
 
 ; //*********************************************************************************************************** //
 ; //*********************************************************************************************************** //
@@ -38,7 +38,7 @@
 ; //                                                                                                           //
 ; //*********************************************************************************************************** //
 ; //*********************************************************************************************************** //
-   
+
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -66,25 +66,23 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 
 FUNCTION __fp64_ftoa
 
-	; internal entry point with x already split into rA7..rA0 rEA1.rAE0 
-	; make sure to properly set Z and T flags: 
-	; 	Z=0 x is NaN 
+	; internal entry point with x already split into rA7..rA0 rEA1.rAE0
+	; make sure to properly set Z and T flags:
+	; 	Z=0 x is NaN
 	;	Z=1	x is +/- INF (depending on sign in T)
 ENTRY __fp64_ftoa_nan
 	ldi XL, lo8(__fp64_ftoabuf)
 	ldi XH, hi8(__fp64_ftoabuf)
 	push rB7
-	
+
 0:	; handle NaN and +/-Inf
-	
+
 #ifdef ARDUINO_AVR_MEGA2560
 	in ZL, RAMPZ			; save previous content of RAMPZ
 	push ZL
@@ -103,7 +101,7 @@ ENTRY __fp64_ftoa_nan
 	ldi ZH, hi8(.L_nan)		; return "NaN"
 
 1:	lpm rA7, Z+				; copy string into buffer
-#endif		
+#endif
 
 2:	st X+, rA7
 	tst rA7
@@ -132,7 +130,7 @@ ENTRY __fp64_ftoa_nan
 	brtc 2b
 	ldi rA7, '-'			; or '-Inf'
 	rjmp 2b
-	
+
 4:	; handle 0
 #ifdef ARDUINO_AVR_MEGA2560
 	in ZL, RAMPZ			; save previous content of RAMPZ
@@ -163,7 +161,7 @@ ENTRY __fp64_ftoa_nan
 #endif
 
 	; add as many "0" as needed for filling up the precision
-40:	dec rB6					
+40:	dec rB6
 	breq 41f
 	st X+, rA7
 	rjmp 40b
@@ -176,7 +174,7 @@ ENTRY __fp64_ftoa_nan
 	st X+, rA7
 	elpm rA7, Z+
 	st X+, rA7
-	
+
 	pop rA7
 	out RAMPZ, rA7
 #else
@@ -186,7 +184,7 @@ ENTRY __fp64_ftoa_nan
 	st X+, rA7
 	lpm rA7, Z+
 	st X+, rA7
-#endif	
+#endif
 
 	movw ZL, rB2			; if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0
@@ -194,7 +192,7 @@ ENTRY __fp64_ftoa_nan
 	st Z+, r1				; store exponent = 0
 	st Z+, r1
 	rjmp 21b				; return with C = 0, i.e. normal result
-	
+
 /* char *__fp64_ftoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 )
    char *fp64_to_decimalExp( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 )
 	converts a number to a string with maxDigits of significand
@@ -206,7 +204,7 @@ ENTRY __fp64_ftoa_nan
 			rB2:		int16_t *Exp10 // if != NULL, store exponent base 10 here
 	output: rA7..rA6	pointer to result, '\0' terminated C-string
 	modfies: rAE1.rAE0
-	
+
 	WARNING: 	function returns a pointer to a static temporary scratch area which might be used
 				also for other functions. The returned string might become invalid/scrambled
 				if one of the other fp64_ functions will be called. So copy the result to some
@@ -216,10 +214,10 @@ ENTRY __fp64_ftoa_nan
 ENTRY   __fp64_ftoa
 ENTRY	fp64_to_decimalExp
 	XCALL _U(__fp64_splitA)
-	
-	; internal entry point with x already split into rA7..rA0 rEA1.rAE0 
-	; make sure to properly set C, Z and T flags: 
-	; 	C=1 Z=0 x is NaN 
+
+	; internal entry point with x already split into rA7..rA0 rEA1.rAE0
+	; make sure to properly set C, Z and T flags:
+	; 	C=1 Z=0 x is NaN
 	;	C=1 Z=1	x is +/- INF (depending on sign in T)
 	; 	C=0 Z=1	x is +/- 0.0 (depending on sign in T)
 	;	C=0 Z=0 x is a finite number != 0.0, sign is in T
@@ -229,14 +227,14 @@ ENTRY __fp64_ftoa_pse
 	push rB7
 	brcs 0b		; handle NaN and Inf
 	breq 4b		; handle 0.0
-	
+
 	; TemporaryMemory[len++]= (f_sign) ? '+' : '-';
 	ldi rB7, '+'
 	brtc 0f
 	ldi rB7, '-'
 0:	st X+, rB7
 	adiw XL, 1					; leave room for '.'
-	
+
 	; if(anz_dezimal_mantisse>17)
 	;	anz_dezimal_mantisse=17;
 	; if(anz_dezimal_mantisse<1)
@@ -252,7 +250,7 @@ ENTRY __fp64_ftoa_pse
 	sts .L_bufp, XH				; and current pointer
 	sts .L_bufp+1, XL
 	sts .L_sepExp, rB4			; save flag for seperating significand and mantissa
-	
+
 	subi rAE0, 0xff
 	sbci rAE1, 0x03			; remove base from exponent
 
@@ -295,8 +293,8 @@ ENTRY __fp64_ftoa_pse
 	adiw rExp2L, 1			; exponent += 1 - shiftLeft(A)
 	sub rExp2L, r0
 	sbc rExp2H, r1
-	
-	push YH	
+
+	push YH
 	push YL
 
 	ldi rB7, '0'			; digitBase = '0'
@@ -304,51 +302,51 @@ ENTRY __fp64_ftoa_pse
 
 	lds YH, .L_bufp			; save pointer to current position
 	lds YL, .L_bufp+1
-	
+
 50:	tst rExp2H
 	brpl 51f				; while( exp2 < 0 ) {
 	rcall .L_initB10		; 	B = 10;
 	rcall .L_nextDigit		;	A = A * 10; exp2 += 4 - shiftLeft(A)
 	sbiw rExp10L, 1			;	exp10--
 	rjmp 50b				; }
-	
+
 	; now rA7...rA0 is A*10^-(exp10)
 51:	cpi rExp2L, 3			; if( exp2 < 3 )
 	brlo 59f				;	no scaling necessary
 	brne 52f				; else if( exp2 > 3 ) scaling necessary
 	cpi rA7, 0xa0			; same, if exp2 == 3 and first digit > 9
 	brlo 59f
-	
+
 52:	ldi rB7, 0xcc			; load B with 0,1
 	mov rB6, rB7
 	movw rB4, rB6
 	movw rB2, rB6
 	movw rB0, rB6
-	
+
 	push r1
 	clr r1
 	XCALL _U(__fp64_mul64AB)	; C = A * 0.1
 	XCALL _U(__fp64_lshift64)	; shift left C until bit63 is set
 	pop r1
 	XCALL _U(__fp64_movAC)		; move result back to A
-	
+
 	adiw rExp10L, 1				; exp10++
-	
+
 	; exp2 = exp2 - 3 - numberOfShifts in r0
 	sbiw rExp2L, 3
 	sub rExp2L, r0
 	sbci rExp2H, 0
 	rjmp 51b
-	
+
 59:	rcall .L_initB10		; preload B with 10
 
 	; main loop for conversion
 6:	clr r0
 	tst rExp2H				; if( exp2 < 0 )
 	brmi 8f					; 	digit = 0
-	
+
 	;	A <<= 1 + exp2
-	;   digit = A >> 63-exp2 
+	;   digit = A >> 63-exp2
 7:	add rA0, rA0
 	XCALL _U(__fp64_lslA1)
 	rol rA7
@@ -356,7 +354,7 @@ ENTRY __fp64_ftoa_pse
 	sbiw rExp2L, 1
 	brpl 7b
 						; at the end of the loop exp2 = -1
-8:	
+8:
 	add r0, r1			; digit += '0'
 	st Y+, r0			; TemporaryMemory[len++] = digit + '0'
 
@@ -366,22 +364,22 @@ ENTRY __fp64_ftoa_pse
 	dec r0
 	sts .L_maxDigits, r0
 	brpl 6b					; repeat until necessary precision+1 is reached
-	
+
 	; check whether rounding is needed
 	ld ZL, -Y				; get last digit, overrides exp2 (no longer needed)
 	cpi ZL, '5'				; next digit < 5 --> no rounding
 	brlo .L_exp
-	
+
 	push YH					; save pointer to last digit
 	push YL
 	lds ZH, .L_maxDigits2
 9:	ld ZL, -Y				; get previous digit
-	cpi ZL, '9'				
+	cpi ZL, '9'
 	breq 10f				; if(TemporaryMemory[i]!='9')
 	inc ZL					;	++TemporaryMemory[i];
 	st Y, ZL
 	rjmp 12f
-	
+
 10:	ldi ZL, '0'				; else
 	st Y, ZL				;	TemporaryMemory[i]='0';
 	dec ZH					; repeat until at beginning of string
@@ -398,7 +396,7 @@ ENTRY __fp64_ftoa_pse
 11:	st Y+, ZL				;	TemporaryMemory[++i]='0';
 	dec ZH					;} until (i>=len)
 	brne 11b
-	
+
 12:
 	pop YL					; restore pointer to last digit
 	pop YH
@@ -408,24 +406,24 @@ ENTRY __fp64_ftoa_pse
 	sts __fp64_ftoabuf+1, r0	; and put it before the decimal point
 	ldi rA7, '.'
 	sts __fp64_ftoabuf+2, rA7	; store the decimal point
-	
+
 	clr r1						; restore some registers to confirm to libc conventions
 	lds r0, .L_sepExp			; do we have to seperate significand and exponent
 	tst r0
 	breq 13f
 	st Y+, r1					; yes, terminate significand with '\0'
 
-13:	
+13:
 	ldi rA7, 'E'
 	st Y+, rA7					; start exponent with 'E'
 	;rcall __fp64_saveAB
 
-	adiw rExp10L, 0				
+	adiw rExp10L, 0
 	breq 14f					; if exponent > 0
 	brmi 14f
 	ldi rA7, '+'				; store +-sign for exponent
 	st Y+, rA7
-	
+
 14:	ldi r20, 0x0a				; use existing itoa function to convert exponent
 	movw r22, YL
 	movw r24, rExp10L
@@ -436,10 +434,10 @@ ENTRY __fp64_ftoa_pse
 	push rExp10L
 	XCALL __itoa_ncheck
 	pop rExp10L
-	pop rExp10H 
+	pop rExp10H
 
 	XCALL _U(__fp64_popBC)		; restore register set
-	
+
 	movw ZL, rB2			; // if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0
 
@@ -461,11 +459,11 @@ ENTRY __fp64_ftoa_pse
 	cpi r24, '-'				; '+' is 0x2b, '-' is 0x2d --> C is set when character is '+'
 	adc XL, r1
 	adc XH, r1
-99:	
+99:
 	movw r24, XL				; and return address
 	pop rB7
 	ret
-	
+
 .L_initB10:					; initialize B with 10
 	ldi rB7, 0xa0			; B = 10 << 60;
 	clr rB6
@@ -474,7 +472,7 @@ ENTRY __fp64_ftoa_pse
 	movw rB2, rB4
 	movw rB0, rB2
 	ret
-	
+
 	; get next digit
 .L_nextDigit:
 	push r1
@@ -483,13 +481,13 @@ ENTRY __fp64_ftoa_pse
 	XCALL _U(__fp64_lshift64)	; shift left C until bit63 is set
 	pop r1
 	XCALL _U(__fp64_movAC)		; move result back to A
-	
+
 	; exp2 = exp2 + 4 - numberOfShifts in r0
 	adiw rExp2L, 4
 	sub rExp2L, r0
 	sbci rExp2H, 0
 	ret
-	
+
 
 .L_nan:		.asciz "NaN"
 .L_inf:		.asciz "INF"

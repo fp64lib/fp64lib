@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* long fp64_lround (double A);
      The fp64_lround() function rounds A to the nearest integer, but rounds
      halfway cases away from zero (instead of to the nearest even integer).
@@ -39,7 +37,7 @@
    Return:
      The rounded long integer value. If A is infinite, NaN or an overflow
      was, this realization returns the LONG_MIN value (0x80000000).
-	
+
 	The following rules apply:
 
 	case|           A	       | result
@@ -63,7 +61,7 @@
      fp64_lround(-1.1) --> -1L
      fp64_lround(-1.5) --> -2L
  */
- 
+
  #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -83,7 +81,7 @@ FUNCTION fp64_lround
 	brne .L_zr					; |x| < 2^-255, case 5, return 0
 	cpi rAE0, 0xff
 	brne .L_zr					; 2^-255 >= |x| > 0.5, case 5, return 0
-.L_one:	
+.L_one:
 	mov rA7, r1					; get a zero (can't use __fp_zero as this clears the T flag)
 	mov rA6, r1
 	movw rA4, rA6
@@ -101,16 +99,16 @@ GCC_ENTRY __lround
 	sbci rAE1, hi8(1023)
 	tst rAE1
 	brmi 0b						; |x| < 1, check for cases 5 & 6
-	brne .L_err					; |x| > 2^255, case 4, return LONG_MIN 
+	brne .L_err					; |x| > 2^255, case 4, return LONG_MIN
 	cpi rAE0, 31
 	brge .L_err					; |x| >= 2^31, case 4, return LONG_MIN
-	
+
 	; case 7: now x is in range 1 <= |x| < 2^31
 	; clear out the fractional bits
-	
+
 	ldi rAE1, 31				; counter = 31 digits - exp2(x)
 	sub rAE1, rAE0				; as |x| < 2^31, this is always >= 0
-	
+
 0:	breq 1f
 	lsr rA6						; shift number downwards -> this clears the fraction
 	ror rA5
@@ -118,7 +116,7 @@ GCC_ENTRY __lround
 	ror rA3
 	dec rAE1
 	rjmp 0b
-	
+
 1:	adc rA3, r1					; C = 1 if fraction(x) >= 0.5
 	adc rA4, r1
 	adc rA5, r1
@@ -129,7 +127,7 @@ GCC_ENTRY __lround
 	mov rA6, rA5
 	mov rA5, rA4
 	mov rA4, rA3
-	
+
   ; restore the sign and return
 .L_sign:
 	brtc	.L_ret

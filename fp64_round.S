@@ -26,12 +26,10 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float64_t fp64_round( float64_t x );
     Rounds x upwards to the nearest integer, but rounds halfway
 	cases away from 0.
-	
+
 	The following rules apply:
 
 	case|           x	       | result
@@ -55,7 +53,7 @@
      fp64_round(-1.1) --> -1.0
      fp64_round(-1.5) --> -2.0
  */
- 
+
  #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -78,7 +76,7 @@ FUNCTION fp64_round
 	brne .L_zr					; |x| < 2^-255, case 5, return 0
 	cpi rAE0, 0xff
 	brne .L_zr					; 2^-255 >= |x| > 0.5, case 5, return 0
-.L_one:							
+.L_one:
 	XCALL _U(__fp64_one)		; clear all registers
 	bld rA7, 7					; with proper sign
 	ret
@@ -93,21 +91,21 @@ GCC_ENTRY __round
 	sbci rAE1, hi8(1023)
 	tst rAE1
 	brmi 0b						; |x| < 1, check for cases 5 & 6
-	brne .L_ret					; |x| > 2^255, case 4, return x 
+	brne .L_ret					; |x| > 2^255, case 4, return x
 	cpi rAE0, 52
 	brge .L_ret					; |x| >= 2^52, case 4, return x
-	
+
 	; case 7: now x is in range 1 <= |x| < 2^52
 	; clear out the fractional bits
-	
+
 	ldi rAE1, 55				; counter = (52 digits + 3 saveguard digits) - exp2(x)
 	sub rAE1, rAE0				; as |x| < 2^52, this is always > 1
 	push rAE1
-	
+
 0:	XCALL _U(__fp64_lsrA)		; shift number downwards -> this clears the fraction
 	dec rAE1
 	brne 0b
-	
+
 	adc rA0, r1					; C = 1 if fraction(x) >= 0.5
 	adc rA1, r1
 	adc rA2, r1
@@ -119,7 +117,7 @@ GCC_ENTRY __round
 
 1:	pop rAE1					; restore number of shifts
 	; rcall __fp64_saveAB
-	
+
 2:	XCALL _U(__fp64_lslA)		; now shift the number back into position
 	dec rAE1
 	brne 2b

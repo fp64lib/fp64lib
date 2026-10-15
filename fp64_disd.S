@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float64_t __fp64disd (long long x)
    float64_t int64_to_float64( long long x );
    Convert a signed 64-bit integer (long long) to float64_t.

@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 
 #if !defined(__AVR_TINY__)
 
@@ -43,20 +41,20 @@ FUNCTION __fp64_pretA
 	 Lower 3 bits of rA0 are used for rounding (round to even)
 
    Input:
-     rA6.rA5.rA4.rA3.rA2.rA1.rA0 - mantissa of A, 
+     rA6.rA5.rA4.rA3.rA2.rA1.rA0 - mantissa of A,
 	 rAE1.rAE0					 - exponent of A
 	 T							 - sign of A
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - result in IEEE 754 formaz
  */
- 
+
 ENTRY __fp64_rpretA
 	clc					; default: do not take carry into account
 ENTRY __fp64_rcpretA
-	sbrs rA0, 2			; does rounding occur?		
+	sbrs rA0, 2			; does rounding occur?
 	rjmp __fp64_pretA 	; no, pack result
 	;rjmp 0f
-	
+
 	sbrc rA1, 1
 	rjmp 1f				; guard bit 1 set --> round up
 	brcs 1f				; carry as guard bit -1 is set --> round up
@@ -73,10 +71,10 @@ ENTRY __fp64_rcpretA
 	adc rA5,r1
 	adc rA6,r1
 	brcc __fp64_pretA	; no overflow, everything fine
-	
+
 	ror  rA6
 	XCALL _U(__fp64_rorA5) 	; overflow --> shift mantissa of result with 1st bit set (could be discarded)
-	
+
 	adiw rAE0, 1			; increase exponent by 1
 	cpi	rAE0, 0xff			; did we get overflow (exp == 0x7ff) ?
 	brne __fp64_pretA		; no -> return A
@@ -119,7 +117,7 @@ ENTRY __fp64_pretA
 	mov rA7,rAE0	; built top 8 bits of exponent, rA7 = e0.e1
 	andi rA7, 0x0f	; start with 0.e1
 	or rA7,rAE1		; add it to e2.e1
-	
+
 	andi rA6, 0x0f	; mask out leading 1 bit
 	andi rAE0, 0xf0	; as e0.0 in rAE0
 	or rA6, rAE0	; with mantissa as e0.a6 in rA6

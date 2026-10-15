@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float64_t fp64_floor( float64_t A );
 	Rounds A downwards to the nearest integer less or equal A.
 	For A > 0 this is identical to trunc(A).

@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -39,7 +37,7 @@
 /* float64_t fp64_pow(float64_t x, float64_t y);
      The fp64_pow() function returns the value of x raised to the power of y.
 
-	A \ B|  NaN | +Inf | -Inf |  +0  |  -0  |  +1  | odd>0| any>0| odd<0| any<0 
+	A \ B|  NaN | +Inf | -Inf |  +0  |  -0  |  +1  | odd>0| any>0| odd<0| any<0
 	-----+------+------+------+------+------+------+------+------+------+------+
 	NaN  |      |      |      | +1  a|      | NaN c|      |      |      |      |
 	+Inf |      |      |      | +1  a|      |+Inf c|      |      |      |      |
@@ -64,7 +62,7 @@
 FUNCTION fp64_pow
 .L_one:
 	XJMP _U(__fp64_one)			; case 1: return 1.0 for y == 0.0
-	
+
 	; result is in rA7...rA0 --> return it
 .L_ret:
 	ret
@@ -74,7 +72,7 @@ GCC_ENTRY __pow
 	; ZH.ZL := exponent of y without sign
 	movw ZL, rB6				; save exponent and sign
 	andi ZH, 0x7f				; get rid of sign bit
-	XCALL _U(__fp64_isBzero)	
+	XCALL _U(__fp64_isBzero)
 	cpc ZH, r1					; __fp64_isBzero only checks for rB6..rB0
 	breq	.L_one				; y == 0? Yes, case a: return x^+/-0 = +1.0
 
@@ -82,12 +80,12 @@ GCC_ENTRY __pow
 	ldi	ZL, 0x3f
 	XCALL _U(__fp64_cpc0A5)
 	brne 0f						; skip a bit of comparisons
-	
+
 	; x == +1.0 ?
 	cpi	rA6, 0xf0
 	cpc	rA7, ZL
 	breq .L_ret					; x == +1.0? Yes, case b: return +1^any = +1.0
-	
+
 	; y == 1.0 ?
 0:	cpi rB6, 0xf0
 	cpc rB7, ZL
@@ -98,22 +96,22 @@ GCC_ENTRY __pow
 	cpc	rB4, r1
 	cpc	rB5, r1
 	breq .L_ret					; y == +1.0? Yes, case c: return any^1 = any
-	
+
 	; x >= 0 ?
 	tst	rA7
 	brpl .L_pow					; yes, compute x^y via exp(log(x)*y)
-    
+
     ; x < 0, now check if |y| is an odd/even integer
     ; if |y| is an odd integer, then pow(x,y) = -pow(abs(x),y)
     ; if |y| is an even integer, then pow(x,y) = pow(abs(x),y)
     ; for |y| to be an integer, it has to be in the range of 1 <= |y| < 2^52
 	push rB7					; save sign of y
 	andi rB7, 0x7f				; continue with |y|
-	
+
 	cpi rB7, 0x3f
 	brlo .L_nan					; |y| < 1 --> x^y result undefined
 	brne 7f						; |y| >= 2, check for |y| < 2^52
-	cpi rB6, 0xf0				
+	cpi rB6, 0xf0
 	brlo .L_nan					; |y| < 1 --> x^y result undefined
 	brne .L_nan					; |y| > 1 --> x^y result undefined
 
@@ -129,22 +127,22 @@ GCC_ENTRY __pow
 	; first get the exponent of |y|
 	movw rBE0, rB6 				; get exponent from rB7.rB6 into rBE1.rBE0
     andi rBE0, 0xf0 			; get rid of mantissa bits in exponent
-  
+
 	lsr  rBE1       			; mov exponent downwards 4 bits
-	ror  rBE0		
-	lsr  rBE1
-	ror  rBE0		
-	lsr  rBE1
-	ror  rBE0		
+	ror  rBE0
 	lsr  rBE1
 	ror  rBE0
-	
+	lsr  rBE1
+	ror  rBE0
+	lsr  rBE1
+	ror  rBE0
+
 	subi rBE0, lo8(1023)		; remove exponent bias: exp -= 1023
 	sbci rBE1, hi8(1023)
 
 	; now rBE1.rBE0 is < 53 --> rBE0 is < 53, rBE1 can be used
 	mov rBE1, rBE0 				; save the exponent
-	
+
 	; we have to separate between rBE0 < 4 and >=4
 	ldi rB7, 0x0f				; load mask to be used on rB6 for 0 <= exponent < 4
 	cpi rBE0, 4
@@ -152,7 +150,7 @@ GCC_ENTRY __pow
 	ldi rB7, 0xff				; load mask to be used on rB5..rB0 for exponent >= 4
 	subi rBE0, 4				; round down to nearest 8 bits
 	andi rBE0, 0x07
-	
+
 3:  ; now rB7 has the mask and rBE0 the exponent mod 8
 	; now shift the mask to the right position
 	tst rBE0
@@ -185,19 +183,19 @@ GCC_ENTRY __pow
 #endif
 
 	ldi ZL, lo8(.L_mask)		; add 8*offset to jump table
-	add ZL, rBE1		
+	add ZL, rBE1
 	ldi ZH, hi8(.L_mask)
 	adc ZH, r1					; take care of any overflows
 
 #ifdef ARDUINO_AVR_MEGA2560
 	adc r0, r1					; extend to 256MB address calculation
 	lsr r0						; PC addresses words, so divide target address by 2
-	ror ZH	 						
+	ror ZH
 	ror ZL
 
 	out EIND, r0				; set upper byte of 24-bit address
 	pop r0
-	
+
 	eijmp						; and clear out the bits top to bottom
 #else
 	lsr ZH						; PC addresses words, so divide target address by 2
@@ -220,26 +218,26 @@ GCC_ENTRY __pow
 	XCALL 	_U(__fp64_popB)
 	XCALL	_U(fp64_mul)		; log(abs(x))*y
 	XJMP	_U(fp64_exp)		; exp(log(abs(x)))*y = abs(x)^y
-	
+
 .L_mask:
 	; for 2^1 <= y < 2^4
 	mov rBE0, rB6				; fraction starts at rB6
 	mov rBE1, rB6				; integer ends in rB6
 	and r0, rB6					; if mask & rB6 true --> not an integer
 	rjmp .L_a5
-	
+
 	; for 2^4 <= y < 2^12
 	mov rBE0, rB5				; fraction starts at rB5
 	mov rBE1, rB6				; integer might end in rB6
 	and r0, rB5
 	rjmp .L_a4
-	
+
 	; for 2^12 <= y < 2^20
 	mov rBE0, rB4
 	mov rBE1, rB5
 	and r0, rB4
 	rjmp .L_a3
-	
+
 	; for 2^20 <= y < 2^28
 	mov rBE0, rB3
 	mov rBE1, rB4
@@ -263,14 +261,14 @@ GCC_ENTRY __pow
 	mov rBE1, rB1
 	and r0, rBE0
 	rjmp .L_check
-	
+
 	; for 2^52 <= y < 2^53
 	; special case, there can be no fraction
 	mov rBE0, rB0
 	mov rBE1, rB0
 	and r0, r1
 	rjmp .L_check
-	
+
 	; r0 contains the first fraction bits
 	; now check, there are some more fraction bits set
 .L_a5:
@@ -298,15 +296,15 @@ GCC_ENTRY __pow
 
 2:	pop rB7						; restore used rB7
 	breq .L_pow					; bit not set --> number is even, x^y = abs(x)^y
-	rcall .L_pow				; bit set --> number is odd 
+	rcall .L_pow				; bit set --> number is odd
 	subi rA7, 0x80				; return -pow(abs(x),y)
-	ret 
+	ret
 
 3:	; we are here because rBE0 contains only fraction bits
 	; so we have to check the byte above, i.e. bit 0 of rBE1 as the LSB of the integer
 	andi rBE1, 1
 	rjmp 2b
-	
+
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */

@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -35,7 +33,7 @@ FUNCTION __fp64_movBC
 
 /*  __fp64_movBC() move C into B
    Input:
-	  rC7.rC6.rC5.rC4.rC3.rC2.rC1.rC0  - C in packed format 
+	  rC7.rC6.rC5.rC4.rC3.rC2.rC1.rC0  - C in packed format
    Return:
 	  rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0  - a copy of C in packed format
    Modifies:

@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -54,7 +52,7 @@
 	  5 | exponent(x)+n <-1074  | +/- 0.0 (Underflow)
 	  6 | exponent(x)+n <-1023  | x*2^exp as subnormal number
 	  7 | exponent(x)+n >=-1023 | x*2^exp
-  
+
  */
 
 FUNCTION fp64_ldexp
@@ -74,11 +72,11 @@ FUNCTION fp64_ldexp
 ENTRY fp64_scalbln
 GCC_ENTRY __scalbln
 	rcall __fp64_saveAB
-	
+
 	; check for INF or NAN
 	bst rA7, 7					; save sign
 	andi rA7, 0x7f
-	
+
 	; check for INF or NaN
 	cpi rA7, 0x7f
 	brne 1f						; not INF or NaN, check for 0
@@ -87,11 +85,11 @@ GCC_ENTRY __scalbln
 	brne .L_NaN					; case 1: it's a NaN --> return it
 	XCALL _U(__fp64_cpc0A5)		; check whether it is really INF or another NaN
 	breq .L_Inf					; case 3: INF --> return it
-	
+
 	; case 1: number is NaN, return it
 .L_NaN:
 	ret
-	
+
 1:	; check for 0
 	XCALL _U(__fp64_cpc0A5)
 	brne 2f
@@ -127,7 +125,7 @@ GCC_ENTRY __scalbln
 	ldi XL, 0x80
 	cp rB5, XL
 	breq .L_szero
-	
+
 	; n fits in int, handle sign bit correctly
 	bld rB5, 7
 

@@ -3,7 +3,7 @@
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
    Copyright (c) 2008  Ruud v Gessel
-   
+
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
     Square root function.
  */
 
- 
+
 FUNCTION fp64_sqrt
 	// Special cases
 	// sqrt(NaN) = NaN
@@ -69,12 +69,12 @@ ALIAS_ENTRY fp64_sqrtf
 	sbrs	rA6, 7
 	XCALL	_U(__fp64_norm2)
 	;call __fp64_saveA
-	
+
 	rcall __fp64_sqrt_pse		; call the internal worker routine
-	
+
 	XJMP _U(__fp64_rpretA)		; round, pack and return A
 
-	
+
 ENTRY __fp64_sqrt_pse
 
 #define	msk6	rA7
@@ -108,12 +108,12 @@ ENTRY __fp64_sqrt_pse
 	clr msk4
 	X_movw msk2, msk4
 	X_movw msk0, msk4
-	
+
 	ldi	rB6, 0xa0		; Initial developing root =
 						;	10100000.00000000...00000000
-	X_movw	rB4, msk0	
-	X_movw	rB2, msk0	
-	X_movw	rB0, msk0	
+	X_movw	rB4, msk0
+	X_movw	rB2, msk0
+	X_movw	rB0, msk0
 
 	clr	tv			; Test value for end of loop
 	subi rA6, 0x40	; Initial remainder for odd exponent
@@ -129,7 +129,7 @@ ENTRY __fp64_sqrt_pse
 	cp	msk6, tv			; Only needed to get the proper rounding
 							;   for ffffff
 	XCALL _U(__fp64_subAB)	; Prepare remainder argument for next bits
-	
+
 	or	rB0, msk0			; Set developing bit to 1
 	or	rB1, msk1
 	or	rB2, msk2
@@ -137,7 +137,7 @@ ENTRY __fp64_sqrt_pse
 	or	rB4, msk4
 	or	rB5, msk5
 	or	rB6, msk6
-	
+
 2:	lsr	msk6				; Shift right mask, C --> end loop
 	ror	msk5
 	ror	msk4
@@ -146,7 +146,7 @@ ENTRY __fp64_sqrt_pse
 	ror	msk1
 	ror	msk0
 	rol	tv			; Bit 1 set if end of loop
-	
+
 	eor	rB0, msk0	; Shift right test bit in developing root
 	eor	rB1, msk1
 	eor	rB2, msk2
@@ -154,20 +154,20 @@ ENTRY __fp64_sqrt_pse
 	eor	rB4, msk4
 	eor	rB5, msk5
 	eor	rB6, msk6
-	
+
 3:	XCALL _U(__fp64_lslA)	; Shift left remainder argument (C used at .Loop)
 	brcs	4f
-	
+
 	XCALL _U(__fp64_cpcBA)
 
 4:	sbrs	tv, 1
 	rjmp	.Loop
 
 	X_movw	rA0, rB0	; copy result from rB6.rB5...rB0 to A
-	X_movw	rA2, rB2	
-	X_movw	rA4, rB4	
+	X_movw	rA2, rB2
+	X_movw	rA4, rB4
 	mov	rA6, rB6
-	
+
 	pop rB6
 	pop rB5
 	pop rB4
@@ -183,7 +183,7 @@ ENTRY __fp64_sqrt_pse
 
 	subi	rAE0, lo8(-1023)	; adjust to exponent bias
 	sbci	rAE1, hi8(-1023)
-	
+
 	ret
 ENDFUNC
 

@@ -26,15 +26,13 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float64_t fp64_trunc( float64_t A );
     Rounds A to the nearest integer not larger in absolute value,
 	by cutting the noninteger part ( = setting the fractional part to 0).
 	This is effectively the same as rounding A towards 0.
-	
+
 	The following rules apply:
-	 
+
 	case|           A	       | result
 	----+----------------------+------------
 	  1 |          NaN         | NaN
@@ -54,7 +52,7 @@
      fp64_trunc(1.9) --> 1.0
      fp64_trunc(-1.9) --> -1.0
  */
- 
+
  #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -83,17 +81,17 @@ ENTRY   fp64_cut_noninteger_fraction
 	sbci rAE1, hi8(1023)
 	tst rAE1
 	brmi .L_zr					; 0 < |x| < 1, case 7, return 0
-	brne .L_ret				; |x| > 2^255, case 6, return x 
+	brne .L_ret				; |x| > 2^255, case 6, return x
 	cpi rAE0, 52
 	brge .L_ret					; |x| >= 2^52, case 6, return x
-	
+
 	; now x is in range 1 <= |x| < 2^52
 	; clear out the fractional bits
-	
+
 	ldi rA7, 0xff				; inital mask
 	ldi rAE1, 55				; counter = (52 digits + 3 saveguard digits) - exp2(x)
 	sub rAE1, rAE0				; as |x| < 2^52, this is always > 1
-	andi rAE1 ,0x07				
+	andi rAE1 ,0x07
 0:	breq 1f
 	lsl rA7
 	dec rAE1
@@ -113,14 +111,14 @@ ENTRY   fp64_cut_noninteger_fraction
 #endif
 
 	ldi ZL, lo8(.L_mask)		; add offset to jump table
-	add ZL, rAE1		
+	add ZL, rAE1
 	ldi ZH, hi8(.L_mask)
 	adc ZH, r1					; take care of any overflows
 
 #ifdef ARDUINO_AVR_MEGA2560
 	adc r0, r1					; extend to 256MB address calculation
 	lsr r0							; PC addresses words, so divide target address by 2
-	ror ZH	 						
+	ror ZH
 	ror ZL
 	out  EIND, r0
 	eijmp
@@ -131,29 +129,29 @@ ENTRY   fp64_cut_noninteger_fraction
 	ijmp						; and clear out the bits top to bottom
 #endif
 
-		
+
 .L_mask:
-	; for 2^0 <= |x| < 2^8, i.e. (rAE0/8)*4 == 0 
+	; for 2^0 <= |x| < 2^8, i.e. (rAE0/8)*4 == 0
 	and rA6, rA7				; clear out parts of rA6
 	clr rA7						; and all lower digits
 
-	; for 2^8 <= |x| < 2^16, i.e. (rAE0/8)*4 == 4 
+	; for 2^8 <= |x| < 2^16, i.e. (rAE0/8)*4 == 4
 	and rA5, rA7				; clear out parts of rA5
 	clr rA7     				; and all lower digits
 
-	; for 2^16 <= |x| < 2^24, i.e. (rAE0/8)*4 == 8 
+	; for 2^16 <= |x| < 2^24, i.e. (rAE0/8)*4 == 8
 	and rA4, rA7				; clear out parts of rA4
 	clr rA7     				; and all lower digits
 
-	; for 2^24 <= |x| < 2^32, i.e. (rAE0/8)*4 == 12 
+	; for 2^24 <= |x| < 2^32, i.e. (rAE0/8)*4 == 12
 	and rA3, rA7				; clear out parts of rA3
 	clr rA7     				; and all lower digits
 
-	; for 2^32 <= |x| < 2^40, i.e. (rAE0/8)*4 == 16 
+	; for 2^32 <= |x| < 2^40, i.e. (rAE0/8)*4 == 16
 	and rA2, rA7				; clear out parts of rA2
 	clr rA7     				; and all lower digits
 
-	; for 2^40 <= |x| < 2^48, i.e. (rAE0/8)*4 == 20 
+	; for 2^40 <= |x| < 2^48, i.e. (rAE0/8)*4 == 20
 	and rA1, rA7				; clear out parts of rA1
 	clr rA7     				; and all lower digits
 
@@ -166,7 +164,7 @@ ENTRY   fp64_cut_noninteger_fraction
 .L_ret:
 #ifdef ARDUINO_AVR_MEGA2560
 	; out  EIND, r1	; reset EIND
-#endif	
+#endif
 
 	subi rAE0, -0xff			; add base 1023
 	sbci rAE1, -0x04
@@ -175,4 +173,3 @@ ENTRY   fp64_cut_noninteger_fraction
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */
-

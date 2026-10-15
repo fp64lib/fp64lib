@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* float64_t fp64_sd (float A);
      Converts a float32 to the float64 representing the same number.
 	 As float64_t fully includes all values of float, no error or truncation occurs
@@ -37,7 +35,7 @@
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - A in IEEE 754 - 64-bit format
  */
- 
+
  #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -94,7 +92,7 @@ GCC_ENTRY __extendsfdf2
 2:	lsl rA4						; shift subnormal number until we got a leading 1 bit
 	rol rA5
 	rol rA6
-	brmi 3f	
+	brmi 3f
 	subi rAE0, lo8(1)			; exp--
 	sbci rAE1, hi8(1)
 	rjmp 2b
@@ -107,4 +105,3 @@ GCC_ENTRY __extendsfdf2
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */
-

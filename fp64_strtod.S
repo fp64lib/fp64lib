@@ -1,9 +1,9 @@
 /* Copyright (c) 2019-2020  Uwe Bissinger
    Algorithm is based on code of avr_f64.c with:
    Original Code by Detlef_a (Nickname in the www.mikrocontroller.net forum).
-   Extensions (trigonometric functions et al.) und changes by Florian Kï¿½nigstein, mail@virgusta.eu .
-  
-  The following copyright information refers to the code developed by Florian Kï¿½nigstein.
+   Extensions (trigonometric functions et al.) und changes by Florian Königstein, mail@virgusta.eu .
+
+  The following copyright information refers to the code developed by Florian Königstein.
 
 ; //*********************************************************************************************************** //
 ; //*********************************************************************************************************** //
@@ -66,8 +66,6 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -86,37 +84,37 @@ FUNCTION fp64_strtod
 	converts a string to a number, handles also NaN, +INF, -INF
 	a valid number (non NaN or INF) can be expressed by the
 	following regex: [+-]?[0-9]+\.?[0-9]*([eE][+-]?[0-9]+)?
-	
+
 	input:	rA7.rA6:	pointer to string
  */
 ENTRY fp64_atof
 	mov rA4, r1
 	mov rA5, r1			; use fp64_strod with end_ptr = NULL
- 
+
 /* float64_t fp64_strtod( char *str, char **endptr )
 	converts a string to a number, handles also NaN, +INF, -INF
 	a valid number (non NaN or INF) can be expressed by the
 	following regex: [+-]?[0-9]+\.?[0-9]*([eE][+-]?[0-9]+)?
-	
+
 	input:	rA7.rA6:	pointer to string
 			rA5.rA4:	return last parsed position in string into that char*
  */
- 
+
 ENTRY   fp64_strtod
 	sts .L_endpL, rA4	; save pointer to pointer to last parsed position
 	sts .L_endpH, rA5
 	sts .L_sign, r1		; per default sign = 0 (positive number)
 	push YH				; Y is used for pointing to actual position in str
 	push YL
-	clr rPoint			; rPoint = 0			
+	clr rPoint			; rPoint = 0
 	movw YL, rA6
 	adiw YL, 0			; if( (s = str) == NULL )
 	breq 90b				;	return( 0 );
 
-	; skip whitespace	
+	; skip whitespace
 						; do {
 0:	ld	rCh, Y+			; 	ch = *s++;
-	tst rCh				; 	if( ch == '\0' ) 	
+	tst rCh				; 	if( ch == '\0' )
 	breq 90b			;		return( 0 );	// only whitespace, return 0
 	cpi rCh, ' '		; } until( ch != ' '
 	breq 0b
@@ -129,7 +127,7 @@ ENTRY   fp64_strtod
 	cpi rCh, 'n'
 	brne .L_noNaN
 1:	; n or N detected, check for a or A
-	ld rCh, Y			
+	ld rCh, Y
 	cpi rCh, 'A'
 	breq 2f
 	cpi rCh, 'a'
@@ -143,7 +141,7 @@ ENTRY   fp64_strtod
 3:	; NaN successfull detected, adjust pointer position and return NaN
 	adiw YL, 3			; s point to first character after NaN
 	rjmp .L_NaN
-	
+
 .L_noNaN:
 	; no NaN, check for sign
 	cpi rCh, '+'
@@ -152,7 +150,7 @@ ENTRY   fp64_strtod
 	brne 10f
 	ldi rCh, 1			; store negative sign
 	sts .L_sign, rCh
-		
+
 4:	ld rCh, Y+			; advance to next character if a sign was detected
 
 	; past sign, check for INF
@@ -161,7 +159,7 @@ ENTRY   fp64_strtod
 	cpi rCh, 'i'
 	brne .L_noInf
 11:	; i or I detected, check for n or N
-	ld rCh, Y			
+	ld rCh, Y
 	cpi rCh, 'N'
 	breq 12f
 	cpi rCh, 'n'
@@ -176,14 +174,14 @@ ENTRY   fp64_strtod
 
 .L_NaN2:
 	XCALL _U(__fp64_popBC)	; restore registers used by __fp64_10pown
-	
+
 	; incorrect string starting with "IN", return NaN
 .L_NaN:
 	rcall .L_savePtr		; save current position
 	pop YL					; restore used register and return NaN
 	pop YH
 	XJMP _U(__fp64_nan)
-	
+
 13:	; INF, +INF or -INF successfull detected, adjust pointer position and return INF with sign
 	adiw YL, 3			; s point to first character after INF
 	rcall .L_savePtr	; save current position and restore sign
@@ -213,17 +211,17 @@ ENTRY   fp64_strtod
 	brne .L_loop
 	ld rCh, Y+
 	rjmp 19b
-	
+
 	; correctly handle a skipped digit:
 	;	if before the decimal point, exp10 has to be increased
 	;	if after the decimal point, digit can be ignored
 	;		(no special handling needed for correct rounding,
 	;		as digits are skipped after 64 bits ~ 19 digits
 	;		where as only 53 bits are stored in the significand,
-	;		~16-17 digits. So there are at least 2 more digits 
+	;		~16-17 digits. So there are at least 2 more digits
 	;		that will be used for rounding.
 .L_skipDigit:
-	tst rPoint			
+	tst rPoint
 	brne .L_nextDigit	; if( !point )
 	;adiw rExp10L, 1		;	exp10++
 	lds r0, .L_exp10L		;	exp10++
@@ -236,12 +234,12 @@ ENTRY   fp64_strtod
 
 .L_nextDigit:			; get next digit
 	ld rCh, Y+
-	
+
 	; *** Main parsing loop ***
 .L_loop:
-	cpi rCh, '.'		; if( ch == '.' ) {		
+	cpi rCh, '.'		; if( ch == '.' ) {
 	brne 20f
-	tst rPoint			;	if( point ) 
+	tst rPoint			;	if( point )
 	brne .L_NaN2		;		return NaN // we already had a decimal pointer
 	inc rPoint			;	point = 1;		// set flag for decimal point
 						; } // and advance to next character
@@ -261,9 +259,9 @@ ENTRY   fp64_strtod
 	; rcall __fp64_saveAB
 
 	brge .L_skipDigit			; no more space, ignore this digit
-	
+
 	; sub rExp10L, rPoint			; if( point )
-	; sbc rExp10H, r1				
+	; sbc rExp10H, r1
 	tst rPoint					; if( point )
 	breq 203f
 	lds r0, .L_exp10L			;	--Exp10;
@@ -272,7 +270,7 @@ ENTRY   fp64_strtod
 	lds r0, .L_exp10H
 	sbc r0, r1
 	sts .L_exp10H, r0
-	
+
 203:
 	ldi rB7, 0xa0				; B = 10 << 60;
 	clr rB6
@@ -281,7 +279,7 @@ ENTRY   fp64_strtod
 	movw rB2, rB4
 	movw rB0, rB2
 	XCALL _U(__fp64_mul64AB)	; C = A * 10
-	cp rC7, r1					; check if result is still 0 
+	cp rC7, r1					; check if result is still 0
 	cpc rC6, r1
 	cpc rC5, r1
 	cpc rC4, r1
@@ -292,7 +290,7 @@ ENTRY   fp64_strtod
 
 	breq 21f					; if( C )
 	adiw rExp2L, 4				; 	rExp2 += 4;	// increase position for new digit
-	
+
 21:	; add digit to the correct position 63 - exp2
 	andi rCh, 0x0f
 	mov rB0, rCh				; B = ch - '0', extended to 64 bits
@@ -314,10 +312,10 @@ ENTRY   fp64_strtod
 	clr rB0
 	subi rExp2H, 8
 	rjmp 22b
-	
-23:	
+
+23:
 	; rcall __fp64_saveAB
-	
+
 	tst rExp2H
 	breq 25f
 24:	lsl rB0						; now shift bitwise if less than 8 shifts are needed
@@ -330,9 +328,9 @@ ENTRY   fp64_strtod
 	rol rB7
 	dec rExp2H
 	brne 24b
-	
+
 25:	pop rExp2H					; restore temporarely used register
-	
+
 	add rC0, rB0				; now add the digit to the correct position:
 	adc rC1, rB1				; C = C + (ch << 63 - exp2)
 	adc rC2, rB2
@@ -361,7 +359,7 @@ ENTRY   fp64_strtod
 	; rcall __fp64_saveA
 
 	rjmp .L_nextDigit
-	
+
 	; check for exponent
 .L_exp:
 	cpi rCh, 'E'
@@ -369,7 +367,7 @@ ENTRY   fp64_strtod
 	cpi rCh, 'e'
 	breq 29f
 	rjmp .L_noExp
-	
+
 	; the following is a custom n-digit atoi implementation that
 	; correctly handles +/- sign and exponents even beyond 32768
 29:	push rExp2H			; temporarely use rExp2H/L
@@ -382,7 +380,7 @@ ENTRY   fp64_strtod
 	cpi rCh, '-'
 	brne 31f			; no sign
 	set					; set T for - sign
-	
+
 30:	; T flag now reflects sign of exponent
 	ld rCh, Y+			; skip sign after 'E'
 31:
@@ -397,16 +395,16 @@ ENTRY   fp64_strtod
 
 	ld rCh, Y+			; get 2nd character
 	cpi rCh, '0'
-	brlo 36f			; if no digit, stop conversion 
+	brlo 36f			; if no digit, stop conversion
 	cpi rCh, '9'+1
 	brge 36f			; if no digit, stop conversion
-	
+
 	ldi rExp2H, 10
 	mul rExp2L, rExp2H
 	mov rExp2L, r0		; exp = first digit * 10
 	subi rCh, '0'
 	add rExp2L, rCh			; 		+ 2nd digit
-	
+
 	ld rCh, Y+			; get 3rd digit
 	cpi rCh, '0'
 	brlo 36f			; if no digit, stop conversion
@@ -418,7 +416,7 @@ ENTRY   fp64_strtod
 	clr r1				; restore r1 to 0
 	add rExp2L, rCh			; + 3rd digit
 	adc rExp2H, r1
-	
+
 	; now all further digits will definitely result in +/-INF or +/-0
 	ld rCh, Y+			; get next character
 	cpi rCh, '0'
@@ -433,7 +431,7 @@ ENTRY   fp64_strtod
 	brlo 33f
 	cpi rCh, '9'+1
 	brlo 32b			; it's a digit, skip it
-	
+
 33:	; end of overflowing exponent reached
 	pop rExp2L			; restore used register
 	pop rExp2H
@@ -450,7 +448,7 @@ ENTRY   fp64_strtod
 	neg rExp2H			;	exp = -exp;
 	neg rExp2L
 	sbci rExp2H, 0
-	
+
 38:	;add rExp10L, rExp2L	; add parsed exponent to current base
 	;adc rExp10H, rExp10H
 	lds r0, .L_exp10L
@@ -460,7 +458,7 @@ ENTRY   fp64_strtod
 	adc r0, rExp2H
 	sts .L_exp10H, r0
 
-39:	
+39:
 	pop rExp2L			; and restore exp2
 	pop rExp2H
 
@@ -478,13 +476,13 @@ ENTRY   fp64_strtod
 	XCALL _U(__fp64_10pown)	; create 10^exp10, overwriting rBx and rCx!
 	pop rB7
 	pop rB6					; restore exponent of A
-	
+
 	; rcall __fp64_saveAB
 
 	add rExp2L, rB6
 	adc rExp2H, rB7			; exponent2 += 1 + exponent2 of 10^exp10
 	adiw rExp2L, 1
-	
+
 	XCALL _U(__fp64_popB)	; restore significand of A into B
 
 	; rcall __fp64_saveAB
@@ -496,7 +494,7 @@ ENTRY   fp64_strtod
 	; adjust exp2 for shifts
 	sub rExp2L, r0				; exp2 += shiftLeft(A)
 	sbc rExp2H, r1
-	
+
 	; now combine everything
 	; first round to 56 bits
 	; rcall __fp64_saveAB
@@ -533,7 +531,7 @@ ENTRY   fp64_strtod
 	; rcall __fp64_saveAB
 
 	XCALL _U(__fp64_popBC)	; restore saved registers
-	
+
 	; check whether exponent is in range
 	subi rAE0, lo8(-(0x3ff))		; exp += 1023 (exponent base)
 	sbci rAE1, hi8(-(0x3ff))
@@ -546,14 +544,14 @@ ENTRY   fp64_strtod
 	brne .L_RetInf			; exponent > 0x700 --> overflow
 	cpi rAE0, 0xff
 	breq .L_RetInf			; exponent = 0x7ff --> overflow
-	
+
 .L_ret:	; everything is "normal" now
 	call .L_savePtr			; save last parsed position
 	pop YL					; restore Y
 	pop YH
 	; pack and return number
 	XJMP _U(__fp64_rpretA)
-	
+
 	; exponent to big, return +/-INF
 .L_RetInf:
 	call .L_savePtr			; save last parsed position and restore sign
@@ -563,9 +561,9 @@ ENTRY   fp64_strtod
 
 .L_subn:	; handle subnormal number / underflow
 	cpi rAE0, lo8(-51)
-	brlt .L_RetZero			; result will not fit into 52 bits --> round down to 0 
+	brlt .L_RetZero			; result will not fit into 52 bits --> round down to 0
 	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
-	
+
 40:	; shift subnormal number right until exponent is 0
 	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
 	adiw rAE0, 1			; exponent++
@@ -588,8 +586,8 @@ ENTRY   fp64_strtod
 99:	lds r0, .L_sign			; set T flag based on sign of significand
 	bst r0, 0
 	ret
-	
-.L_RetZero:	
+
+.L_RetZero:
 	; result is too small, return +/-0
 	rcall .L_savePtr
 	pop YL

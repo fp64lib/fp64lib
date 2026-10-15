@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -65,13 +63,13 @@
 */
 FUNCTION fp64_atan
 
-	; case |   x	 | atan(x)
+	; case |   x     | atan(x)
 	;------+---------+----------
-	;  1   |  NaN	 |	 NaN
-	;  2   | +/-Inf	 | +/-PI/2
-	;  3   | +/-0.0	 | +/-0.0
+	;  1   |  NaN    |   NaN
+	;  2   | +/-Inf  | +/-PI/2
+	;  3   | +/-0.0  | +/-0.0
 	;  4   | |x|>1.0 | pi/2-atan(1/x)
-	;  5   |  else	 |	atan(x)
+	;  5   |  else   |  atan(x)
 
 	; case 1: NaN
 .L_nan:

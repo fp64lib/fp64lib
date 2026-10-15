@@ -26,18 +26,16 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /*	float64_t_intern __fp64_ldb_log2()
 	load B register with log(2) in internal, unpacked format
 	does not modify any other registers except SREG
-	
+
 	input:		- none -
 	output:		rB7.rB6...rB0.rBE1.rBE0		log(2) in unpacked format
-				
+
 */
 
 FUNCTION __fp64_ldb_log2

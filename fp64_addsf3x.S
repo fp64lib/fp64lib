@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* <non_standart> __fp64addsf3x (float_64 A, float_64 B);
      Internal function to add 64-bit float point numbers.
 

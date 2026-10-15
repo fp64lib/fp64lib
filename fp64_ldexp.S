@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -50,7 +48,7 @@
 	  5 | exponent(x)+exp<-1074  | +/- 0.0 (Underflow)
 	  6 | exponent(x)+exp<-1023  | x*2^exp as subnormal number
 	  7 | exponent(x)+exp>=-1023 | x*2^exp
-	  
+
    float64_t fp64_scalbn (float64_t x, int n)
    fp64_scalbn is an alias to fp64_ldexp(), see there
  */
@@ -78,17 +76,17 @@ GCC_ENTRY __scalbn
 	XCALL _U(__fp64_splitA)
 	brcs .L_NaN					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0
-	
+
 	sbrs rA6, 7					; does significand start with a leading bit?
 	XCALL _U(__fp64_norm2)		; no: normalize subnormal number
-	
+
 	; now "multiply" by 2^exp
 	; this is done by adding exp to exponent of A
 	add rAE0, rB6
 	adc rAE1, rB7
 	; rcall __fp64_saveAB
 	brvs .L_Inf					; case 4: abs(exponent) > 0x7fff
-	
+
 	; check for overflow
 	cpi rAE1, 0x07
 	; rcall __fp64_saveAB
@@ -104,17 +102,17 @@ GCC_ENTRY __scalbn
 	brlo .L_zr					; case 5: exponent < -1023-255 --> underflow
 	cpi rAE0, -51
 	brlo .L_zr					; case 5: exponent < -1023-51 --> underflow
-	
+
 	; case 6: exponent between -1024 and -1074
 	; create subnormal number
 1:	XCALL _U(__fp64_lsrA)		; A >>= 1
 	inc rAE0
 	brmi 1b
-	
+
 	mov rAE0, r1
 	mov rAE1, r1
 	XJMP _U(__fp64_rcpretA)		; round, pack and return x
-	
+
 	; case 7: return x
 .L_norm:
 	XJMP _U(__fp64_pretA)		; pack and return x

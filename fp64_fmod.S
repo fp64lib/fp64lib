@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #if !defined(__AVR_TINY__)
 
 #include "fp64def.h"
@@ -66,7 +64,7 @@ FUNCTION fp64_fmod
 	; A is not Inf, so B must be Inf, cases 6,7 --> return A
 	XJMP _U(__fp64_pretA)
 
-	; cases 1-5: result is NaN 
+	; cases 1-5: result is NaN
 .L_nan:
 	XJMP	_U(__fp64_nan)
 
@@ -99,7 +97,7 @@ ENTRY fp64_fmodn
 	st X+, rB7
 
 92:	ret
-	
+
 
 /* float64_t fp64_fmod (float64_t x, float64_t y);
      The fp64_fmod() function computes the remainder of dividing x by y. The
@@ -115,7 +113,7 @@ GCC_ENTRY __fmod
 	breq	1f			; handle fmod( 0, B ) --> 0
 	XCALL	_U(__fp64_pscB)
 	breq	.L_nan		; finite (!=0) / 0.0 --> NaN
-	
+
 	push rC4			; save working registers
 	push rC5
 	push rC6
@@ -136,7 +134,7 @@ GCC_ENTRY __fmod
 20:	clc
 	ret
 
-1: ; A is 0, B is not Inf or NaN, cases 8, 9	
+1: ; A is 0, B is not Inf or NaN, cases 8, 9
 	XCALL	_U(__fp64_pscB)
 	breq	.L_nan		; fmod(0,0), case 8 -->  NaN
 	; clr r0			; init division result
@@ -158,7 +156,7 @@ GCC_ENTRY __fmod
 	XCALL	_U(__fp64_szero)
 	sec
 	ret
-	
+
 /* float64_t_intern fp64_fmod_pse (float64_t_intern x, float64_t_intern y);
      The fp64_fmod_pse() function computes the remainder of dividing x by y. The
      return value is x - n*y, where n is the quotient of x/y, rounded
@@ -173,7 +171,7 @@ GCC_ENTRY __fmod
 	A = x; B = y;
 	if( A < B ) {
 		// A is already the result
-		Carry = 0; 
+		Carry = 0;
 		return( A );
 		}
 	if( A == B )
@@ -184,7 +182,7 @@ GCC_ENTRY __fmod
 	if( exp >= 54 ) {
 		// A > 2^54 * B --> fmod cannot be determined exactly
 		return( 0 * sign(A^B) );
-		}		
+		}
 	do {
 		counter++;
 		A -= B;
@@ -201,9 +199,9 @@ GCC_ENTRY __fmod
 			}
 		if( --exp < 0 )
 			break;
-		
+
 	}
-	
+
 */
 ENTRY	__fp64_fmod_pse	; post split entry
 
@@ -212,29 +210,29 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	clr rC4		; init division result
 	clr rC5
 	movw rC6, rC4
-	
+
 	XCALL _U(__fp64_cpcAB)	; check whether A < B
 	cpc rAE0, rBE0
 	cpc rAE1, rBE1
 	;call __fp64_saveAB
-	brlo 20b		; if fabs(A) < fabs(B), A is already the result 
+	brlo 20b		; if fabs(A) < fabs(B), A is already the result
 	breq .L_sz1		; if fabs(A) = fabs(B) --> return sign(A^B)*0
-  
+
 	; from now on fabs(A) > fabs(B)
-	; as we do allow subnormal numbers, mantissa of A might not start with 
+	; as we do allow subnormal numbers, mantissa of A might not start with
 	; a leading 1 bit, so normalize A
 	tst rA6
 	brmi 3f
-	
+
 2:	sbiw rAE0,1				; decrease exponent
 	XCALL _U(__fp64_lslA)	; A <<= 1
 	brpl 2b					; repeat until we have a leading 1 bit
 
-3:	; as we do allow subnormal numbers, mantissa of B might not start with 
+3:	; as we do allow subnormal numbers, mantissa of B might not start with
 	; a leading 1 bit, so normalize B
 	tst rB6
 	brmi 5f
-	
+
 4:	sbiw rBE0,1		; decrease exponent
 	lsl	rB0			; B <<= 1
 	rol	rB1
@@ -254,7 +252,7 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	brsh .L_sz		; A > 2^54*B --> fmod(A,B)  can not exactly be determined , return 0
 	clr rA7			; highest A byte
 	clr rB7			; and B byte
-	
+
 .Loop:
 	; inc r0
 	add rC4, r0		; counter++
@@ -306,13 +304,13 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	movw rAE0, rBE0
 	clc
 	ret
-	
-10: 
+
+10:
 	XCALL _U(__fp64_lsrA)	; A >>= 1
 	adiw rBE0, 1	; exponent++
 	brne 10b		; repeat until exponent = 0
 	rjmp 9b
-	
+
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */

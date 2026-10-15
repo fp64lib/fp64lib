@@ -134,10 +134,10 @@ FUNCTION fp64_atan2
 	ldi rB7, 0x80				; set indicator to "add PI"
 	rjmp .L_addPi
 
-	; case 2a: A is +0,		 B is +finite --> atan(A,B) == +0
-	; case 2c: A is -0,		 B is +finite --> atan(A,B) == -0
-	; case 3a: A is +finite, B is +Inf	  --> atan(A,B) == +0
-	; case 3c: A is -finite, B is +Inf	  --> atan(A,B) == -0
+	; case 2a: A is +0,      B is +finite --> atan(A,B) == +0
+	; case 2c: A is -0,      B is +finite --> atan(A,B) == -0
+	; case 3a: A is +finite, B is +Inf    --> atan(A,B) == +0
+	; case 3c: A is -finite, B is +Inf    --> atan(A,B) == -0
 .L_zr:
 	XCALL _U(__fp64_popB)
 	XJMP _U(__fp64_szero)

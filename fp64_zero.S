@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -39,7 +37,7 @@
 	__fp64_szero() returns +/-0.0, based on sign bit in T register.
  */
 
-FUNCTION __fp64_zero 
+FUNCTION __fp64_zero
 ENTRY __fp64_one
 	XCALL _U(__fp64_szero)
 	ldi rA7, 0x3f

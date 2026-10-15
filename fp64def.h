@@ -26,14 +26,12 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /* Interprocedure convensions. In separate file: for math library
    developers.	*/
 #if (!defined(__AVR_ATmega328P__) || defined(__AVR_TINY__) || !defined(__AVR_ENHANCED__)) && !defined(ARDUINO_AVR_MEGA2560) &&!defined(__AVR_MEGA__)
 #error fp64lib is created and tested only for Atmel AVR 328p microprocessors like Arduino UNO or Nano
 #endif
-   
+
 #ifndef	_FP64DEF_H
 #define	_FP64DEF_H
 
@@ -48,13 +46,13 @@
 #endif
 
 /*
-Registers 
+Registers
 	A packed:	rA7, rA6, rA5, rA4, rA3, rA2, rA1, rA0			8 registers
 				r18, r19, r20, r21, r22, r23, r24, r25
 	A unpacked:	rAE1, rAE0, rA6, rA5, rA4, rA3, rA2, rA1, rA0	9 registers
 				r30.  r31,	r19, r20, r21, r22, r23, r24, r25
 	B packed:	rB7, rB6, rB5, rB4, RB3, RB2, RB1, rB0			8 registers
-				r10, r11, r12, r13, r14, r15, r16, r17			
+				r10, r11, r12, r13, r14, r15, r16, r17
 	B unpacked:	rBE1, rBE0, rB6, rB5, rB4, RB3, RB2, RB1, rB0	9 registers
 				r26,  r27,  r11, r12, r13, r14, r15, r16, r17
 

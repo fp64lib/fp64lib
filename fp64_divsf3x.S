@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 /*
 	float64_t __fp64_divsd3( float64_t A, float64_t B )
 	Divides two 64 bit floating point numbers

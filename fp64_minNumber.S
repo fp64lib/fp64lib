@@ -26,15 +26,13 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 FUNCTION fp64_minNumber
 /* float64_t fp64_maximumNumber(float64_t x, float64_t y);
-	fp64_maximumNumber(x, y) returns the bigger of it's arguments. 
-	This is x if x > y, y if y > x. , and the number 
+	fp64_maximumNumber(x, y) returns the bigger of it's arguments.
+	This is x if x > y, y if y > x. , and the number
 	if one operand is a number and the other is a NaN.
 	For this operation, +0 compares greater than −0.
 	If both operands are NaNs, a NaN is returned
@@ -45,7 +43,7 @@ ENTRY fp64_maximumNumber
 	rcall fp64_minimumNumber
 	subi rA7, 0x80
 	ret
-	
+
 .L_nan:	; one of the numbers is a NaN --> return the one that is a number
 	cpi rAE1, 0x07			; check A for being a NaN
 	brne .L_retA			; it's not A, so return A
@@ -60,9 +58,9 @@ ENTRY fp64_maximumNumber
 
 
 /* float64_t fp64_minimumNumber(float64_t x, float64_t y);
-    fp64_minimum(x, y) returns the smaller of its arguments. 
-	This x if x < y, y if y < x, and the number 
-	if one operand is a number and the other is a NaN. 
+    fp64_minimum(x, y) returns the smaller of its arguments.
+	This x if x < y, y if y < x, and the number
+	if one operand is a number and the other is a NaN.
 	For this operation, −0 compares less than +0.
 	If both operands are NaNs, a NaN is returned
  */
@@ -71,7 +69,7 @@ ENTRY fp64_minimumNumber
 	push rA7				; save the original sign bits
 	push rB7
 
-ENTRY __fp64_minNum_intern	; entry point for other min/max routines	
+ENTRY __fp64_minNum_intern	; entry point for other min/max routines
 	push rA7
 	push rB7
 	XCALL _U(__fp64_split3)
@@ -86,14 +84,14 @@ ENTRY __fp64_minNum_intern	; entry point for other min/max routines
 	brmi .L_neg
 							; no, both are positive
 	XCALL _U(__fp64_cpcAB)	; if B > A, i.e. x < y, then C = 1
-	cpc rA7, rB7			
+	cpc rA7, rB7
 	rjmp .L_common
-	
+
 .L_neg:						; both numbers are negative
 	XCALL _U(__fp64_cpcBA)	; if A <= B, i.e. B is more negative, i.e y < x, then C = 0
-	
+
 .L_sign:
-	; x and y have a different sign --> return the negative number, 
+	; x and y have a different sign --> return the negative number,
 	; i.e. the one with the bigger value in rX7
 	cpc rB7, rA7
 
@@ -105,7 +103,7 @@ ENTRY __fp64_minNum_intern	; entry point for other min/max routines
 	pop rA7
 	XCALL _U(__fp64_movABx)	; B is the smaller number, move B to A to return it
 	rjmp 2f
-	
+
 .L_retA:
 	pop rB7					; retrieve the original signs
 	pop rA7
@@ -120,10 +118,10 @@ ENTRY __fp64_minNum_intern	; entry point for other min/max routines
 	cpc r1, rA6				; is A INF?
 	breq .L_inf				; yes, return INF
 	XJMP _U(__fp64_nan)		; no, return NaN
-	
+
 .L_inf:
 	XJMP _U(__fp64_inf)		; return +/-INF
 3:
 	XJMP _U(__fp64_pretA)	; pack and return A
-	
+
 ENDFUNC

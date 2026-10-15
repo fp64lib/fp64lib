@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -36,10 +34,10 @@ FUNCTION __fp64_ldb_pi2
 /*	float64_t_intern __fp64_ldb_pi2x()
 	load B register with π-PI/2 in internal, unpacked format
 	does not modify any other registers except SREG
-	
+
 	input:		- none -
 	output:		rB7.rB6...rB0.rBE1.rBE0		PI/2 in unpacked format
-				
+
 */
 ENTRY __fp64_ldb_pi2x
 	push ZL				; load b with PI/2
@@ -53,14 +51,14 @@ ENTRY __fp64_ldb_pi2x
 	ldi ZL, lo8(__pi_o_2x)
 	ldi ZH, hi8(__pi_o_2x)
 	rjmp __fp64_ldb_const
-	
+
 /*	float64_t_intern __fp64_ldb_pi2()
 	load B register with PI/2 in internal, unpacked format
 	does not modify any other registers except SREG
-	
+
 	input:		- none -
 	output:		rB7.rB6...rB0.rBE1.rBE0		PI/2 in unpacked format
-				
+
 */
 ENTRY __fp64_ldb_pi2
 	push ZL				; load b with PI/2
@@ -73,32 +71,32 @@ ENTRY __fp64_ldb_pi2
 #endif
 	ldi ZL, lo8(__pi_o_2)
 	ldi ZH, hi8(__pi_o_2)
-	
+
 ENTRY __fp64_ldb_const
 	rcall __fp64_ldb8_const
-	
+
 #ifdef ARDUINO_AVR_MEGA2560
 	elpm rBE1, Z+
 	elpm rBE0, Z+
 	pop ZL
 	out  RAMPZ, ZL	; restore RAMPZ
-#else	
+#else
 	lpm rBE1, Z+
 	lpm rBE0, Z+
 #endif
-	
+
 	pop ZH
 	pop ZL
 	ret
-	
+
 /*	float64_t_intern __fp64_ldb8_const()
 	load B register with constant from flash
 	does not modify any other registers except SREG
 	ATTENTION: caller has to set/reset RAMPZ properly!!!
-	
+
 	input:		RAMPZ.ZH.ZL								pointer to flash
 	output:		rB7.rB6...rB0.rBE1.rBE0		PI/2 in unpacked format
-				
+
 */
 ENTRY __fp64_ldb8_const
 #ifdef ARDUINO_AVR_MEGA2560
@@ -121,7 +119,7 @@ ENTRY __fp64_ldb8_const
 	lpm rB0, Z+
 #endif
 	ret
-	
+
 	; PI/2 with 56 bits precision in unpacked format
 __pi_o_2:	  .byte  0x00, 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x03, 0xff	; PI/2   = 1.570796326794896613510132965529919601977
 __pi_o_2x:	.byte  0x00, 0xD3, 0x13, 0x19, 0x8A, 0x2E, 0x03, 0x70, 0x03, 0xc5	; π-PI/2 = 5.721188726109831797891137135379528169152E-18

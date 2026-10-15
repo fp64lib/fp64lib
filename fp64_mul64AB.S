@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -36,7 +34,7 @@
     return top 64 bit of unsigned multiplication C = A*B
 	input	rA7..rA0		64 bit of A
 			rB7..rB0		64 bit of B
-	output	rC7...rC0		top 64 bit of result A*B 
+	output	rC7...rC0		top 64 bit of result A*B
 	modifies r0
  */
 FUNCTION __fp64_mul64AB
@@ -55,31 +53,31 @@ ENTRY __fp64_mul64AB
 	; rAm*rBn for m+n = 6 --> rC0.ZL
 	mul rA0, rB6
 	mov ZL, r1
-	
+
 	mul rA1, rB5
 	add ZL, r1
 	adc rC0, ZH
-	
+
 	mul rA2, rB4
 	add ZL, r1
 	adc rC0, ZH
-	
+
 	mul rA3, rB3
 	add ZL, r1
 	adc rC0, ZH
-	
+
 	mul rA4, rB2
 	add ZL, r1
 	adc rC0, ZH
-	
+
 	mul rA5, rB1
 	add ZL, r1
 	adc rC0, ZH
-	
+
 	mul rA6, rB0
 	add ZL, r1
 	adc rC0, ZH
-	
+
 	; start with m+n = 7
 	mul rA0, rB7	; rAm*rBn for m+n=7 -> rC1.rC0.ZL
 ;	mov ZL, r0
@@ -87,12 +85,12 @@ ENTRY __fp64_mul64AB
 	add ZL, r0
 	adc rC0, r1
 	adc rC1, ZH
-	
+
 	mul rA1, rB6
 	add ZL, r0
 	adc rC0, r1
 	adc rC1, ZH
-	
+
 	mul rA2, rB5
 	add ZL, r0
 	adc rC0, r1
@@ -127,92 +125,92 @@ ENTRY __fp64_mul64AB
 	add rC0, r0
 	adc rC1, r1
 	adc rC2, ZH
-	
+
 	mul rA2, rB6
 	add rC0, r0
 	adc rC1, r1
 	adc rC2, ZH
-	
+
 	mul rA3, rB5
 	add rC0, r0
 	adc rC1, r1
 	adc rC2, ZH
-	
+
 	mul rA4, rB4
 	add rC0, r0
 	adc rC1, r1
 	adc rC2, ZH
-	
+
 	mul rA5, rB3
 	add rC0, r0
 	adc rC1, r1
 	adc rC2, ZH
-	
+
 	mul rA6, rB2
 	add rC0, r0
 	adc rC1, r1
 	adc rC2, ZH
-	
+
 	mul rA7, rB1
 	add rC0, r0
 	adc rC1, r1
 	adc rC2, ZH
-	
+
 	mul rA2, rB7	; rAm*rBn for m+n=9 -> rC3.rC2.rC1
 	add rC1, r0
 	adc rC2, r1
 	adc rC3, ZH
-	
+
 	mul rA3, rB6
 	add rC1, r0
 	adc rC2, r1
 	adc rC3, ZH
-	
+
 	mul rA4, rB5
 	add rC1, r0
 	adc rC2, r1
 	adc rC3, ZH
-	
+
 	mul rA5, rB4
 	add rC1, r0
 	adc rC2, r1
 	adc rC3, ZH
-	
+
 	mul rA6, rB3
 	add rC1, r0
 	adc rC2, r1
 	adc rC3, ZH
-	
+
 	mul rA7, rB2
 	add rC1, r0
 	adc rC2, r1
 	adc rC3, ZH
-	
+
 	mul rA3, rB7	; rAm*rBn for m+n=10 -> rC4.rC3.rC2
 	add rC2, r0
 	adc rC3, r1
 	adc rC4, ZH
-	
+
 	mul rA4, rB6
 	add rC2, r0
 	adc rC3, r1
 	adc rC4, ZH
-	
+
 	mul rA5, rB5
 	add rC2, r0
 	adc rC3, r1
 	adc rC4, ZH
-	
+
 	mul rA6, rB4
 	add rC2, r0
 	adc rC3, r1
 	adc rC4, ZH
-	
+
 	mul rA7, rB3
 	add rC2, r0
 	adc rC3, r1
 	adc rC4, ZH
-	
+
 	mul rA4, rB7	; rAm*rBn for m+n=11 -> rC5.rC4.rC3
 	add rC3, r0
 	adc rC4, r1
@@ -237,27 +235,27 @@ ENTRY __fp64_mul64AB
 	add rC4, r0
 	adc rC5, r1
 	adc rC6, ZH
-	
+
 	mul rA6, rB6
 	add rC4, r0
 	adc rC5, r1
 	adc rC6, ZH
-	
+
 	mul rA7, rB5
 	add rC4, r0
 	adc rC5, r1
 	adc rC6, ZH
-	
+
 	mul rA6, rB7	; rAm*rBn for m+n=13 -> rC7.rC6.rC5
 	add rC5, r0
 	adc rC6, r1
 	adc rC7, ZH
-	
+
 	mul rA7, rB6
 	add rC5, r0
 	adc rC6, r1
 	adc rC7, ZH
-	
+
 	mul rA7, rB7	; rAm*rBn for m+n=14 -> rC7.rC6 (carry not possible)
 	add rC6, r0
 	adc rC7, r1
@@ -273,19 +271,19 @@ ENTRY __fp64_mul64AB
 	adc rC5, ZH
 	adc rC6, ZH
 	adc rC7, ZH
-	
+
 1:	mov r1, ZH	; clear r1 without affecting flags
-	
+
 	pop ZH		; restore used registers and return
 	pop ZL
-	
+
 	ret
 
 /*  uint64_t __fp64_domul64AB (uint64_t A, B);
     return top 64 bit of unsigned multiplication A = A*B
 	input	rA7..rA0		64 bit of A
 			rB7..rB0		64 bit of B
-	output	rA7...rA0		top 64 bit of result A*B 
+	output	rA7...rA0		top 64 bit of result A*B
  */
 
 ENTRY __fp64_domul64AB
@@ -297,11 +295,11 @@ ENTRY __fp64_domul64AB
 	push rC5
 	push rC6
 	push rC7
-	
+
 	XCALL _U(__fp64_mul64AB)	; C = A * B
-	
+
 	XCALL _U(__fp64_movAC)		; move result to A
-	
+
 	pop rC7		; restore registers
 	pop rC6
 	pop rC5
@@ -310,7 +308,7 @@ ENTRY __fp64_domul64AB
 	pop rC2
 	pop rC1
 	pop rC0
-	
+
 	ret
-	
+
 ENDFUNC

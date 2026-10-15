@@ -42,4 +42,3 @@
 #define ASSEMBLY_MLIB_SECTION   .section MLIB_SECTION, "ax", @progbits
 
 #endif
-

@@ -26,15 +26,13 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 FUNCTION fp64_minMag
 
 /* float64_t fp64_maximumMagnitudeNumber(float64_t x, float64_t y);
-	fp64_maximumMagnitudeNumber(x, y) is x if |x| > |y|, y if |y| > |x|, 
+	fp64_maximumMagnitudeNumber(x, y) is x if |x| > |y|, y if |y| > |x|,
 	otherwise fp64_maximumNumber(x, y).
  */
 ENTRY fp64_maximumMagnitudeNumber
@@ -45,13 +43,13 @@ ENTRY fp64_maximumMagnitudeNumber
 	eor rA7, rB7			; do x and y have different sign?
 	bst rA7, 7
 	pop rA7
-	
+
 	ori rA7, 0x80			; now get minimum( -|x|, -|y|) = -maximum( |x|, |y| )
 	ori rB7, 0x80			; but as we saved the original sign, this will return x or y
-	brtc .L_min				; no special handling is sign(x) == sign(y)	
+	brtc .L_min				; no special handling is sign(x) == sign(y)
 
 	XCALL _U(__fp64_cpcAB)	; is y = -x?
-	cpc rA7, rB7			; 
+	cpc rA7, rB7			;
 	brne .L_min				; no, do normal minimum(|x|,|y|)
 
 	; yes, y = -x --> return the one with the positive sign
@@ -61,7 +59,7 @@ ENTRY fp64_maximumMagnitudeNumber
 0:	ret
 
 /* float64_t fp64_minimumMagnitudeNumber(float64_t x, float64_t y);
-	fp64_minimumMagnitudeNumber(x, y) is x if |x| < |y|, y if |y| < |x|, 
+	fp64_minimumMagnitudeNumber(x, y) is x if |x| < |y|, y if |y| < |x|,
 	otherwise fü64_minimumNumber(x, y).
  */
 ENTRY fp64_minimumMagnitudeNumber
@@ -72,13 +70,13 @@ ENTRY fp64_minimumMagnitudeNumber
 	eor rA7, rB7			; do x and y have different sign?
 	bst rA7, 7
 	pop rA7
-	
+
 	andi rA7, 0x7f			; remove sign, create |x|, |y|
 	andi rB7, 0x7f
 	brtc .L_min				; no special handling is sign(x) == sign(y)
 
 	XCALL _U(__fp64_cpcAB)	; is y = -x?
-	cpc rA7, rB7			; 
+	cpc rA7, rB7			;
 	brne .L_min				; no, do normal minimum(|x|,|y|)
 
 	; yes, y = -x --> return the one with the negative sign

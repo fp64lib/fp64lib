@@ -28,8 +28,6 @@
    CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
-
-/* $Id$ */
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -40,8 +38,8 @@
      rAE1, rAE0, rA6, rA5, rA5, rA3, rA2.rA1.rA0	- exponent and mantissa of A (see __fp64_splitA)
      rBE1, rBE0, rB6, rB5, rB4, rB3, rB2.rB1.rB0	- exponent and mantissa of B (see __fp64_splitA)
      Flags:
-        C = 0, Z = 0	- both numbers are finite, A is != 0 
-        C = 0, Z = 1	- both numbers are finite, A is 0 
+        C = 0, Z = 0	- both numbers are finite, A is != 0
+        C = 0, Z = 1	- both numbers are finite, A is 0
 		C = 1		    - A and/or B is Inf (if Z=1)/NaN (if Z=0)
 						  NaN has priority over Inf
 		T = sign(A) ^ sign(B)
@@ -57,33 +55,33 @@ ENTRY	__fp64_split3
 	; rA7[7] := sign(A) ^ sign(B)
 	sbrc rB7, 7		; is B negative?
 	subi rA7, 0x80	; yes: reverse sign of A
-	
+
 	movw rBE0, rB6 	; get exponent from rB7.rB6 into rBE1.rBE0
     andi rBE0, 0xf0 ; get rid of mantissa bits in exponent
     eor  rB6, rBE0  ; and get rid of exponent bits in mantissa
-  
+
 	andi rBE1, 0x7f	; clear sign bit
 	lsr  rBE1       ; mov exponent downwards 4 bits
-	ror  rBE0		
-	lsr  rBE1
-	ror  rBE0		
-	lsr  rBE1
-	ror  rBE0		
+	ror  rBE0
 	lsr  rBE1
 	ror  rBE0
-	
-	; from now on 
-	; 	exponent is in rBE1,rBE0, 
+	lsr  rBE1
+	ror  rBE0
+	lsr  rBE1
+	ror  rBE0
+
+	; from now on
+	; 	exponent is in rBE1,rBE0,
 	;	mantissa is in rB6 - rB0 (not yet normalized)
 	;	sign is not saved, but rA7[7] = sign(A) ^ sign(B)
-	adiw rBE0,0	
+	adiw rBE0,0
 	breq 4f			; e = 0 --> B is 0 or subnormal
-	
+
 	cpi  rBE1, 0x07	; exp(b) = 0x7ff ?
 	brne 1f
 	cpi  rBE0, 0xff
 	breq 5f			; yes --> B is INF or NaN
-	
+
 	; it is a normal number --> shift it to the left until MSB is set
 1:	rcall 3f
 	rcall 3f
@@ -92,7 +90,7 @@ ENTRY	__fp64_split3
 	sec
 	ror rB6
 	rjmp  __fp64_splitA	; split A into rAx, return with flags set from A
-	
+
 3:	lsl  rB0			; shift B6.B5....B0 left one bit
 	rol  rB1
 	rol  rB2
@@ -101,15 +99,15 @@ ENTRY	__fp64_split3
 	rol  rB5
 	rol  rB6
 	ret				; C = 0
-	
+
 	; B is not a finite (i.e. NaN or Inf), exponent rBE1,rBE0 was 0x07ff
 	; now check whether B is INF or NaN
 	; set Z=1 if INF, else Z=0 for NaN
 	; and return with C=1
 5:	rcall 3b			; even for NaN make sure that value is decomposed
-	rcall 3b			; correctly by shifting mantissa 4 bits to rights	
-	rcall 3b			; otherwise it is possible that a NaN might be 
-	rcall 3b			; converted to Inf 
+	rcall 3b			; correctly by shifting mantissa 4 bits to rights
+	rcall 3b			; otherwise it is possible that a NaN might be
+	rcall 3b			; converted to Inf
 
 	rcall __fp64_splitA	; split A into rAx, return with flags set from A
 	brcc 51f		; ignore flags of A for finite number
@@ -128,15 +126,15 @@ ENTRY	__fp64_split3
 	; now check whether B is subnormal
 	; if so set exponent rBE1, rBE0 to 1
 4:	rcall 3b			; even for zero and subnormal make sure that value is decomposed
-	rcall 3b			; correctly by shifting mantissa 4 bits to rights	
-	rcall 3b			; otherwise it is possible that a subnormal might be 
-	
+	rcall 3b			; correctly by shifting mantissa 4 bits to rights
+	rcall 3b			; otherwise it is possible that a subnormal might be
+
 	XCALL _U(__fp64_cpc0B5)	; C = 1 if one of Bx > 0
 	cpc	r1, rB6		; C = 1, if A is not a zero
 	rol	rBE0		; if C = 1 --> exponent rAE0 = 1 else exponent = 0
 	; rjmp __fp64_splitA	; split A into rAx, return with flags set from A as B does not matter
 	; rjmp eliminated by code rearrangement
-	
+
 /* <non_standard> __fp64_splitA (fp64 A);
      Splits an A 64bit floating point number, which conforms to IEEE float format double
 	   Bit 63: sign S 0 = + / 1 = -
@@ -172,30 +170,30 @@ ENTRY   __fp64_splitA
 	andi rAE1, 0x7f	; clear sign bit
 	andi rAE0, 0xf0	; clear mantissa bits, keep exponent bits
 	lsr  rAE1		; mov exponent downwards 4 bits
-	ror  rAE0		
+	ror  rAE0
 
 	lsr  rAE1
-	ror  rAE0		
+	ror  rAE0
 
 	lsr  rAE1
-	ror  rAE0		
+	ror  rAE0
 
 	lsr  rAE1
 	ror  rAE0
 	andi rA6, 0x0f 	; get rid of exponent bits
-	
-	; from now on 
-	; 	exponent is in rAE1,rAE0, 
+
+	; from now on
+	; 	exponent is in rAE1,rAE0,
 	;	mantissa is in rA6 - rA0 (not yet normalized)
 	;	sign in T flag
 	adiw rAE0, 0	; is exponent = 0 ?
 	breq 6f			; e = 0 --> A is 0 or subnormal
-	
+
 	cpi rAE1, 0x07
 	brne 88f
 	cpi rAE0, 0xff	; is exponent = 2047 (=0x7ff)
 	breq 7f			; yes --> A is INF or NaN
-	
+
 	; it is a normal number --> shift it to the left until MSB is set
 88:	ori  rA6, 0x10	; set leading one for mantissa
 8:	XCALL _U(__fp64_lslA)
@@ -203,7 +201,7 @@ ENTRY   __fp64_splitA
 	XCALL _U(__fp64_lslA)	; shift A6.A5....A0 left one bit
 	clz						; clear Z (needed for subnormal numbers as rA6 may be 0)
 	ret						; C = 0, Z = 0
-	
+
 	; A is zero or subnormal, exponent rAE1,rAE0 was 0
 	; now check whether A is subnormal
 	; if so set exponent rAE1, rAE0 to 1
@@ -212,15 +210,15 @@ ENTRY   __fp64_splitA
 	rol	rAE0		; if C = 1 --> exponent rAE0 = 1 else exponent = 0
 	brne 8b			; if Z != 0 --> subnormal, shift for correct operations
 	ret				; return with C = 0, Z = 1 for finite number 0
-	
+
 	; A is not a finite (i.e. NaN or Inf), exponent rAE1,rAE0 was 0x07ff
 	; now check whether A is INF or NaN
 	; set Z=1 if INF, else Z=0 for NaN
 	; and return with C=1
 7:	XCALL _U(__fp64_lslA)	; even for NaN make sure that value is decomposed
-	XCALL _U(__fp64_lslA)	; correctly by shifting mantissa 4 bits to rights	
-	XCALL _U(__fp64_lslA)	; otherwise it is possible that a NaN might be 
-	XCALL _U(__fp64_lslA)	; converted to Inf 
+	XCALL _U(__fp64_lslA)	; correctly by shifting mantissa 4 bits to rights
+	XCALL _U(__fp64_lslA)	; otherwise it is possible that a NaN might be
+	XCALL _U(__fp64_lslA)	; converted to Inf
 
 	cp	rA6, r1		; Z = 1 if rAx = 0
 	cpc	rA5, r1
@@ -232,4 +230,3 @@ ENTRY   __fp64_splitA
 	sec				; set C=1 to indicate NaN or Inf
 	ret
 ENDFUNC
-	

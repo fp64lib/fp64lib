@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
@@ -35,7 +33,7 @@ FUNCTION __fp64_movCA
 
 /*  __fp64_movCA() move A into C
    Input:
-	  rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A in packed format 
+	  rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0  - A in packed format
    Return:
 	  rC7.rC6.rC5.rC4.rC3.rC2.rC1.rC0  - a copy of A in packed format
    Modifies:

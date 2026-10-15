@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 // Include file is only needed when debugging fp64lib
 
 #ifndef fp64lib_h_included
@@ -38,7 +36,7 @@
 
 #ifdef __cplusplus
 extern "C"{
-#endif 
+#endif
 
 // debugging structure
 typedef struct fp64_debug_t {

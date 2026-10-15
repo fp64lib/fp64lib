@@ -26,15 +26,13 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* $Id$ */
-
 #include "fp64def.h"
 #include "asmdef.h"
 
 /* float64_t fp64_hypot(float64_t x, float64_t y);
      The float64_t() function returns `sqrt (x*x + y*y)'. This is the length
      of the hypotenuse of a right triangle with sides of length x and y,
-     or the distance of the point (x, y) from the origin. 
+     or the distance of the point (x, y) from the origin.
  */
 
 FUNCTION fp64_hypot
