@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2026	Uwe Bissinger
+/* Copyright (c) 2018-2026  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
