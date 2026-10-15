@@ -1,18 +1,18 @@
-/* Copyright (c) 2020  Uwe Bissinger
+/* Copyright (c) 2020-2026	Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -42,20 +42,20 @@
 
 FUNCTION __fp64_cmp_1
 ENTRY __fp64_cmp_1
-	cpi rAE1, 0x03	; x < 2^-255 or x > 2^1\
-	brne .L_ret		; yes --> return Z=0, C=1 for x<2^-255, C=0 for x>2
+	cpi rAE1, 0x03				; x < 2^-255 or x > 2^1\
+	brne .L_ret					; yes --> return Z=0, C=1 for x<2^-255, C=0 for x>2
 
-	cpi rAE0, 0xff	; x < 1.0
-	brlo .L_ret		; yes --> return Z=0, C=1
+	cpi rAE0, 0xff				; x < 1.0
+	brlo .L_ret					; yes --> return Z=0, C=1
 
 	; now here: 1 <= |x| < 2
 	; check, whether |x| is == 1.0, i.e. significand = 0x80....0
 
 	XCALL _U(__fp64_cpc0A5)
-	brne .L_ret		; significand != 0 --> |x|>1, return Z=0, C=0
+	brne .L_ret					; significand != 0 --> |x|>1, return Z=0, C=0
 
-	cpi rA6, 0x80	; significand = 0x80...0? --> Z=1 C=0 if yes, otherwise x>1 --> Z=0 C=0
+	cpi rA6, 0x80				; significand = 0x80...0? --> Z=1 C=0 if yes, otherwise x>1 --> Z=0 C=0
 
-.L_ret:	; return current flag settings
+.L_ret:							; return current flag settings
 	ret
 ENDFUNC

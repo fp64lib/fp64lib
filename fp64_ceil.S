@@ -1,18 +1,18 @@
-/* Copyright (c) 2019-2020  Uwe Bissinger
+/* Copyright (c) 2019-2026	Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -27,28 +27,28 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 /* float64_t fp64_ceil( float64_t A );
-    Rounds A upwards to the nearest integer greater or equal A.
+	Rounds A upwards to the nearest integer greater or equal A.
 	For A < 0 this is identical to trunc(A).
 
 	The following rules apply:
 
-	case|           A	       | result
+	case|			A		   | result
 	----+----------------------+------------
-	  0 |           x < 0	   | trunc(x)
-	  1 |          NaN         | NaN
-	  2 |         +Inf         | +Inf
-	  3 |          0.0		   | 0.0
-	  4 |           x >=2^52   | x
-	  5 |       0 < x < 1	   | 1.0
-	  6 |       1 <=x < 2^52   | ceil(x)
+	  0 |			x < 0	   | trunc(x)
+	  1 |		   NaN		   | NaN
+	  2 |		  +Inf		   | +Inf
+	  3 |		   0.0		   | 0.0
+	  4 |			x >=2^52   | x
+	  5 |		0 < x < 1	   | 1.0
+	  6 |		1 <=x < 2^52   | ceil(x)
 
    Input:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - A in IEEE 754 - 64-bit format
+	 rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - A in IEEE 754 - 64-bit format
    Output:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - ceil(x)
+	 rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - ceil(x)
    Examples:
-     fp64_ceil(1.9) --> 2.0
-     fp64_ceil(-1.9) --> -1.0
+	 fp64_ceil(1.9) --> 2.0
+	 fp64_ceil(-1.9) --> -1.0
  */
 
  #if !defined(__AVR_TINY__)
@@ -101,7 +101,6 @@ GCC_ENTRY __ceil
 	brne 0b
 
 	tst r0						; was there a fraction?
-	; rcall __fp64_saveAB
 	breq 1f
 
 	ldi rA7, 1
@@ -115,13 +114,10 @@ GCC_ENTRY __ceil
 								; get a carry at this operation
 
 1:	pop rAE1					; restore number of shifts
-	; rcall __fp64_saveAB
 
 2:	XCALL _U(__fp64_lslA)		; now shift the number back into position
 	dec rAE1
 	brne 2b
-
-	;rcall __fp64_saveAB
 
 	; mov rAE1, r1				; restore proper exponent 0 <= rAE1.rAE0 < 52
 	brcc .L_ret
@@ -130,7 +126,6 @@ GCC_ENTRY __ceil
 	ldi rA6, 0x80				; create a new leading bit (due to overflow all other bits are 0)
 
 .L_ret:
-	; rcall __fp64_saveAB
 	subi rAE0, -0xff			; add base 1023
 	sbci rAE1, -0x04
 	XJMP _U(__fp64_pretA)		; pack and return x

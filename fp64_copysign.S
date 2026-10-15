@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2020  Uwe Bissinger
+/* Copyright (c) 2018-2026	Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -8,14 +8,14 @@
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -33,13 +33,13 @@
 #include "asmdef.h"
 
 /* float64_t fp64_copysign (float64_t x, float64_t y);
-     The fp64_copysign() function returns x but with the sign of y.
-     They work even if x or y are NaN, Inf or zero.
+	 The fp64_copysign() function returns x but with the sign of y.
+	 They work even if x or y are NaN, Inf or zero.
  */
 
 FUNCTION fp64_copysign
-ENTRY   fp64_copysign
-	bst	rB7, 7
-	bld	rA7, 7
+ENTRY	fp64_copysign
+	bst rB7, 7
+	bld rA7, 7
 	ret
 ENDFUNC

@@ -1,18 +1,18 @@
-/* Copyright (c) 2020  Uwe Bissinger
+/* Copyright (c) 2020-2026	Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -45,7 +45,7 @@
 		  return 0.0 * sign(x)
 
 	  if( res >= 1.0 )
-		  // |x| >= 1:  use atan(x) + atan(1/x) = pi/2 to reduce argument to [0, 1].
+		  // |x| >= 1:	use atan(x) + atan(1/x) = pi/2 to reduce argument to [0, 1].
 		  flag = true
 		  res = 1/x
 
@@ -82,7 +82,7 @@ FUNCTION fp64_atan
 
 	; case 2: 0 --> 0
 .L_zero:
-	XJMP _U(__fp64_szero)			; no: return 0.0 for asin
+	XJMP _U(__fp64_szero)		; no: return 0.0 for asin
 
 /*	float64_t fp64_atan(float64_4 phi )
 	returns the arcus tangens of phi (inverse function to fp64_tan(x)
@@ -90,58 +90,55 @@ FUNCTION fp64_atan
 ENTRY fp64_atan
 GCC_ENTRY __atan
 	XCALL _U(__fp64_splitA)
-	brcs .L_nan						; NaN or +/- INF
-	breq .L_zero					; x = 0 --> result of atan = 0
+	brcs .L_nan					; NaN or +/- INF
+	breq .L_zero				; x = 0 --> result of atan = 0
 
-	push rA7						; save sign of x
+	push rA7					; save sign of x
 
-	XCALL _U(__fp64_pushCB)			; as all registers may be used, save them
+	XCALL _U(__fp64_pushCB)		; as all registers may be used, save them
 	push YH
 	push YL
 	push XH
 	push XL
 
-	cpi rAE1, 0x03					; fabs(x) < 1.0?
-	brmi 10f						; definitely yes, x < 2^-255 --> go ahead with approximation
-	brne 1f							; definitely no, x >= 2.0 --> calculate 1/x
+	cpi rAE1, 0x03				; fabs(x) < 1.0?
+	brmi 10f					; definitely yes, x < 2^-255 --> go ahead with approximation
+	brne 1f						; definitely no, x >= 2.0 --> calculate 1/x
 
 	; maybe yes, 2^-255 < x < 2.0
 	cpi rAE0, 0xff
-	brlo 10f						; |x| < 1.0 --> go ahead with approximation
+	brlo 10f					; |x| < 1.0 --> go ahead with approximation
 
 1:	; here: |x| >= 1.0
 	; use atan(x) + atan(1/x) = pi/2 to reduce argument to [0, 1]
 	; --> compute 1/x , which will be <= 1.0
 
-	XCALL _U(__fp64_movBAx)			; B = |x|
+	XCALL _U(__fp64_movBAx)		; B = |x|
 
 	set
-	XCALL _U(__fp64_szero)			; will return packed -0, which is nearly unpacked 1.0
+	XCALL _U(__fp64_szero)		; will return packed -0, which is nearly unpacked 1.0
 	mov rA6, rA7
 	clr rA7
 	ldi rAE1, 0x03
 	ldi rAE0, 0xff
 	clt
-	; rcall __fp64_saveAB
-	XCALL _U(__fp64_divsd3_pse)		; 1/|x|
-	inc r1							; flag = true
+	XCALL _U(__fp64_divsd3_pse) ; 1/|x|
+	inc r1						; flag = true
 
-10:	; here: A = |x| or 1/|x|
-	push r1							; save flag
+10: ; here: A = |x| or 1/|x|
+	push r1						; save flag
 	clr r1
 	clt
 
-	XCALL _U(__fp64_movBAx)			; B = A = |x|
+	XCALL _U(__fp64_movBAx)		; B = A = |x|
 
-	XCALL _U(__fp64_pushA)			; save res = |x| (or 1/|x|)
+	XCALL _U(__fp64_pushA)		; save res = |x| (or 1/|x|)
 	push rAE1
 	push rAE0
 
-	; rcall __fp64_saveAB
-	XCALL _U(__fp64_mulsd3_pse)		; x2 = x^2
-	; rcall __fp64_saveA
+	XCALL _U(__fp64_mulsd3_pse) ; x2 = x^2
 
-	XCALL _U(__fp64_pushA)			; save x2 = x^2
+	XCALL _U(__fp64_pushA)		; save x2 = x^2
 	push rAE1
 	push rAE0
 
@@ -151,49 +148,45 @@ GCC_ENTRY __atan
 #endif
 	ldi XL, lo8(.L_tableAtanDenom)	; calculate Denominator
 	ldi XH, hi8(.L_tableAtanDenom)
-	; rcall __fp64_saveAB
 	XCALL _U(__fp64_powser)
 
-	pop rBE0						; retrieve x2 = x^2
+	pop rBE0					; retrieve x2 = x^2
 	pop rBE1
 	XCALL _U(__fp64_popB)
 
-	XCALL _U(__fp64_pushA)			; save y = horner( x2, coeff_denominator )
+	XCALL _U(__fp64_pushA)		; save y = horner( x2, coeff_denominator )
 	push rAE1
 	push rAE0
 
-	XCALL _U(__fp64_movABx)			; A = B = x2
+	XCALL _U(__fp64_movABx)		; A = B = x2
 #ifdef ARDUINO_AVR_MEGA2560
 	ldi XL, byte3(.L_tableAtanNom)
-	out  RAMPZ, XL
+	out	 RAMPZ, XL
 #endif
-	ldi XL, lo8(.L_tableAtanNom)	; calculate Nominator
+	ldi XL, lo8(.L_tableAtanNom); calculate Nominator
 	ldi XH, hi8(.L_tableAtanNom)
-	XCALL _U(__fp64_powser)			; z = horner( x2, coeff_nominator )
-	; rcall __fp64_saveAB
+	XCALL _U(__fp64_powser)		; z = horner( x2, coeff_nominator )
 
-	pop rBE0						; retrieve Denominator y = horner( x2, coeff_denominator )
+	pop rBE0					; retrieve Denominator y = horner( x2, coeff_denominator )
 	pop rBE1
 	XCALL _U(__fp64_popB)
 
-	; rcall __fp64_saveAB
+	XCALL _U(__fp64_divsd3_pse) ; res = z / y
 
-	XCALL _U(__fp64_divsd3_pse)			; res = z / y
-
-	pop rBE0							; retrieve res = |x| or 1/|x|
+	pop rBE0					; retrieve res = |x| or 1/|x|
 	pop rBE1
 	XCALL _U(__fp64_popB)
 
-	XCALL _U(__fp64_mulsd3_pse)			; res = z / y * res
+	XCALL _U(__fp64_mulsd3_pse) ; res = z / y * res
 
-	pop r0								; retrieve flag
+	pop r0						; retrieve flag
 	tst r0
 	breq 19f
 
 	; yes: adjust result to PI/2 - res
 	XCALL _U(__fp64_ldb_pi2)
-	XCALL _U(__fp64_sub_pse)			; compute res - PI/2
-	bld rA7, 7							; res = -res --> res = PI/2 - res
+	XCALL _U(__fp64_sub_pse)	; compute res - PI/2
+	bld rA7, 7					; res = -res --> res = PI/2 - res
 	subi rA7, 0x80
 
 19:
@@ -203,7 +196,7 @@ GCC_ENTRY __atan
 	pop YH
 	XCALL _U(__fp64_popBC)		; restore register set
 
-	pop r0						; rerieve sign(x)
+	pop r0						; retrieve sign(x)
 	bst r0, 7					; yes, return res*sign
 
 .L_retA:
@@ -214,14 +207,14 @@ GCC_ENTRY __atan
 
 .L_tableAtanNom:
 	; Ideal polynom:
-	; +   0.09762721591717633036983 * x^6
-	; +  11.3221594116764655236245  * x^5
-	; + 192.5792014481559613474286  * x^4
-	; +1114.1290728455183546172942  * x^3
-	; +2761.7198246138834959053784  * x^2
-	; +3031.0745956115083044212807  * x
+	; +	  0.09762721591717633036983 * x^6
+	; +	 11.3221594116764655236245	* x^5
+	; + 192.5792014481559613474286	* x^4
+	; +1114.1290728455183546172942	* x^3
+	; +2761.7198246138834959053784	* x^2
+	; +3031.0745956115083044212807	* x
 	; +1209.7470017580907217240715
-	.byte 6	; polynom power = 6 --> 7 entries
+	.byte 6 ; polynom power = 6 --> 7 entries
 	.byte 0x00, 0xc7, 0xf0, 0xc7, 0x1c, 0x82, 0xab, 0x23, 0x03, 0xfb	; 0.09762721591717633036983906357029073391773
 	.byte 0x00, 0xb5, 0x27, 0x90, 0xa0, 0x93, 0xfb, 0xfc, 0x04, 0x02	; 11.32215941167646552362524635208795853458
 	.byte 0x00, 0xc0, 0x94, 0x46, 0x8b, 0xcd, 0xa0, 0x2d, 0x04, 0x06	; 192.5792014481559613474381288666936740128
@@ -233,8 +226,8 @@ GCC_ENTRY __atan
 
 .L_tableAtanDenom:
 	; Ideal polynom:
-	; +   1.0000000000000000000000 * x^6
-	; +  39.9178842486537981501999 * x^5
+	; +	  1.0000000000000000000000 * x^6
+	; +	 39.9178842486537981501999 * x^5
 	; + 423.0716464809047804524206 * x^4
 	; +1821.6003392918464941509225 * x^3
 	; +3664.5449563283749893504796 * x^2

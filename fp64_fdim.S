@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020  Uwe Bissinger
+/* Copyright (c) 2019-2026	Uwe Bissinger
    Based on 32bit floating point arithmetic routines which is:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -8,14 +8,14 @@
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -35,56 +35,56 @@
 #include "asmdef.h"
 
 /* float_64t fp64_fdim (float_64t A, float_64t B);
-     The fp64_fdim() function  return max(A-B,0). If x or y or both are NaN,
-     NaN is returned.
+	 The fp64_fdim() function  return max(A-B,0). If x or y or both are NaN,
+	 NaN is returned.
 
    Notes:
-     * In case 'A == B' subtraction is called to save flash space.
-     Contrary it is needed to check 'Inf - Inf'.  And the fp64_sub()
-     is fast if both arguments are equal.
+	 * In case 'A == B' subtraction is called to save flash space.
+	 Contrary it is needed to check 'Inf - Inf'.  And the fp64_sub()
+	 is fast if both arguments are equal.
  */
 
 FUNCTION fp64_fdim
 ENTRY fp64_fdim
   ; sign(A) | sign(B)
-	mov	r0, rA7
+	mov r0, rA7
 	or	r0, rB7
 	brmi	2f
 
 	; A >= 0 and B >= 0
-	XCALL _U(__fp64_cpcAB)	; is B > A ? (or: is A-B < 0?)
-	cpc	rA7, rB7
-	brcs 	3f			; yes, check for NaN
-1:	XJMP _U(fp64_sub)	; no ---> A-B > 0, return A-B
+	XCALL _U(__fp64_cpcAB)		; is B > A ? (or: is A-B < 0?)
+	cpc rA7, rB7
+	brcs	3f					; yes, check for NaN
+1:	XJMP _U(fp64_sub)			; no ---> A-B > 0, return A-B
 
 	; A < 0 or B < 0 or both < 0
-2:	XCALL _U(__fp64_cpcBA)	; is A > B?
-	cpc	rB7, rA7
-	brcc 1b				; no --> A-B > 0, return A-B
+2:	XCALL _U(__fp64_cpcBA)		; is A > B?
+	cpc rB7, rA7
+	brcc 1b						; no --> A-B > 0, return A-B
 
 	; handle here all cases of A-B < 0
 	; before 0 return, check if A or B is NaN
-3:	ldi	ZL, 0xf0	; hlo8(Inf)
-	ldi	ZH, 0xfe	; hhi8(Inf) after 'lsl'
-	lsl	rA7			; get rid of sign of A
+3:	ldi ZL, 0xf0				; hlo8(Inf)
+	ldi ZH, 0xfe				; hhi8(Inf) after 'lsl'
+	lsl rA7						; get rid of sign of A
 	XCALL _U(__fp64_cpc0A5)
-	cpc	ZL, rA6
-	cpc	ZH, rA7
+	cpc ZL, rA6
+	cpc ZH, rA7
 	brlo	.L_nan
 
 	; check B for NaN
 	push rB7
-	lsl	rB7			; get rid of sign of B
+	lsl rB7						; get rid of sign of B
 	XCALL _U(__fp64_cpc0B5)
-	cpc	ZL, rB6
-	cpc	ZH, rB7
+	cpc ZL, rB6
+	cpc ZH, rB7
 	pop rB7
 	brlo	.L_nan
 	; neither A nor B are NaN --> return 0
 	XJMP	_U(__fp64_zero)
 
 	; A or B is NaN --> fp64_dim(A,B) is NaN
-.L_nan:	XJMP	_U(__fp64_nan)
+.L_nan: XJMP	_U(__fp64_nan)
 ENDFUNC
 
 #endif /* !defined(__AVR_TINY__) */

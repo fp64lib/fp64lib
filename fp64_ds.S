@@ -1,18 +1,18 @@
-/* Copyright (c) 2019-2020  Uwe Bissinger
+/* Copyright (c) 2019-2026	Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -28,21 +28,21 @@
 
 /* float __fp64_sdsf (float64_t A);
    float fp64_ds (float64_t A);
-    Converts a float64 to the float32 representing the same number.
+	Converts a float64 to the float32 representing the same number.
 	As the range of float is significandly smaller than float64_t,
 	the following rules apply:
 
-	case|           A	       | result
+	case|			A		   | result
 	----+----------------------+------------
-	  1 |          NaN         | 0x7fffffff (NaN in float)
-	  2 |         +Inf         | 0x7f800000 (+Inf in float)
-	  3 |         -Inf         | 0xff800000 (-Inf in float)
-	  4 |          0.0		   | 0x00000000 (0.0 in float)
-	  5 |         -0.0		   | 0x80000000 (-0.0 in float)
-	  6 |           x >=2^128  | 0x7f800000 (+Inf in float)
-	  7 |  -2^128 <=x          | 0xff800000 (-Inf in float)
-	  8 |       0 < x < 2^-149 | 0x00000000 (0.0 as float, underflow)
-	  9 | -2^-149 < x < 0      | 0x80000000 (-0.0 as float, underflow)
+	  1 |		   NaN		   | 0x7fffffff (NaN in float)
+	  2 |		  +Inf		   | 0x7f800000 (+Inf in float)
+	  3 |		  -Inf		   | 0xff800000 (-Inf in float)
+	  4 |		   0.0		   | 0x00000000 (0.0 in float)
+	  5 |		  -0.0		   | 0x80000000 (-0.0 in float)
+	  6 |			x >=2^128  | 0x7f800000 (+Inf in float)
+	  7 |  -2^128 <=x		   | 0xff800000 (-Inf in float)
+	  8 |		0 < x < 2^-149 | 0x00000000 (0.0 as float, underflow)
+	  9 | -2^-149 < x < 0	   | 0x80000000 (-0.0 as float, underflow)
 	 10 |  2^-149 < x < 2^-126 | 0x00mmmmmm (subnormal number with mmmmmm < 0x800000)
 	 11 | -2^-126 < x <-2^-149 | 0x80mmmmmm (subnormal number with mmmmmm < 0x800000)
 	 12 |  2^-126 <|x|< 2^127  | (float) A
@@ -50,9 +50,9 @@
 	Significand is rounded up, if bit 25 of significand of A is set
 
    Input:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - A in IEEE 754 - 64-bit format
+	 rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - A in IEEE 754 - 64-bit format
    Output:
-     rA7.rA6.rA5.rA4  				 - arg. A in IEEE 754 - 32-bit format
+	 rA7.rA6.rA5.rA4				 - arg. A in IEEE 754 - 32-bit format
  */
 
  #if !defined(__AVR_TINY__)
@@ -88,7 +88,6 @@ ENTRY fp64_ds
 	; now rAE1 is either 0x00 or 0xff -- > exponent is in range -256 < exp < 255
 	tst rAE1
 	brpl 1f
-	; rcall __fp64_saveAB
 3:	cpi rAE0, -127-23			; is A < 2^-149
 	brlo .L_zr					; yes, case 8&9, return 0
 	cpi rAE0, -126				; is A >= 2^-126
@@ -101,7 +100,6 @@ ENTRY fp64_ds
 	ror rA5
 	ror rA4
 	inc rAE0					; until exponent is no longer positive
-	; rcall __fp64_saveAB
 	brmi 0b
 
 	clr rA7						; clear exponent to identify subnormal number
@@ -117,7 +115,7 @@ ENTRY fp64_ds
 								; this will not trigger any overflow conditions
 
 	; TODO: handle rounding
-	; sbrc rA4,7					; if bit 24 is set, round up
+	; sbrc rA4,7				; if bit 24 is set, round up
 	; rjmp .L_round
 
 	; now pack and return the result

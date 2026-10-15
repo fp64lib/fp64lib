@@ -5,14 +5,14 @@
    modification, are permitted provided that the following conditions are met:
 
    * Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
+	 notice, this list of conditions and the following disclaimer.
    * Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+	 notice, this list of conditions and the following disclaimer in
+	 the documentation and/or other materials provided with the
+	 distribution.
    * Neither the name of the copyright holders nor the names of
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+	 contributors may be used to endorse or promote products derived
+	 from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -35,46 +35,46 @@ FUNCTION __fp64_addsubAB
 /* __fp64_addAB() add rB0:6 to rA0:6
 
 	Input:
-		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - (mantissa of) A
-		rB6.rB5.rB4.rB3.rB2.rB1.rB0  - (mantissa of) b
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0	 - (mantissa of) A
+		rB6.rB5.rB4.rB3.rB2.rB1.rB0	 - (mantissa of) b
 	Return:
-		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - (mantissa of) A + B
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0	 - (mantissa of) A + B
 		Flags set according to result of last operation
 	Modifies:
 		nothing
  */
 
 ENTRY __fp64_addAB
-	add rA0, rB0	; compute A = A + B
-	adc	rA1, rB1
-	adc	rA2, rB2
-	adc	rA3, rB3
-	adc	rA4, rB4
-	adc	rA5, rB5
-	adc	rA6, rB6
+	add rA0, rB0				; compute A = A + B
+	adc rA1, rB1
+	adc rA2, rB2
+	adc rA3, rB3
+	adc rA4, rB4
+	adc rA5, rB5
+	adc rA6, rB6
 	ret
 
 
 /* __fp64_subAB() subtracts rB0:6 from rA0:6
 
 	Input:
-		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - (mantissa of) A
-		rB6.rB5.rB4.rB3.rB2.rB1.rB0  - (mantissa of) B
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0	 - (mantissa of) A
+		rB6.rB5.rB4.rB3.rB2.rB1.rB0	 - (mantissa of) B
 	Return:
-		rA6.rA5.rA4.rA3.rA2.rA1.rA0  - (mantissa of) A - B
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0	 - (mantissa of) A - B
 		Flags set according to result of last operation
 	Modifies:
 		nothing
  */
 
 ENTRY __fp64_subAB
-	sub	rA0, rB0	; compute A = A - B
-	sbc	rA1, rB1
-	sbc	rA2, rB2
-	sbc	rA3, rB3
-	sbc	rA4, rB4
-	sbc	rA5, rB5
-	sbc	rA6, rB6
+	sub rA0, rB0				; compute A = A - B
+	sbc rA1, rB1
+	sbc rA2, rB2
+	sbc rA3, rB3
+	sbc rA4, rB4
+	sbc rA5, rB5
+	sbc rA6, rB6
 	ret
 
 ENDFUNC
