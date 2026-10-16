@@ -74,7 +74,7 @@ FUNCTION fp64_asin
 
 	; case 2: 0 --> 0 (for asin) or PI/2 (for acos)
 .L_zero:
-	sbrs r0, 1					; acos?
+	.sbrs_callj r0, 1			; acos?
 	XJMP _U(__fp64_szero)		; no: return 0.0 for asin
 	clt							; yes: return +PI/2 for acos
 	XJMP _U(__fp64_pi2)
@@ -119,10 +119,10 @@ GCC_ENTRY __asin
 	brne .L_nan
 
 	; cases 5,6: fabs(x) = 1.0 --> return +/- PI/2 for asin, 0 or PI for acos
-	sbrs r0,1					; acos?
+	.sbrs_callj r0,1			; acos?
 	XJMP _U(__fp64_pi2)			; no: return +/- PI/2
 
-	sbrs r0, 7					; x == -1?
+	.sbrs_callj r0, 7			; x == -1?
 	XJMP _U(__fp64_szero)		; no --> x == 1 --> return +0
 	clt
 	XCALL _U(__fp64_pi2)		; yes, return +PI/2

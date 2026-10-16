@@ -69,6 +69,7 @@
 #include "fp64def.h"
 #include "fp64asm.h"
 
+.require_lpmx
 
 FUNCTION __fp64_ftoa
 
@@ -186,7 +187,7 @@ ENTRY __fp64_ftoa_nan
 	st X+, rA7
 #endif
 
-	movw ZL, rB2			; if exp10 != NULL, store exponent base 10 here
+	X_movw ZL, rB2			; if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0
 	breq 21b				; return with C = 0, i.e. normal result
 	st Z+, r1				; store exponent = 0
@@ -319,9 +320,9 @@ ENTRY __fp64_ftoa_pse
 
 52:	ldi rB7, 0xcc			; load B with 0,1
 	mov rB6, rB7
-	movw rB4, rB6
-	movw rB2, rB6
-	movw rB0, rB6
+	X_movw rB4, rB6
+	X_movw rB2, rB6
+	X_movw rB0, rB6
 
 	push r1
 	clr r1
@@ -425,8 +426,8 @@ ENTRY __fp64_ftoa_pse
 	st Y+, rA7
 
 14:	ldi r20, 0x0a				; use existing itoa function to convert exponent
-	movw r22, YL
-	movw r24, rExp10L
+	X_movw r22, YL
+	X_movw r24, rExp10L
 	pop YL
 	pop YH
 
@@ -438,7 +439,7 @@ ENTRY __fp64_ftoa_pse
 
 	XCALL _U(__fp64_popBC)		; restore register set
 
-	movw ZL, rB2			; // if exp10 != NULL, store exponent base 10 here
+	X_movw ZL, rB2			; // if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0
 
 	; rcall __fp64_saveAB
@@ -460,7 +461,7 @@ ENTRY __fp64_ftoa_pse
 	adc XL, r1
 	adc XH, r1
 99:
-	movw r24, XL				; and return address
+	X_movw r24, XL				; and return address
 	pop rB7
 	ret
 
@@ -469,8 +470,8 @@ ENTRY __fp64_ftoa_pse
 	clr rB6
 	clr rB5
 	clr rB4
-	movw rB2, rB4
-	movw rB0, rB2
+	X_movw rB2, rB4
+	X_movw rB0, rB2
 	ret
 
 	; get next digit

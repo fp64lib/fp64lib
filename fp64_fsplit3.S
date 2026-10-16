@@ -56,7 +56,7 @@ ENTRY	__fp64_split3
 	sbrc rB7, 7		; is B negative?
 	subi rA7, 0x80	; yes: reverse sign of A
 
-	movw rBE0, rB6 	; get exponent from rB7.rB6 into rBE1.rBE0
+	X_movw rBE0, rB6 	; get exponent from rB7.rB6 into rBE1.rBE0
     andi rBE0, 0xf0 ; get rid of mantissa bits in exponent
     eor  rB6, rBE0  ; and get rid of exponent bits in mantissa
 
@@ -165,7 +165,7 @@ ENTRY	__fp64_split3
 ENTRY   __fp64_splitA
 	;call __fp64_saveAB ; save value of registers
 	bst	rA7, 7		; store sign in T flag (or sign(a)^sign(B))
-	movw rAE0, rA6 	; get exponent from rA7.rA6 into rAE1.rAE0
+	X_movw rAE0, rA6 	; get exponent from rA7.rA6 into rAE1.rAE0
 	mov  rAE1, rA7	; save exponent
 	andi rAE1, 0x7f	; clear sign bit
 	andi rAE0, 0xf0	; clear mantissa bits, keep exponent bits

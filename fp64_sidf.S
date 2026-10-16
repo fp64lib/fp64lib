@@ -29,9 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -82,8 +79,8 @@ GCC_ENTRY __floatsidf
 .L_common:
 	clr rAE0			; exponent = 0
 	clr rAE1
-	movw rA0, rAE0		; set lower 32 bits to 0
-	movw rA2, rAE0
+	X_movw rA0, rAE0		; set lower 32 bits to 0
+	X_movw rA2, rAE0
 
 	cp r1, rA4
 	cpc r1, rA5
@@ -136,5 +133,3 @@ GCC_ENTRY __floatsidf
 	sbci rAE1, -0x04
 	XJMP _U(__fp64_pretA)
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

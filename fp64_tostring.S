@@ -83,7 +83,7 @@ FUNCTION fp64_to_string
 .L_zero: ; handle +/- 0
 	ldi XL, lo8(__fp64_ftoabuf)	; get buffer address
 	ldi XH, hi8(__fp64_ftoabuf)
-	movw r24, XL				; save it as returned result
+	X_movw r24, XL				; save it as returned result
 
 	ldi rB7, '-'
 	brtc 0f
@@ -257,7 +257,7 @@ ENTRY   fp64_to_string
 	mov rB7, r1
 	; rcall __fp64_saveAB
 	XCALL _U(__fp64_ftoa_pse)	; 	s = fp64_to_decimalExp(x, prec, 0, NULL); // get number
-	movw ZL, r24				; overwrite rExp2/rAE0 which is no longer needed
+	X_movw ZL, r24				; overwrite rExp2/rAE0 which is no longer needed
 
 	lds rExp10L, L_exp10L		; retrieve exp10
 	lds rExp10H, L_exp10H
@@ -301,7 +301,7 @@ ENTRY   fp64_to_string
 
 	add ZL, rPrec				; pos = prec - exp10
 	adc ZH, r1
-	movw YL, ZL					; YH.YL now points to s[prec]
+	X_movw YL, ZL					; YH.YL now points to s[prec]
 	sub ZL, rExp10L
 	sbc ZH, rExp10H				; ZH.ZL now points to s[pos]
 	push ZH						; save pos
@@ -346,7 +346,7 @@ ENTRY   fp64_to_string
 	adiw ZL, 1					; pos = 1; // start at "."
 								; ZH.ZL now points to s[pos]
 
-	movw YL, ZL					; endPos = pos + prec;
+	X_movw YL, ZL					; endPos = pos + prec;
 	add YL, rPrec
 	adc YH, r1					; YH.YL now points to s[endPos]
 
@@ -367,7 +367,7 @@ ENTRY   fp64_to_string
 	ldi rExp10H, '.'			;	s[pos] = '.';
 	st Z, rExp10H
 
-	movw ZL, YL					; set endpos that was saved in YL
+	X_movw ZL, YL					; set endpos that was saved in YL
 	rjmp .L_cut
 
 	; digits after '.' do not fit in, so terminate the string one character earlier
@@ -379,7 +379,7 @@ ENTRY   fp64_to_string
 	add ZL, rPrec				; endpos = prec + 1
 	adc ZH, r1
 	adiw ZL, 1					; ZL.ZH now points to s[endPos]
-	movw XL, ZL					; pos = endPos
+	X_movw XL, ZL					; pos = endPos
 
 	; remove trailing 0s
 .L_cut:
@@ -421,7 +421,7 @@ ENTRY   fp64_to_string
 	pop rNrd
 	pop rPrec
 
-	movw r24, ZL				; return( s )
+	X_movw r24, ZL				; return( s )
 	ret
 
 ENDFUNC

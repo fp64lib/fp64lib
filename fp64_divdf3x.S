@@ -41,8 +41,6 @@
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 result = A / B
 */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -270,5 +268,3 @@ ENTRY	__fp64_divsd3_pse	; post split entry
 	ret
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

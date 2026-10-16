@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -121,5 +119,3 @@ GCC_ENTRY __nextUp
 	XJMP _U(__fp64_szero)
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

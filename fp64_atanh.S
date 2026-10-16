@@ -79,8 +79,8 @@ GCC_ENTRY __atanh
 	ldi rB6, 0xe0
 	mov rB5, r1
 	mov rB4, r1
-	movw rB2, rB4
-	movw rB0, rB4
+	X_movw rB2, rB4
+	X_movw rB0, rB4
 	XCALL _U(fp64_mul)			; 1/2 * ln( sqrt( x*x +/- 1 ) + x )
 
 	XCALL _U(__fp64_popBC)		; restore used registers

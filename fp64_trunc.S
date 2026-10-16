@@ -53,8 +53,6 @@
      fp64_trunc(-1.9) --> -1.0
  */
 
- #if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -158,5 +156,3 @@ ENTRY   fp64_cut_noninteger_fraction
 	XJMP _U(__fp64_pretA)		; pack and return x
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

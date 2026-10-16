@@ -29,6 +29,9 @@
 #include "fp64def.h"
 #include "fp64asm.h"
 
+.require_lpmx
+.require_mul
+
 /*  int16_t __fp64_getExp10(int16_t n);
 	int16_t __fp64_getExp10r(int16_t n);
 	calculates log10 of a signed number in range -1023-53 < n < 1023
@@ -75,7 +78,7 @@ ENTRY __fp64_getExp10int
 
 	ldi rExp10L, lo8(301)
 	mul rExp10L, rExp2L
-	movw rB0, r0
+	X_movw rB0, r0
 	eor rB2, rB2					; rB2.rB1.rB0 = 45*exp2L
 	mul rExp10L, rExp2H
 	add rB1, r0
@@ -143,7 +146,7 @@ ENTRY __fp64_getExp10int
 	; exception table is sorted in ascending order
 	; of exp2 values, with terminating value which is always
 	; greater than the biggest exponent
-	movw rB4, rExp2L	; save exponent
+	X_movw rB4, rExp2L	; save exponent
 #ifdef ARDUINO_AVR_MEGA2560
 	in ZL, RAMPZ
 	push ZL

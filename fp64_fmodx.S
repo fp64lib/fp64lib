@@ -26,10 +26,10 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
+
+.require_lpmx
 
 FUNCTION fp64_fmodx
 	; do special case handling
@@ -206,7 +206,7 @@ ENTRY __fp64_f64_to_f96
 	clr rAx4
 	clr rAx3
 	clr rAx2
-	movw rAx0, rAx2
+	X_movw rAx0, rAx2
 	ret
 
 .L_sz1:
@@ -225,16 +225,16 @@ ENTRY __fp64_f64_to_f96
 	; return rAx11.rAx0 == 0
 .L_Azero:
 	XCALL	_U(__fp64_szero)
-	movw rAx0, rAx10
-	movw rAx2, rAx10
-	movw rAE0, rAx10
+	X_movw rAx0, rAx10
+	X_movw rAx2, rAx10
+	X_movw rAE0, rAx10
 	ret
 
 	; x was < y --> result already in A, return A and n = 0
 .L_retA:
 	clr rC4			; set n to 0
 	clr rC5
-	movw rC6, rC4
+	X_movw rC6, rC4
 	ret
 
 
@@ -295,7 +295,7 @@ ENTRY	__fp64_fmodx
 
 	clr Cnt0
 	clr Cnt1
-	movw Cnt2, Cnt0
+	X_movw Cnt2, Cnt0
 
 .Loop:
 	; inc r0
@@ -425,7 +425,7 @@ ENTRY	__fp64_fmodx
 	brne 8b			; repeat until topmost bit or exponent = 0, i.e. subnormal number
 
 9:	adiw rBE0, 1	; adjust exponent
-	movw rAE0, rBE0
+	X_movw rAE0, rBE0
 	ret
 
 10:
@@ -532,5 +532,3 @@ __xln2:
 	.byte 0xb1, 0x72, 0x17, 0xf7, 0xd1, 0xcf, 0x79, 0xab, 0xc9, 0xe3, 0xb3, 0x98, 0x03, 0xfe
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

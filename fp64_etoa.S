@@ -29,6 +29,8 @@
 #include "fp64def.h"
 #include "fp64asm.h"
 
+.require_mul
+
 /* char *__fp64_etoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 )
 	converts a number to a string with maxDigits of significand in engineering format,
 	i.e. exponent is a multiple of 3, the exponent has always a sign except for 0,
@@ -99,7 +101,7 @@ ENTRY	fp64_etoa
 	push XL						; save X
 	push XH
 
-	movw X, rResL				; is *res == "0", i.e. is x == 0.0?
+	X_movw X, rResL				; is *res == "0", i.e. is x == 0.0?
 	; call __fp64_saveAB
 	ld rChar, X
 	cpi rChar, '0'
@@ -288,8 +290,8 @@ ENTRY	fp64_etoa
 	push rResH
 
 	ldi r20, 0x0a				; convert to radix 10
-	movw r24, rAE0				; number to convert
-	movw r22, X					; pointer to string
+	X_movw r24, rAE0			; number to convert
+	X_movw r22, X				; pointer to string
 	XCALL __itoa_ncheck			; and convert exponent it to string
 
 	pop rResH					; restore pointer to string result
@@ -299,7 +301,7 @@ ENTRY	fp64_etoa
 
 .L_saveExp:						; save exp if *exp != 0
 
-	movw XL, rB2				; // if exp10 != NULL, store exponent base 10 here
+	X_movw XL, rB2				; // if exp10 != NULL, store exponent base 10 here
 	adiw XL, 0
 	breq .L_retp
 

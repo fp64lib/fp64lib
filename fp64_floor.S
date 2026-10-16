@@ -51,8 +51,6 @@
 	 fp64_floor(-1.9) --> -2.0
  */
 
- #if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -64,5 +62,3 @@ GCC_ENTRY __floor
 	subi rA7, 0x80
 	ret
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

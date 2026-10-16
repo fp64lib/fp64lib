@@ -46,8 +46,8 @@ GCC_ENTRY __cbrt
 	ldi rB6, 0x55
 	mov rB5, rB6
 	mov rB4, rB6
-	movw rB2, rB4
-	movw rB0, rB4
+	X_movw rB2, rB4
+	X_movw rB0, rB4
 	ldi rB6, 0xd5
 
 	XCALL _U(fp64_pow)			; calc x^(1/3) = cbrt(x)

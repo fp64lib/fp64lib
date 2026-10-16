@@ -48,9 +48,9 @@ ENTRY	__fp64_zero
 ENTRY   __fp64_szero
 	mov rA7, r1
 	mov rA6, r1
-	movw rA4, rA6
-	movw rA2, rA6
-	movw rA0, rA6
+	X_movw rA4, rA6
+	X_movw rA2, rA6
+	X_movw rA0, rA6
 	bld	 rA7, 7
 	ret
 ENDFUNC

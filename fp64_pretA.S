@@ -26,9 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -125,5 +122,3 @@ ENTRY __fp64_pretA
 	bld	rA7, 7		; get sign
 	ret
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

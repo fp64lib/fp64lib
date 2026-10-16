@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -81,7 +79,7 @@ GCC_ENTRY __frexp
 	subi rAE0, lo8(1022)	; remove base 1023 - 1 from exponent
 	sbci rAE1, hi8(1022)	; (-1 as result is in [0.5;1) )
 
-	sbrs rA6, 7				; is x a subnormal number
+	.sbrs_callj rA6, 7		; is x a subnormal number
 	XCALL _U(__fp64_norm2)	; yes: normalize it
 
 	adiw	XL, 0			; skip if pointer is == NULL
@@ -95,5 +93,3 @@ GCC_ENTRY __frexp
 	ldi rAE0, 0xfe
 	XJMP _U(__fp64_pretA)
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

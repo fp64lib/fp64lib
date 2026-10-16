@@ -69,6 +69,8 @@
 #include "fp64def.h"
 #include "fp64asm.h"
 
+.require_mul
+
 #define MAX_SIGNIFICAND		17
 #define	MAX_EXPONENT		3
 #define rExp2L				ZL
@@ -107,7 +109,7 @@ ENTRY   fp64_strtod
 	push YH				; Y is used for pointing to actual position in str
 	push YL
 	clr rPoint			; rPoint = 0
-	movw YL, rA6
+	X_movw YL, rA6
 	adiw YL, 0			; if( (s = str) == NULL )
 	breq 90b				;	return( 0 );
 
@@ -194,10 +196,10 @@ ENTRY   fp64_strtod
 	; initalize some stuff and then enter our main loop
 	clr rA7				; A = 0
 	clr rA6
-	movw rA4, rA6
-	movw rA2, rA6
-	movw rA0, rA6
-	; movw rExp10L, rA6	; exp10 = 0
+	X_movw rA4, rA6
+	X_movw rA2, rA6
+	X_movw rA0, rA6
+	; X_movw rExp10L, rA6	; exp10 = 0
 	sts .L_exp10L, r1		; exp10 = 0
 	sts .L_exp10H, r1
 	clr rExp2H
@@ -276,8 +278,8 @@ ENTRY   fp64_strtod
 	clr rB6
 	clr rB5
 	clr rB4
-	movw rB2, rB4
-	movw rB0, rB2
+	X_movw rB2, rB4
+	X_movw rB0, rB2
 	XCALL _U(__fp64_mul64AB)	; C = A * 10
 	cp rC7, r1					; check if result is still 0
 	cpc rC6, r1
@@ -411,7 +413,7 @@ ENTRY   fp64_strtod
 	cpi rCh, '9'+1
 	brge 36f			; if no digit, stop conversion
 	mul rExp2L, rExp2H
-	movw rExp2L, r0		; first two digits * 10
+	X_movw rExp2L, r0		; first two digits * 10
 	subi rCh, '0'
 	clr r1				; restore r1 to 0
 	add rExp2L, rCh			; + 3rd digit
@@ -525,7 +527,7 @@ ENTRY   fp64_strtod
 	mov rA4, rA5
 	mov rA5, rA6
 	mov rA6, rA7
-	movw rAE0, rExp2L
+	X_movw rAE0, rExp2L
 
 .L_cleanup:
 	; rcall __fp64_saveAB
