@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -131,9 +129,7 @@ GCC_ENTRY __scalbln
 
 .L_common:
 	; n fits in int, move relevant bits of long n to int name
-	movw rB6, rB4
+	X_movw rB6, rB4
 	; let fp64_ldexp handle the rest
 	XJMP _U(fp64_ldexp)
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

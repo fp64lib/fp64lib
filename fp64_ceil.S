@@ -51,8 +51,6 @@
 	 fp64_ceil(-1.9) --> -1.0
  */
 
- #if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -73,7 +71,7 @@ FUNCTION fp64_ceil
 
 ENTRY	fp64_ceil
 GCC_ENTRY __ceil
-	sbrc rA7, 7					; negative number? (including -NaN, -Inf, -0)
+	.sbrc_callj rA7, 7			; negative number? (including -NaN, -Inf, -0)
 	XJMP _U(fp64_trunc)			; yes, case 0: return trunc(x)
 	XCALL _U(__fp64_splitA)
 	brcs .L_NaN					; handle cases 1&2: NaN and +INF
@@ -131,5 +129,3 @@ GCC_ENTRY __ceil
 	XJMP _U(__fp64_pretA)		; pack and return x
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

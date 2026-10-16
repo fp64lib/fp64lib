@@ -69,8 +69,6 @@
      fp64_lrint(-3.5)  --> -4L
  */
 
- #if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -101,7 +99,7 @@ FUNCTION fp64_lrint
 .L_one:
 	mov rA7, r1					; get a zero (can't use __fp_zero as this clears the T flag)
 	mov rA6, r1
-	movw rA4, rA6
+	X_movw rA4, rA6
 	inc rA4						; create 1L
 	rjmp .L_sign
 	ret
@@ -177,5 +175,3 @@ GCC_ENTRY __lrint
 	ret
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

@@ -49,7 +49,7 @@ ENTRY   __fp64_inf
 	ldi	rA6, 0xf0	; bits 52-55 (exponent) = 1, all other mantissa bits = 0
 	clr	rA5
 	clr	rA4
-	movw rA2, rA4
-	movw rA0, rA4
+	X_movw rA2, rA4
+	X_movw rA0, rA4
 	ret
 ENDFUNC

@@ -29,10 +29,10 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
+
+.require_lpmx
 
 /* float64_t __fp64_powser (float64_t_intern x, float64_t_intern* XH.XL);
      The __fp64_powser() function calculates the polynom using the horner
@@ -67,8 +67,8 @@ ENTRY __fp64_powser
 	in ZL, RAMPZ
 	push ZL
 
-	movw ZL, XL
-	elpm	rcntr, Z+				; load polynom power (3 in our example)
+	X_movw ZL, XL
+	elpm	rcntr, Z+			; load polynom power (3 in our example)
 	in r1, RAMPZ
 	sts .L_saveZ, ZL			; save pointer to table
 	sts .L_saveZ+1, ZH
@@ -83,7 +83,7 @@ ENTRY __fp64_powser
 	push ZL						; Z is in use by A
 	push ZH
 
-	movw ZL, XL
+	X_movw ZL, XL
 	lpm	rcntr, Z+				; load polynom power (3 in our example)
 	sts .L_saveZ, ZL			; save pointer to table
 	sts .L_saveZ+1, ZH
@@ -324,4 +324,3 @@ NOINIT_SECTION
 OBJECT .L_saveZ
     .skip PC_SIZE			; scratch area to save pointer to table
 ENDOBJ .L_saveZ
-#endif /* !defined(__AVR_TINY__) */

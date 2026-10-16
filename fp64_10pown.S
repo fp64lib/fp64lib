@@ -29,7 +29,7 @@
 #include "fp64def.h"
 #include "fp64asm.h"
 
-
+.require_lpmx
 
 /*	uint64_t __fp64_10pown (int16_t n);
 	internal function to return 64 bit significant of 10^n
@@ -92,9 +92,9 @@ ENTRY __fp64_10pown
 
 	ldi rA7, 0x80				; res = 1 << 63 // res = 1.0
 	clr rA6
-	movw rA4, rAE0
-	movw rA2, rAE0
-	movw rA0, rAE0
+	X_movw rA4, rAE0
+	X_movw rA2, rAE0
+	X_movw rA0, rAE0
 
 1:	adiw XL, 0					; while( 0 != n ) {
 	breq 3f
@@ -167,7 +167,7 @@ ENTRY __fp64_10pown
 ENTRY fp64_10pown
 	XCALL _U(__fp64_pushCB) ; preserve register set
 
-	movw XL, rA6				; for __fp64_10pown, n has to be in XH.XL
+	X_movw XL, rA6				; for __fp64_10pown, n has to be in XH.XL
 	push rA4					; save pointer
 	push rA5
 

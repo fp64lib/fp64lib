@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -108,5 +106,3 @@ ENTRY	__fp64_cmp
 9:	sec
 	ret
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

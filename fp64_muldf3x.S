@@ -46,10 +46,10 @@
 	die routinen hier runden nicht
  */
 
-#if	defined(__AVR_ENHANCED__) && __AVR_ENHANCED__
-
 #include "fp64def.h"
 #include "fp64asm.h"
+
+.require_mul
 
 FUNCTION __fp64_mulsd3x
 
@@ -483,6 +483,4 @@ ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
 	ror rR6
 	ror rR5
 	ret
-	ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */
+ENDFUNC

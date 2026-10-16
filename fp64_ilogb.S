@@ -87,14 +87,14 @@ GCC_ENTRY __ilogb
 	brcs .L_nf					; handle cases 1-2 (NaN, Inf)
 	breq .L_zero				; handle case 3 (0.0)
 
-	sbrs rA6, 7				; is x a subnormal number?
+	.sbrs_callj rA6, 7		; is x a subnormal number?
 	XCALL _U(__fp64_norm2)	; yes: normalize it
 
 	; subtract base for exponent (0x3ff = 1023)
 	subi rAE0, lo8(1023)
 	sbci rAE1, hi8(1023)
 
-	movw rA6, rAE0				; and return result
+	X_movw rA6, rAE0			; and return result
 	; rcall __fp64_saveAB
 	ret
 

@@ -54,8 +54,6 @@
      fp64_round(-1.5) --> -2.0
  */
 
- #if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -136,5 +134,3 @@ GCC_ENTRY __round
 	XJMP _U(__fp64_pretA)		; pack and return x
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

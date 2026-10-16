@@ -39,8 +39,6 @@
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - result A - B
  */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -154,7 +152,7 @@ ENTRY __fp64_addsd3x
 
 12:	; case 7: B = 0 --> result is A
 	XCALL _U(__fp64_popB)
-	sbrc rA6, 7					; is A normal number ?
+	.sbrc_callj rA6, 7			; is A normal number ?
 	XJMP _U(__fp64_pretA)		; yes: result is already ok
 	XCALL _U(__fp64_lslA)
 	sbiw rAE0, 1
@@ -242,7 +240,7 @@ __fp64_add_pse_r0:
 	bld rA7, 7
 	sbrc rA7, 7					; sign(a) != sign(b), cases 2,3
 	eor r0, rA7					; yes, we have to do swap the operation
-	call .L_sign				; sign(result) = sign(A)
+	rcall .L_sign				; sign(result) = sign(A)
 	rjmp 4f
 
 	; fabs(a) < fabs(b)  --> swap A and B, cases 5-8
@@ -307,7 +305,7 @@ __fp64_add_pse_r0:
 .L_zr:	; exponent is zero, but topmost bit is still not set --> subnormal number
 	; or A+(-A)
 	XCALL _U(__fp64_zero)		; return 0
-	movw rAE0, rA0				; also in internal format
+	X_movw rAE0, rA0			; also in internal format
 	sec							; set carry to indicate overflow and for already packed result
 	ret
 
@@ -329,5 +327,3 @@ __fp64_add_pse_r0:
 	ret
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

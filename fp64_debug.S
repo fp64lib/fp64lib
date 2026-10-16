@@ -44,7 +44,7 @@ ENTRY __fp64_saveC
 	push r0
 	bld r0, 0
 	sts __c_sign, r0
-	in	r0, 0x3f
+	in	r0, SREG_IO_ADDR
 	sts __c_sreg, r0
 	;eor r0,r0
 	lds r0, __c_count
@@ -61,7 +61,7 @@ ENTRY __fp64_saveC
 	sts __c_m+6, rC0
 	sts __c7, rC7				; only for debugging as exponent is in rBE1.rBE0
 	lds r0, __c_sreg
-	out 0x3f, r0
+	out SREG_IO_ADDR, r0
 	pop r0
 	ret
 
@@ -70,7 +70,7 @@ ENTRY __fp64_saveB
 	push r0
 	bld r0, 0
 	sts __b_sign, r0
-	in	r0, 0x3f
+	in	r0, SREG_IO_ADDR
 	sts __b_sreg, r0
 	;eor r0,r0
 	lds r0, __b_count
@@ -89,7 +89,7 @@ ENTRY __fp64_saveB
 	sts __x, ZL
 	sts __x+1, ZH
 	lds r0, __b_sreg
-	out 0x3f, r0
+	out SREG_IO_ADDR, r0
 	pop r0
 	ret
 
@@ -104,7 +104,7 @@ ENTRY __fp64_saveA
 	push r0
 	bld r0, 0
 	sts __a_sign, r0
-	in	r0, 0x3f
+	in	r0, SREG_IO_ADDR
 	sts __a_sreg, r0
 	;eor r0,r0
 	lds r0, __a_count
@@ -123,7 +123,7 @@ ENTRY __fp64_saveA
 	lds r0, __a_sreg
 	sts __x, XL
 	sts __x+1, XH
-	out 0x3f, r0
+	out SREG_IO_ADDR, r0
 	pop r0
 	ret
 
@@ -131,7 +131,7 @@ ENTRY __fp64_saveMul
 	sts __ar0, r0
 	sts __br1, r1
 	push r0
-	in	r0, 0x3f
+	in	r0, SREG_IO_ADDR
 	sts __a_sreg, r0
 	;eor r0,r0
 	bld r0, 0
@@ -148,15 +148,15 @@ ENTRY __fp64_saveMul
 	sts __a7, rR6
 	sts __b7, rR5
 	lds r0, __a_sreg
-	out 0x3f, r0
+	out SREG_IO_ADDR, r0
 	pop r0
 	ret
 
 ENTRY __fp64_saveDiv
-	call __fp64_saveA
+	XCALL _U(__fp64_saveA)
 	push r0
 	sts __b_m+6, r0
-	in	r0, 0x3f
+	in	r0, SREG_IO_ADDR
 	sts __b_sreg, r0
 	;eor r0,r0
 	bld r0, 0
@@ -171,18 +171,18 @@ ENTRY __fp64_saveDiv
 	sts __b_m+5, rBE0
 	sts __b7, rB7
 	lds r0, __b_sreg
-	out 0x3f, r0
+	out SREG_IO_ADDR, r0
 	pop r0
 	ret
 
 ENTRY __fp64_debugA
-	call __fp64_saveA
+	XCALL _U(__fp64_saveA)
 	ldi r24, lo8(__a_sreg)
 	ldi r25, hi8(__a_sreg)
 	ret
 
 ENTRY __fp64_debugAB
-	call __fp64_saveAB
+	XCALL _U(__fp64_saveAB)
 	ldi r24, lo8(__a_sreg)
 	ldi r25, hi8(__a_sreg)
 	ret
@@ -236,7 +236,7 @@ ENTRY __fp64_proxy1_int32
 ENTRY __fp64_proxy1_int64
 	sts __function, rA7
 	sts __function+1, rA6
-	movw ZL, rA4
+	X_movw ZL, rA4
 	ld rA0, Z+
 	ld rA1, Z+
 	ld rA2, Z+
@@ -264,7 +264,7 @@ ENTRY __fp64_proxy2_int8
 	sts __function, rA7
 	sts __function+1, rA6
 	XCALL _U(__fp64_pushB)
-	movw ZL, rA2
+	X_movw ZL, rA2
 	ld rB0, Z+
 	ld rB1, Z+
 	ld rB2, Z+

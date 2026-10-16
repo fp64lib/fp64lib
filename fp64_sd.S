@@ -36,8 +36,6 @@
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - A in IEEE 754 - 64-bit format
  */
 
- #if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -54,7 +52,7 @@ ENTRY	fp64_sd
 GCC_ENTRY __extendsfdf2
 	clr rA3						; clear lower mantissa bits
 	clr rA2
-	movw rA0, rA2
+	X_movw rA0, rA2
 	clr rAE1
 
 	; call __fp64_saveA
@@ -103,5 +101,3 @@ GCC_ENTRY __extendsfdf2
 	XJMP _U(__fp64_pretA)		; pack and return converted number
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

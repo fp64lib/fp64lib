@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -265,5 +263,3 @@ ENTRY __fp64_check_powserexp
 
 	.byte 0x00					; byte needed for code alignment to even adresses!
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

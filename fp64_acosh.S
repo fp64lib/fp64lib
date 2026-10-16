@@ -39,7 +39,7 @@ FUNCTION fp64_acosh
 ENTRY fp64_acosh
 GCC_ENTRY __acosh
 	; check for x < 1
-	sbrc rA7, 7					; is x < 0
+	.sbrc_callj rA7, 7			; is x < 0
 .L_nan:
 	XJMP	_U(__fp64_nan)		; yes --> return NaN
 

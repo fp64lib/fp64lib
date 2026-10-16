@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -63,5 +61,3 @@ ENTRY fp64_fma
 	XCALL _U(fp64_add)			; and add c to a*b
 	XJMP _U(__fp64_popBret)		; restore used registers and return
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

@@ -55,8 +55,6 @@
 	 rA7.rA6.rA5.rA4				 - arg. A in IEEE 754 - 32-bit format
  */
 
- #if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -129,5 +127,3 @@ ENTRY fp64_ds
 	ret
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

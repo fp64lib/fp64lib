@@ -26,8 +26,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -60,9 +58,9 @@ FUNCTION fp64_modf
 .L_zero:					;         *iptr = 0.0
 	clr rB7
 	clr rB6
-	movw rB4, rB6
-	movw rB2, rB6
-	movw rB0, rB6
+	X_movw rB4, rB6
+	X_movw rB2, rB6
+	X_movw rB0, rB6
 	bld rB7, 7				; copy sign from x
 	rjmp .L_write
 
@@ -82,9 +80,9 @@ FUNCTION fp64_modf
 	bld rA7, 7				; copy sign from x
 	clr rA6
 	clr r0
-	movw rA4, r0
-	movw rA2, r0
-	movw rA0, r0
+	X_movw rA4, r0
+	X_movw rA2, r0
+	X_movw rA0, r0
 	rjmp .L_write
 
 ENTRY fp64_modf
@@ -121,8 +119,8 @@ ENTRY fp64_modff
 	mov rC6, r1
 	mov rC5, r1
 	mov rC4, r1
-	movw rC2, rC4
-	movw rC0, rC4
+	X_movw rC2, rC4
+	X_movw rC0, rC4
 
 	XCALL _U(__fp64_movBAx)	; B will contain the integer part
 	subi rAE0, 0xfe 		; A will contain the fraction part < 1.0
@@ -212,5 +210,3 @@ ENTRY fp64_modff
 	nop						; hack to avoid tail call optimization
 	ret
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

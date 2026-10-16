@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -77,7 +75,7 @@ GCC_ENTRY __scalbn
 	brcs .L_NaN					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0
 
-	sbrs rA6, 7					; does significand start with a leading bit?
+	.sbrs_callj rA6, 7			; does significand start with a leading bit?
 	XCALL _U(__fp64_norm2)		; no: normalize subnormal number
 
 	; now "multiply" by 2^exp
@@ -117,5 +115,3 @@ GCC_ENTRY __scalbn
 .L_norm:
 	XJMP _U(__fp64_pretA)		; pack and return x
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

@@ -75,9 +75,9 @@ ENTRY __fp64sssd_pse
 .L_common:
 	clr rAE0			; exponent = 0
 	clr rAE1
-	movw rA0, rAE0		; set lower 48 bits to 0
-	movw rA2, rAE0
-	movw rA4, rAE0
+	X_movw rA0, rAE0		; set lower 48 bits to 0
+	X_movw rA2, rAE0
+	X_movw rA4, rAE0
 
 	adiw rA6, 0			; x == 0?
 	brne 0f				; no, convert

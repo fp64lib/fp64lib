@@ -357,10 +357,10 @@ __fp64_fixxdfxi:
 	brge 5f						;	otherwise negation will round towards next number
 	mov rA0, r1					;	for 32-bit: rA0..rA3 are 0
 	mov rA1, r1
-	movw rA2, rA0
+	X_movw rA2, rA0
 	cpi rBE0, 17
 	brge 5f
-	movw rA4, rA0				;	for 16-bit: rA0..rA5 are 0
+	X_movw rA4, rA0				;	for 16-bit: rA0..rA5 are 0
 	cpi rBE0, 9
 	brge 5f
 	mov rA6, rA0				;	for 8-bit: rA0..rA6 are 0

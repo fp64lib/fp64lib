@@ -31,8 +31,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -66,7 +64,7 @@ ALIAS_ENTRY fp64_sqrtf
 
 	;call __fp64_saveA
 	; normalize, if A is subnormal
-	sbrs	rA6, 7
+	.sbrs_callj rA6, 7
 	XCALL	_U(__fp64_norm2)
 	;call __fp64_saveA
 
@@ -186,5 +184,3 @@ ENTRY __fp64_sqrt_pse
 
 	ret
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

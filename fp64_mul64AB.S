@@ -29,6 +29,7 @@
 #include "fp64def.h"
 #include "fp64asm.h"
 
+.require_mul
 
 /*  uint64_t __fp64_mul64AB (uint64_t A, B);
     return top 64 bit of unsigned multiplication C = A*B
@@ -43,10 +44,10 @@ ENTRY __fp64_mul64AB
 	push ZH
 	clr ZL				; clear ZL as lowest 8 bits for multiplication result
 	clr ZH				; as r1 is used in mul, we use ZH as an alwys 0 register
-	movw rC6, ZL		; and result
-	movw rC4, rC6
-	movw rC2, rC6
-	movw rC0, rC6
+	X_movw rC6, ZL		; and result
+	X_movw rC4, rC6
+	X_movw rC2, rC6
+	X_movw rC0, rC6
 
 	; rC7.rC6...rC0.ZL = rB7.rB6...rB0 * rA7.rA6...rA0
 	; multiplications of rAm * rBn will be skipped for m + n < 7

@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -119,8 +117,8 @@ GCC_ENTRY __fmod
 	push rC6
 	push rC7
 	rcall __fp64_fmod_pse
-	movw rB4, rC4		; return n
-	movw rB6, rC6
+	X_movw rB4, rC4		; return n
+	X_movw rB6, rC6
 	; rcall __fp64_saveAB
 	pop rC7				; restore used registers, n is saved to rB4..rB7
 	pop rC6
@@ -140,7 +138,7 @@ GCC_ENTRY __fmod
 	; clr r0			; init division result
 	clr rC4		; init division result
 	clr rC5
-	movw rC6, rC4
+	X_movw rC6, rC4
 
 .L_sz1:
 	; inc r0			; fabs(A) = fabs(1) --> n = 1, fmod = 0
@@ -209,7 +207,7 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	inc r0		; r0 will contain 1 to aid +1 / -1 operations
 	clr rC4		; init division result
 	clr rC5
-	movw rC6, rC4
+	X_movw rC6, rC4
 
 	XCALL _U(__fp64_cpcAB)	; check whether A < B
 	cpc rAE0, rBE0
@@ -301,7 +299,7 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	brne 8b			; repeat until topmost bit or exponent = 0, i.e. subnormal number
 9:	adiw rBE0, 1	; adjust exponent
 .L_pk:
-	movw rAE0, rBE0
+	X_movw rAE0, rBE0
 	clc
 	ret
 
@@ -312,5 +310,3 @@ ENTRY	__fp64_fmod_pse	; post split entry
 	rjmp 9b
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

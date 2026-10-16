@@ -54,9 +54,9 @@ _U(\name):
 
 /* swap two words with the help of r0/r1 */
 .macro _SWAPW	dst, src
-	movw r0, \src
-	movw \src, \dst
-	movw \dst, r0
+	X_movw r0, \src
+	X_movw \src, \dst
+	X_movw \dst, r0
 .endm
 
 /* alias to be compatible with AVR programming manual */
@@ -75,5 +75,48 @@ _U(\name):
 #else
 #error PC_SIZE
 #endif /* PC_SIZE */
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Deal with ISA quirks.
+
+.macro .sbrs_callj reg, bit
+#ifdef __AVR_ERRATA_SKIP_JMP_CALL__
+    sbrc \reg, \bit
+    rjmp .+4
+#else
+    sbrs \reg, \bit
+#endif
+.endm
+
+.macro .sbrc_callj reg, bit
+#ifdef __AVR_ERRATA_SKIP_JMP_CALL__
+    sbrs \reg, \bit
+    rjmp .+4
+#else
+    sbrc \reg, \bit
+#endif
+.endm
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Chicken out when the code demands more than the hardware can do.
+
+#if __AVR_TINY__
+    .end
+#endif
+
+.macro .require_mul
+#ifndef __AVR_HAVE_MUL__
+    .end
+#endif
+.endm
+
+.macro .require_lpmx
+#if defined (__AVR_HAVE_ELPM__) && !defined (__AVR_HAVE_ELPMX__)
+    .end
+#elif !defined (__AVR_HAVE_ELPM__) && !defined (__AVR_HAVE_LPMX__)
+    .end
+#endif
+.endm
 
 #endif	/* !FP64ASM_H */

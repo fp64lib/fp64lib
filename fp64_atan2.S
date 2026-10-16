@@ -73,7 +73,6 @@
 	;  8a |	  +any	 |	 +/-0	 | +PI/2
 	;  8b |	  -any	 |	 +/-0	 | -PI/2
  */
-#if !defined(__AVR_TINY__)
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -260,5 +259,3 @@ GCC_ENTRY __atan2
 	rjmp .L_div
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

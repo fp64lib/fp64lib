@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -55,5 +53,3 @@ ENTRY   __fp64_pscB
 1:	; it's a number
 	XJMP _U(__fp64_isBzero) 	; return with C=0 and Z set if B == 0
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */

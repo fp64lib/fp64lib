@@ -114,7 +114,7 @@ GCC_ENTRY __log
 	pop rBE1
 	push rAE1					; save exponent of x+1 on stack
 	push rAE0
-	movw rAE0, rBE0				; load exponent of x into A
+	X_movw rAE0, rBE0			; load exponent of x into A
 
 	XCALL _U(__fp64_ldb_1)		; load B with 1.0
 	clt
@@ -154,7 +154,7 @@ GCC_ENTRY __log
 	push rAE0
 
 10:
-	movw rA6, rBE0				; convert exponent-base into float64_t
+	X_movw rA6, rBE0			; convert exponent-base into float64_t
 	sub rA6, r0				    ; exponent - base
 	sbci rA7, 0x03
 

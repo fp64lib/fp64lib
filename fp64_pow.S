@@ -29,8 +29,6 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#if !defined(__AVR_TINY__)
-
 #include "fp64def.h"
 #include "fp64asm.h"
 
@@ -70,7 +68,7 @@ FUNCTION fp64_pow
 ENTRY fp64_pow
 GCC_ENTRY __pow
 	; ZH.ZL := exponent of y without sign
-	movw ZL, rB6				; save exponent and sign
+	X_movw ZL, rB6				; save exponent and sign
 	andi ZH, 0x7f				; get rid of sign bit
 	XCALL _U(__fp64_isBzero)
 	cpc ZH, r1					; __fp64_isBzero only checks for rB6..rB0
@@ -125,7 +123,7 @@ GCC_ENTRY __pow
 1:	; here |y|/B is between 1 and 2^52
 	; now check, whether |y| is an integer
 	; first get the exponent of |y|
-	movw rBE0, rB6 				; get exponent from rB7.rB6 into rBE1.rBE0
+	X_movw rBE0, rB6			; get exponent from rB7.rB6 into rBE1.rBE0
     andi rBE0, 0xf0 			; get rid of mantissa bits in exponent
 
 	lsr  rBE1       			; mov exponent downwards 4 bits
@@ -298,5 +296,3 @@ GCC_ENTRY __pow
 	rjmp 2b
 
 ENDFUNC
-
-#endif /* !defined(__AVR_TINY__) */
