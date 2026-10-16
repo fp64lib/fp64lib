@@ -1,4 +1,4 @@
-/* Copyright (c) 2019-2020  Uwe Bissinger
+/* Copyright (c) 2019-2026  Uwe Bissinger
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,11 @@ GCC_ENTRY __tanh
 	XCALL _U(__fp64_pushB)		; preserve registers
 	XCALL _U(__fp64_pushA)		; save x
 
-	XCALL _U(fp64_sinh)			; calculate sinh(x)
-	XCALL _U(__fp64_movBA)		; save sinh(x)
+	XCALL _U(fp64_cosh)			; calculate cosh(x)
+	XCALL _U(__fp64_movBA)		; save cosh(x)
 
 	XCALL _U(__fp64_popA)		; restore x
-	XCALL _U(fp64_cosh)			; calculate cosh(x)
+	XCALL _U(fp64_sinh)			; calculate sinh(x)
 	XCALL _U(fp64_div)			; calculate sinh(x)/cosh(x)
 
 	XJMP _U(__fp64_popBret)		; restore registers and return
