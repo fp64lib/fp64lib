@@ -32,6 +32,14 @@
 #ifndef	_FP64DEF_H
 #define	_FP64DEF_H
 
+// For Arduino IDE, using gcc7.3.1, where the definition of RAMPZ
+// is commented out by default
+#ifdef ARDUINO_AVR_MEGA2560
+#ifndef RAMPZ
+#define RAMPZ	0x3b
+#endif
+#endif
+
 /*
 Registers
 	A packed:	rA7, rA6, rA5, rA4, rA3, rA2, rA1, rA0			8 registers
