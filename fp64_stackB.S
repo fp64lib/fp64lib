@@ -136,6 +136,7 @@ ENTRY   __fp64_popBret
 	ret
 ENDFUNC
 
-.data
-ENTRY __fp64_saver01
-	.skip 3
+NOINIT_SECTION
+OBJECT .global __fp64_saver01
+	.skip PC_SIZE
+ENDOBJ __fp64_saver01

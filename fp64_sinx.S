@@ -164,5 +164,5 @@ GCC_ENTRY __sin
 	.byte 0x00												; byte needed for code alignment to even adresses!                        ;                    =
 ENDFUNC
 
-.data
+NOINIT_SECTION
 __funcCode:	 .skip 1

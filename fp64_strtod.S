@@ -596,7 +596,7 @@ ENTRY   fp64_strtod
 
 	ENDFUNC
 
-.data
+NOINIT_SECTION
 .L_endpH:	.space 1	; temp area to save endPtr
 .L_endpL:	.space 1	; temp area to save endPtr
 .L_sign:	.space 1	; temp area to save sign of significant

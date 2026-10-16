@@ -71,5 +71,6 @@ GCC_ENTRY __cosh
 
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC
-.data
+
+NOINIT_SECTION
 .L_sign:	.skip 1				; storage for saving sign
