@@ -50,7 +50,7 @@ ENTRY __fp64_pushB
 
 	pop r0						; get return address
 	pop r1
-#if defined (ARDUINO_AVR_MEGA2560)
+#if PC_SIZE == 3
 	sts  __fp64_saver01+2, r0
 	pop r0
 #endif
@@ -86,7 +86,7 @@ ENTRY   __fp64_popB
 
 	pop r0				; get return address
 	pop r1
-#if defined (ARDUINO_AVR_MEGA2560)
+#if PC_SIZE == 3
 	sts  __fp64_saver01+2, r0
 	pop r0
 #endif
@@ -102,7 +102,7 @@ ENTRY   __fp64_popB
 
 ENTRY __fp64_L_ret
 .L_ret:					; restore return address, r0&r1 and return to caller
-#if defined (ARDUINO_AVR_MEGA2560)
+#if PC_SIZE == 3
 	push r0
 	lds r0, __fp64_saver01+2
 #endif
