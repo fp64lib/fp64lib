@@ -174,34 +174,26 @@ GCC_ENTRY __pow
 	subi rBE1, (-4)				; round up to next group (exp=4 will get exp=8)
 
 5:	andi rBE1, 0xf8				; truncate lower 3 bits
-	  					        ; --> index = (exp/8)*8 as 8 byte are used for mov, mov, and, rjmp
+								; --> index = (exp/8)*8 as 8 byte are used
+								; for mov, mov, and, rjmp
 
-#ifdef ARDUINO_AVR_MEGA2560
-	push r0
-	ldi ZL, byte3(.L_mask)
-	mov r0, ZL
-#endif
-
-	ldi ZL, lo8(.L_mask)		; add 8*offset to jump table
-	add ZL, rBE1
-	ldi ZH, hi8(.L_mask)
-	adc ZH, r1					; take care of any overflows
-
-#ifdef ARDUINO_AVR_MEGA2560
-	adc r0, r1					; extend to 256MB address calculation
-	lsr r0						; PC addresses words, so divide target address by 2
-	ror ZH
-	ror ZL
-
-	out EIND, r0				; set upper byte of 24-bit address
-	pop r0
-
-	eijmp						; and clear out the bits top to bottom
-#else
-	lsr ZH						; PC addresses words, so divide target address by 2
-	ror ZL
-	ijmp							; and clear out the bits top to bottom
-#endif
+	;; .L_mask is a code table with 4-word code chunks
+	;; where rBE1 holds the byte offset into that table.
+#if PC_SIZE == 2
+	;; Get the word offset as XIJMP needs a word address.
+	mov ZL, rBE1
+	lsr ZL
+	clr ZH
+	subi ZL, lo8(-(pm(.L_mask)))
+	sbci ZH, hi8(-(pm(.L_mask)))
+	XIJMP
+#else /* PC_SIZE == 3 */
+	;; Mimick an indirect jump since we must not change EIND.
+	lsr rBE1  $  subi rBE1, lo8(-(pm(.L_mask)))  $  push rBE1
+	clr rBE1  $  sbci rBE1, hi8(-(pm(.L_mask)))  $  push rBE1
+	clr rBE1  $  sbci rBE1, hh8(-(pm(.L_mask)))  $  push rBE1
+	ret
+#endif /* PC_SIZE */
 
 
 	; return NaN

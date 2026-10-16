@@ -50,7 +50,7 @@ ENTRY __fp64_pushA
 
 	pop r0						; get return address
 	pop r1
-#if defined (ARDUINO_AVR_MEGA2560)
+#if PC_SIZE == 3
 	sts  __fp64_saver01+2, r0
 	pop r0
 #endif
@@ -85,7 +85,7 @@ ENTRY   __fp64_popA
 
 	pop r0				; get return address
 	pop r1
-#if defined (ARDUINO_AVR_MEGA2560)
+#if PC_SIZE == 3
 	sts  __fp64_saver01+2, r0
 	pop r0
 #endif
