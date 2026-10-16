@@ -487,21 +487,24 @@ ENTRY __fp64_ftoa_pse
 	sub rExp2L, r0
 	sbci rExp2H, 0
 	ret
-
-
-.L_nan:		.asciz "NaN"
-.L_inf:		.asciz "INF"
-.L_zero:	.asciz "0.0E0"
 ENDFUNC
 
 .data
+.L_nan:		.asciz "NaN"
+.L_inf:		.asciz "INF"
+.L_zero:	.asciz "0.0E0"
+.global __do_copy_data
+
+NOINIT_SECTION
 ;.L_zero:	.asciz "-0.0E0"
 .L_bufp:		.space 2	; pointer to current location in __fp64_ftoabuf
 .L_maxDigits:	.space 1	; maximum number of digits, working counter
 .L_maxDigits2:	.space 1	; maximum number of digits, original value
 .L_sepExp:		.space 1	; flag to seperate significand and exponent
-ENTRY __fp64_ftoabuf
-__fp64_ftoabuf:	.space 2+MAX_SIGNIFICAND+3+MAX_EXPONENT, 0	; max 26 bytes needed:
+
+OBJECT .global __fp64_ftoabuf
+	.space 2+MAX_SIGNIFICAND+3+MAX_EXPONENT, 0	; max 26 bytes needed:
+ENDOBJ __fp64_ftoabuf
 														; 1 for sign
 														; 1 for leading digit
 														; 1 for decimal point '.'

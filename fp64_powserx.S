@@ -320,11 +320,8 @@ __testTablex1: ; f(x) = x*1+0 = x
 #endif
 ENDFUNC
 
-.data
-ENTRY __fp64_saveZ
-#ifdef ARDUINO_AVR_MEGA2560
-.L_saveZ:	.skip 3			; scratch area to save pointer to table
-#else
-.L_saveZ:	.skip 2			; scratch area to save pointer to table
-#endif
+NOINIT_SECTION
+OBJECT .L_saveZ
+    .skip PC_SIZE			; scratch area to save pointer to table
+ENDOBJ .L_saveZ
 #endif /* !defined(__AVR_TINY__) */

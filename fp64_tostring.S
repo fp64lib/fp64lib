@@ -425,6 +425,7 @@ ENTRY   fp64_to_string
 	ret
 
 ENDFUNC
-.data
+
+NOINIT_SECTION
 L_exp10L:	.skip 1
 L_exp10H:	.skip 1

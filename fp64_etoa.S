@@ -397,5 +397,5 @@ ENTRY	fp64_etoa
 
 ENDFUNC
 
-.data
+NOINIT_SECTION
 .L_exp10:	.space 2			; save exponent in base 10 here

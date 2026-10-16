@@ -43,6 +43,9 @@ _U(\name):
 _U(\name):
 .endm
 
+
+#define NOINIT_SECTION .section .noinit, "a", @nobits
+
 .macro _SWAP	dst, src	/* swap two registers without need of temporary register */
 	eor dst, src
 	eor src, dst
@@ -59,5 +62,18 @@ _U(\name):
 /* alias to be compatible with AVR programming manual */
 // #define byte3(x)	pm_hh8(x)
 #define byte3(x)	hh8(x)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Handling 3-byte PC and XICALL according to the AVR GCC ABI
+;;; The ABI disallows to change EIND since it would break all
+;;; kind of stuff like ISRs.
+
+#if defined (__AVR_2_BYTE_PC__)
+#define PC_SIZE 2
+#elif defined (__AVR_3_BYTE_PC__)
+#define PC_SIZE 3
+#else
+#error PC_SIZE
+#endif /* PC_SIZE */
 
 #endif	/* !FP64ASM_H */

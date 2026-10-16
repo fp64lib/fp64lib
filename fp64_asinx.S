@@ -332,5 +332,5 @@ GCC_ENTRY __asin
 
 ENDFUNC
 
-.data
+NOINIT_SECTION
 __sinFlags:	 .skip 1
