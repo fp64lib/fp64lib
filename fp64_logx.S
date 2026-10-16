@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /*	float64_t fp64_log( float64_t x );
 	returns the natural logarithm ln of x
@@ -132,16 +132,9 @@ GCC_ENTRY __log
 	bld rA7, 7
 	; rcall __fp64_saveAB
 
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L__tableLog)
-	out RAMPZ, XL
-#endif
-	ldi XL, lo8(.L__tableLog)
-	ldi XH, hi8(.L__tableLog)
+	LPMX_INIT XL, .L__tableLog
 	XCALL _U(__fp64_powsodd)	; approximate log(y) = log((x-1)/(x+1)) by power series
-#ifdef ARDUINO_AVR_MEGA2560
-	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
-#endif
+	LPMX_FINI r1
 	; rcall __fp64_saveAB
 23:
 	pop r0						; restore normalization exponent

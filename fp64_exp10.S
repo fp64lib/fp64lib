@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* float64_t fp64_exp10 (float64_t x);
 	 The fp64_exp10() function returns the value of 10
@@ -41,19 +41,9 @@ GCC_ENTRY __exp10
 GCC_ENTRY __pow10
 	XCALL _U(__fp64_pushB)		; preserve registers
 
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ
-	push ZL
-	ldi ZL, byte3(.L_log10)
-	out RAMPZ, ZL
-#endif
-	ldi ZL, lo8(.L_log10)
-	ldi ZH, hi8(.L_log10)
+	LPMX_INIT ZL, .L_log10
 	XCALL _U(__fp64_ldb8_const)
-#ifdef ARDUINO_AVR_MEGA2560
-	pop r0
-	out RAMPZ, r0				; restore RAMPZ
-#endif
+	LPMX_FINI
 
 	XCALL _U(fp64_mul)
 	XCALL _U(__fp64_popB)

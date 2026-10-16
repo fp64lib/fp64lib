@@ -73,8 +73,8 @@
 	;  8a |	  +any	 |	 +/-0	 | +PI/2
 	;  8b |	  -any	 |	 +/-0	 | -PI/2
  */
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 FUNCTION fp64_atan2
 .L_nf:

@@ -29,8 +29,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* float_64t fp64_fdim (float_64t A, float_64t B);
 	 The fp64_fdim() function  return max(A-B,0). If x or y or both are NaN,

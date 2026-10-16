@@ -69,8 +69,8 @@
      fp64_lrint(-3.5)  --> -4L
  */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 FUNCTION fp64_lrint
 	; handle NaN and +/-Inf

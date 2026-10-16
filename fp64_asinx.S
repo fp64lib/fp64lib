@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /*	float64_t fp64_asin(float64_4 phi )
 	returns the arcus cos of phi (inverse function to fp64_sin(x)
@@ -205,12 +205,7 @@ GCC_ENTRY __asin
 	push rAE1
 	push rAE0
 
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L_tableAsinDenom)
-	out RAMPZ, XL
-#endif
-	ldi XL, lo8(.L_tableAsinDenom)	; calculate Denominator
-	ldi XH, hi8(.L_tableAsinDenom)
+	LPMX_INIT XL, .L_tableAsinDenom	; calculate Denominator
 	XCALL _U(__fp64_powser)
 
 	pop rBE0					; retrieve x2
@@ -222,12 +217,7 @@ GCC_ENTRY __asin
 	push rAE0
 
 	XCALL _U(__fp64_movABx)		; A = B = x3
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L_tableAsinNom)
-	out	 RAMPZ, XL
-#endif
-	ldi XL, lo8(.L_tableAsinNom); calculate Nominator
-	ldi XH, hi8(.L_tableAsinNom)
+	LPMX_INIT XL, .L_tableAsinNom	; calculate Nominator
 	XCALL _U(__fp64_powser)		; res = horner( x2, coeff_zähler )
 
 	pop rBE0					; retrieve Denominator x3 = horner( x2, coeff_nenner )

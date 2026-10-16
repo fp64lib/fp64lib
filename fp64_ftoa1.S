@@ -66,8 +66,8 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 .require_lpmx
 
@@ -84,25 +84,10 @@ ENTRY __fp64_ftoa_nan
 
 0:	; handle NaN and +/-Inf
 
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ			; save previous content of RAMPZ
-	push ZL
 	breq 3f					; handle Inf differently
-	ldi ZL, byte3(.L_nan)	; load upper byte of 24-bit address
-  ; rcall __fp64_saveAB
-	out  RAMPZ, ZL
-	ldi ZL, lo8(.L_nan)
-	ldi ZH, hi8(.L_nan)		; return "NaN"
+	LPMX_INIT ZL, .L_nan	; return "NaN"
 
-1:	elpm rA7, Z+			; copy string into buffer
-
-#else
-	breq 3f					; handle Inf differently
-	ldi ZL, lo8(.L_nan)
-	ldi ZH, hi8(.L_nan)		; return "NaN"
-
-1:	lpm rA7, Z+				; copy string into buffer
-#endif
+1:	LPMX rA7, Z+			; copy string into buffer
 
 2:	st X+, rA7
 	tst rA7
@@ -110,56 +95,32 @@ ENTRY __fp64_ftoa_nan
 
 	st X+, rA7				; store additional '\0' to terminate exponent string
 
-#ifdef ARDUINO_AVR_MEGA2560
-	pop ZL
-	out  RAMPZ, ZL			; restore RAMPZ
-#endif
+	LPMX_FINI ZL
 
 	sec						; flag for special case
 21:	; common return entry for all special cases
 	rjmp .L_ret
 
 3:	; handle +/-Inf
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi zl, byte3(.L_inf)
-  ; rcall __fp64_saveAB
-	out  RAMPZ, ZL
-#endif
-	ldi ZL, lo8(.L_inf)
-	ldi ZH, hi8(.L_inf)
+	LPMX_INIT ZL, .L_inf
 	ldi rA7, '+'			; return either +Inf
 	brtc 2b
 	ldi rA7, '-'			; or '-Inf'
 	rjmp 2b
 
 4:	; handle 0
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ			; save previous content of RAMPZ
-	push ZL
-	ldi ZL, byte3(.L_zero)
-	out RAMPZ, ZL
-#endif
 
-	ldi ZL, lo8(.L_zero)
-	ldi ZH, hi8(.L_zero)
+	LPMX_INIT ZL, .L_zero
 	brtc 5f
 	ldi rA7, '-'			; '-0.0E0'
 	st X+, rA7
 
 5:	; copy "0."
-#ifdef ARDUINO_AVR_MEGA2560
-	elpm rA7, Z+
+	LPMX rA7, Z+
 	st X+, rA7
-	elpm rA7, Z+
+	LPMX rA7, Z+
 	st X+, rA7
-	elpm rA7, Z+
-#else
-	lpm rA7, Z+
-	st X+, rA7
-	lpm rA7, Z+
-	st X+, rA7
-	lpm rA7, Z+
-#endif
+	LPMX rA7, Z+
 
 	; add as many "0" as needed for filling up the precision
 40:	dec rB6
@@ -168,24 +129,14 @@ ENTRY __fp64_ftoa_nan
 	rjmp 40b
 
 41:	; now add the "E0"
-#ifdef ARDUINO_AVR_MEGA2560
-	elpm rA7, Z+
+	LPMX rA7, Z+
 	st X+, rA7
-	elpm rA7, Z+
+	LPMX rA7, Z+
 	st X+, rA7
-	elpm rA7, Z+
+	LPMX rA7, Z+
 	st X+, rA7
 
-	pop rA7
-	out RAMPZ, rA7
-#else
-	lpm rA7, Z+
-	st X+, rA7
-	lpm rA7, Z+
-	st X+, rA7
-	lpm rA7, Z+
-	st X+, rA7
-#endif
+	LPMX_FINI rA7
 
 	X_movw ZL, rB2			; if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0

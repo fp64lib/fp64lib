@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 .require_lpmx
 .require_mul
@@ -147,27 +147,15 @@ ENTRY __fp64_getExp10int
 	; of exp2 values, with terminating value which is always
 	; greater than the biggest exponent
 	X_movw rB4, rExp2L	; save exponent
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ
-	push ZL
-	ldi ZL, byte3(.L_exc)
-	out RAMPZ, ZL
-#endif
-	ldi ZL, lo8(.L_exc)
-	ldi ZH, hi8(.L_exc)
 
-#ifdef ARDUINO_AVR_MEGA2560
-4:	elpm r0, Z+
+	LPMX_INIT ZL, .L_exc
+
+4:	LPMX r0, Z+
 	cp rB4, r0
-	elpm r0, Z+
-#else
-4:	lpm r0, Z+
-	cp rB4, r0
-	lpm r0, Z+
-#endif
+	LPMX r0, Z+
 
 	cpc rB5, r0
-	brlo .L_nomatch		; no match up to now, exp2 is lower than current entry, stop
+	brlo .L_nomatch		; no match yet, exp2 is lower than current entry, stop
 	brne 4b				; exp2 is greater than current entry, try next one
 
 .L_match:
@@ -181,10 +169,7 @@ ENTRY __fp64_getExp10int
 	sbci rExp10H, 0
 5:
 	; now exp10H.exp10L contains result, return to caller
-#ifdef ARDUINO_AVR_MEGA2560
-	pop ZL
-	out RAMPZ, ZL	; reset RAMPZ as required by gcc calling conventions
-#endif
+	LPMX_FINI ZL
 	ret
 
 .L_exc:	; list of exp values where approximation needs to be corrected

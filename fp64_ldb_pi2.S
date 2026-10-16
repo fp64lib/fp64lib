@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 .require_lpmx
 
@@ -44,14 +44,7 @@ FUNCTION __fp64_ldb_pi2
 ENTRY __fp64_ldb_pi2x
 	push ZL				; load b with PI/2
 	push ZH
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ
-	push ZL
-	ldi zl, byte3(__pi_o_2x)
-	out RAMPZ, ZL
-#endif
-	ldi ZL, lo8(__pi_o_2x)
-	ldi ZH, hi8(__pi_o_2x)
+	LPMX_INIT ZL, __pi_o_2x
 	rjmp __fp64_ldb_const
 
 /*	float64_t_intern __fp64_ldb_pi2()
@@ -65,27 +58,14 @@ ENTRY __fp64_ldb_pi2x
 ENTRY __fp64_ldb_pi2
 	push ZL				; load b with PI/2
 	push ZH
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ
-	push ZL
-	ldi ZL, byte3(__pi_o_2)
-	out  RAMPZ, ZL
-#endif
-	ldi ZL, lo8(__pi_o_2)
-	ldi ZH, hi8(__pi_o_2)
+	LPMX_INIT ZL, __pi_o_2
 
 ENTRY __fp64_ldb_const
 	rcall __fp64_ldb8_const
 
-#ifdef ARDUINO_AVR_MEGA2560
-	elpm rBE1, Z+
-	elpm rBE0, Z+
-	pop ZL
-	out  RAMPZ, ZL	; restore RAMPZ
-#else
-	lpm rBE1, Z+
-	lpm rBE0, Z+
-#endif
+	LPMX rBE1, Z+
+	LPMX rBE0, Z+
+	LPMX_FINI ZL
 
 	pop ZH
 	pop ZL
@@ -96,30 +76,19 @@ ENTRY __fp64_ldb_const
 	does not modify any other registers except SREG
 	ATTENTION: caller has to set/reset RAMPZ properly!!!
 
-	input:		RAMPZ.ZH.ZL								pointer to flash
+	input:		[RAMPZ.]ZH.ZL				pointer to flash
 	output:		rB7.rB6...rB0.rBE1.rBE0		PI/2 in unpacked format
 
 */
 ENTRY __fp64_ldb8_const
-#ifdef ARDUINO_AVR_MEGA2560
-	elpm rB7, Z+
-	elpm rB6, Z+
-	elpm rB5, Z+
-	elpm rB4, Z+
-	elpm rB3, Z+
-	elpm rB2, Z+
-	elpm rB1, Z+
-	elpm rB0, Z+
-#else
-	lpm rB7, Z+
-	lpm rB6, Z+
-	lpm rB5, Z+
-	lpm rB4, Z+
-	lpm rB3, Z+
-	lpm rB2, Z+
-	lpm rB1, Z+
-	lpm rB0, Z+
-#endif
+	LPMX rB7, Z+
+	LPMX rB6, Z+
+	LPMX rB5, Z+
+	LPMX rB4, Z+
+	LPMX rB3, Z+
+	LPMX rB2, Z+
+	LPMX rB1, Z+
+	LPMX rB0, Z+
 	ret
 
 	; PI/2 with 56 bits precision in unpacked format
