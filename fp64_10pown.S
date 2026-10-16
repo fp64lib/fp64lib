@@ -46,7 +46,8 @@ ENTRY __fp64_10pown
 	ldi YL, 3					; pot_exp2 = 3	// first 3 bits of pot are the leading bits
 	clr YH
 
-	LPMX_INIT ZL, .L_10			; pot = 10 << 60
+	ldi ZL, lo8(.L_10)			; pot = 10 << 60
+	ldi ZH, hi8(.L_10)
 
 	bst XH, 7					; neg = 0
 	brtc 0f						; if( n < 0 ) {
@@ -56,8 +57,8 @@ ENTRY __fp64_10pown
 	adiw ZL, 8					;	pot = 0.1 << 63
 
 #ifdef RAMPZ
-	in rB6, RAMPZ_IO_ADDR
-	inc rB6						; mind carry from ADIW above
+	ldi rB6, hh8(.L_10)
+	adc rB6, r1					; mind carry from ADIW above
 	out RAMPZ_IO_ADDR, rB6
 #endif /* RAMPZ */
 
