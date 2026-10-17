@@ -65,7 +65,7 @@ ENTRY __fp64_ldb_const
 
 	LPMX rBE1, Z+
 	LPMX rBE0, Z+
-	LPMX_FINI ZL
+	LPMX_FINI r1
 
 	pop ZH
 	pop ZL

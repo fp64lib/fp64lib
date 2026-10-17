@@ -86,6 +86,7 @@ ENTRY __fp64_powsodd
 
 #ifdef CHECK_POWSER
 .L_nf:
+	LPMX_FINI r1
 	brne	.L_nan			; +/-Inf? No --> return NaN
 .L_inf:
 	XJMP	_U(__fp64_inf)	; No, case 2 --> return Inf
@@ -111,6 +112,7 @@ ENTRY __fp64_check_powsoddn
 	push YH
 
 	XCALL _U(__fp64_powsodd)
+	LPMX_FINI r1
 
 	pop YH
 	pop YL

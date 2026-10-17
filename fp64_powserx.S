@@ -119,7 +119,6 @@ ENTRY __fp64_powser
 	brne	.Loop				; repeat until all constants processed
 
 .L_ret:
-	LPMX_FINI ZL
 	ret
 
 	; load an unpacked 10 byte number from program memory
@@ -153,7 +152,7 @@ ENTRY __fp64_powser
 
 #ifdef CHECK_POWSER
 .L_nf:
-	LPMX_FINI XL
+	LPMX_FINI r1
 	pop XH
 	pop XL
 
@@ -181,6 +180,7 @@ ENTRY __fp64_check_powsern
 	push YL
 	push YH
 	XCALL _U(__fp64_powser)
+	LPMX_FINI r1
 
 	; rcall __fp64_saveABC
 

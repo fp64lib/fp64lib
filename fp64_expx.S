@@ -113,7 +113,7 @@ GCC_ENTRY __exp
 	push YH
 	LPMX_INIT XL, .L_expxTable
 	XCALL	_U(__fp64_powser)
-	;; __fp64_powser restored RAMPZ as needed.
+	LPMX_FINI r1
 	pop YH
 	pop YL
 	pop rBE1					; load n into B

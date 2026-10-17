@@ -43,7 +43,7 @@ GCC_ENTRY __pow2
 
 	LPMX_INIT ZL, .L_log2
 	XCALL _U(__fp64_ldb8_const)
-	LPMX_FINI
+	LPMX_FINI r1
 
 	XCALL _U(fp64_mul)
 	XCALL _U(__fp64_popB)

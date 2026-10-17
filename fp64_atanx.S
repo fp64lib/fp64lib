@@ -144,6 +144,7 @@ GCC_ENTRY __atan
 
 	LPMX_INIT XL, .L_tableAtanDenom	; calculate Denominator
 	XCALL _U(__fp64_powser)
+	;; LPMX_FINI pending...
 
 	pop rBE0					; retrieve x2 = x^2
 	pop rBE1
@@ -157,6 +158,7 @@ GCC_ENTRY __atan
 
 	LPMX_INIT XL, .L_tableAtanNom	; calculate Nominator
 	XCALL _U(__fp64_powser)		; z = horner( x2, coeff_nominator )
+	LPMX_FINI r1
 
 	pop rBE0					; retrieve Denominator y = horner( x2, coeff_denominator )
 	pop rBE1

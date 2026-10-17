@@ -169,7 +169,7 @@ ENTRY __fp64_getExp10int
 	sbci rExp10H, 0
 5:
 	; now exp10H.exp10L contains result, return to caller
-	LPMX_FINI ZL
+	LPMX_FINI r1
 	ret
 
 .L_exc:	; list of exp values where approximation needs to be corrected

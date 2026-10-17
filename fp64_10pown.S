@@ -56,7 +56,7 @@ ENTRY __fp64_10pown
 	sbci XH, 0
 	adiw ZL, 8					;	pot = 0.1 << 63
 
-#ifdef RAMPZ
+#ifdef LPMX_USES_RAMPZ
 	ldi rB6, hh8(.L_10)
 	adc rB6, r1					; mind carry from ADIW above
 	out RAMPZ_IO_ADDR, rB6

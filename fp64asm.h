@@ -86,6 +86,19 @@ _U(\name):
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Loading constants from program memory and RAMPZ
 
+;;; We only have to init RAMPZ when we also have ELPM since we only
+;;; use it for ELPM and not for LD Z / ST Z.
+#if defined(RAMPZ) && defined(__AVR_HAVE_ELPM__)
+#define LPMX_USES_RAMPZ
+#endif
+
+;;; On EBI devices, RAMPZ has to be restored to 0 after, since it is
+;;; also used by LD Z / ST Z.  On devices without EBI, there is on need
+;;; to restore RAMPZ since the next ELPM access will set it as needed.
+#if defined(__AVR_HAVE_RAMPD__) && defined(LPMX_USES_RAMPZ)
+#define MUST_RESTORE_RAMPZ
+#endif
+
 /*  This is a bit of a mess.  We have the following functions:
     __fp64_ldb8_const   // fp64_ldb_pi2.S
         Load an 8-bit big-endian constant to B.
@@ -99,7 +112,7 @@ _U(\name):
         to the invocation.  Restores RAMPZ as needed.
 
     __fp64_powser      // fp64_powserx.S
-        Gets the table address in XH.XL and restores RAMPZ.
+        Gets the table address in XH.XL.  Caller restores RAMPZ.
 
     Some CHECK_POWSER functions are also reading from flash and restore RAMPZ.
     In any case, RAMPZ is initialized by the caller as needed.
@@ -120,17 +133,10 @@ _U(\name):
 #endif
 .endm
 
-;;; On EBI devices, RAMPZ has to be restored to 0 after, since it is
-;;; also used by LD Z / ST Z.  On devices without EBI, there is on need
-;;; to restore RAMPZ since the next ELPM access will set it as needed.
-#if defined(__AVR_HAVE_RAMPD__) && defined(RAMPZ)
-#define MUST_RESTORE_RAMPZ
-#endif
-
 ;;; Load the byte address of TAB to REG, and init RAMPZ as needed.
 .macro LPMX_INIT reg, tab
     REGNO .regno, \reg
-#ifdef RAMPZ
+#ifdef LPMX_USES_RAMPZ
     ldi .regno, hh8 (\tab)
     out RAMPZ_IO_ADDR, .regno
 #endif

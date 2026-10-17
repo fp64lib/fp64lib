@@ -95,7 +95,7 @@ ENTRY __fp64_ftoa_nan
 
 	st X+, rA7				; store additional '\0' to terminate exponent string
 
-	LPMX_FINI ZL
+	LPMX_FINI r1
 
 	sec						; flag for special case
 21:	; common return entry for all special cases
@@ -136,7 +136,7 @@ ENTRY __fp64_ftoa_nan
 	LPMX rA7, Z+
 	st X+, rA7
 
-	LPMX_FINI rA7
+	LPMX_FINI r1
 
 	X_movw ZL, rB2			; if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0

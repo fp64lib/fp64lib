@@ -486,7 +486,7 @@ ENTRY __fp64_load_xconst
 	LPMX rBE1, Z+
 	LPMX rBE0, Z+
 
-	LPMX_FINI ZH
+	LPMX_FINI r1
 	pop ZH
 	pop ZL
 	ret

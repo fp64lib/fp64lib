@@ -207,6 +207,7 @@ GCC_ENTRY __asin
 
 	LPMX_INIT XL, .L_tableAsinDenom	; calculate Denominator
 	XCALL _U(__fp64_powser)
+	;; LPMX_FINI pending...
 
 	pop rBE0					; retrieve x2
 	pop rBE1
@@ -219,6 +220,7 @@ GCC_ENTRY __asin
 	XCALL _U(__fp64_movABx)		; A = B = x3
 	LPMX_INIT XL, .L_tableAsinNom	; calculate Nominator
 	XCALL _U(__fp64_powser)		; res = horner( x2, coeff_zähler )
+	LPMX_FINI r1
 
 	pop rBE0					; retrieve Denominator x3 = horner( x2, coeff_nenner )
 	pop rBE1

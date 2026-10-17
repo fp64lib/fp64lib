@@ -127,6 +127,7 @@ GCC_ENTRY __sin
 	; rcall __fp64_saveAB
 	LPMX_INIT XL, .L_tableSin
 	XCALL _U(__fp64_powsodd)
+	LPMX_FINI r1
 
 	; restore used registers and return
 	lds r0, __funcCode
