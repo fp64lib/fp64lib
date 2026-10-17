@@ -51,8 +51,8 @@
 	 fp64_floor(-1.9) --> -2.0
  */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 FUNCTION fp64_floor
 ENTRY	fp64_floor

@@ -46,8 +46,8 @@
 	die routinen hier runden nicht
  */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 .require_mul
 

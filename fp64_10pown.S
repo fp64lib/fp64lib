@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 .require_lpmx
 
@@ -46,10 +46,6 @@ ENTRY __fp64_10pown
 	ldi YL, 3					; pot_exp2 = 3	// first 3 bits of pot are the leading bits
 	clr YH
 
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ				; get and save previous RAMPZ
-	push ZL
-#endif
 	ldi ZL, lo8(.L_10)			; pot = 10 << 60
 	ldi ZH, hi8(.L_10)
 
@@ -60,32 +56,22 @@ ENTRY __fp64_10pown
 	sbci XH, 0
 	adiw ZL, 8					;	pot = 0.1 << 63
 
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi rB6, byte3(.L_10)
-	adc rB6, r1					; conside carry over at 16bit address to 24bit address
-	out RAMPZ, rB6
+#ifdef LPMX_USES_RAMPZ
+	ldi rB6, hh8(.L_10)
+	adc rB6, r1					; mind carry from ADIW above
+	out RAMPZ_IO_ADDR, rB6
+#endif /* RAMPZ */
 
-0:	elpm rB7, Z+				; load pot with 10.0 or 0.1
-	elpm rB6, Z+
-	elpm rB5, Z+
-	elpm rB4, Z+
-	elpm rB3, Z+
-	elpm rB2, Z+
-	elpm rB1, Z+
-	elpm rB0, Z+
+0:	LPMX rB7, Z+				; load pot with 10.0 or 0.1
+	LPMX rB6, Z+
+	LPMX rB5, Z+
+	LPMX rB4, Z+
+	LPMX rB3, Z+
+	LPMX rB2, Z+
+	LPMX rB1, Z+
+	LPMX rB0, Z+
 
-	pop ZL
-	out	 RAMPZ, ZL				; restore RAMPZ
-#else
-0:	lpm rB7, Z+					; load pot with 10.0 or 0.1
-	lpm rB6, Z+
-	lpm rB5, Z+
-	lpm rB4, Z+
-	lpm rB3, Z+
-	lpm rB2, Z+
-	lpm rB1, Z+
-	lpm rB0, Z+
-#endif
+	LPMX_FINI r1
 
 	clr rAE1					; exp2 = 0 // exponent of result in base 2
 	clr rAE0

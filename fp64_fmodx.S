@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 .require_lpmx
 
@@ -453,12 +453,7 @@ ENTRY	__fp64_fmodx
 ENTRY __fp64_load_xln2
 	push ZL				; load b with ln2
 	push ZH
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi zl, byte3(__xln2)
-	out  RAMPZ, ZL
-#endif
-	ldi ZL, lo8(__xln2)
-	ldi ZH, hi8(__xln2)
+	LPMX_INIT ZL, __xln2
 	rjmp __fp64_load_xconst
 
 /* float96_t_intern __fp64_load_xpio2();
@@ -468,12 +463,7 @@ ENTRY __fp64_load_xln2
 ENTRY __fp64_load_xpio2
 	push ZL				; load b with PI/2
 	push ZH
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi zl, byte3(__xpi_o_2)
-	out  RAMPZ, ZL
-#endif
-	ldi ZL, lo8(__xpi_o_2)
-	ldi ZH, hi8(__xpi_o_2)
+	LPMX_INIT ZL, __xpi_o_2
 
 /* float96_t_intern __fp64_load_xconst();
 	 load extended precision constant out of flash space in rBX11..
@@ -481,38 +471,22 @@ ENTRY __fp64_load_xpio2
 	 Output: rBx11..rB0, rBE1.rBE0	loaded constant in internal 96 bit format
 */
 ENTRY __fp64_load_xconst
-#ifdef ARDUINO_AVR_MEGA2560
-	elpm rBx11, Z+
-	elpm rBx10, Z+
-	elpm rBx9, Z+
-	elpm rBx8, Z+
-	elpm rBx7, Z+
-	elpm rBx6, Z+
-	elpm rBx5, Z+
-	elpm rBx4, Z+
-	elpm rBx3, Z+
-	elpm rBx2, Z+
-	elpm rBx1, Z+
-	elpm rBx0, Z+
-	elpm rBE1, Z+
-	elpm rBE0, Z+
-	out  RAMPZ, r1	; reset RAMPZ as required by gcc calling conventions
-#else
-	lpm rBx11, Z+
-	lpm rBx10, Z+
-	lpm rBx9, Z+
-	lpm rBx8, Z+
-	lpm rBx7, Z+
-	lpm rBx6, Z+
-	lpm rBx5, Z+
-	lpm rBx4, Z+
-	lpm rBx3, Z+
-	lpm rBx2, Z+
-	lpm rBx1, Z+
-	lpm rBx0, Z+
-	lpm rBE1, Z+
-	lpm rBE0, Z+
-#endif
+	LPMX rBx11, Z+
+	LPMX rBx10, Z+
+	LPMX rBx9, Z+
+	LPMX rBx8, Z+
+	LPMX rBx7, Z+
+	LPMX rBx6, Z+
+	LPMX rBx5, Z+
+	LPMX rBx4, Z+
+	LPMX rBx3, Z+
+	LPMX rBx2, Z+
+	LPMX rBx1, Z+
+	LPMX rBx0, Z+
+	LPMX rBE1, Z+
+	LPMX rBE0, Z+
+
+	LPMX_FINI r1
 	pop ZH
 	pop ZL
 	ret

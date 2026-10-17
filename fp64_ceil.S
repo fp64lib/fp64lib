@@ -51,8 +51,8 @@
 	 fp64_ceil(-1.9) --> -1.0
  */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 FUNCTION fp64_ceil
 	; handle NaN and +/-Inf
