@@ -101,7 +101,7 @@ _U(\name):
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Chicken out when the code demands more than the hardware can do.
 
-#if __AVR_TINY__
+#ifdef __AVR_TINY__
     .end
 #endif
 
