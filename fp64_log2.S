@@ -40,7 +40,7 @@ FUNCTION fp64_log2
    logb(A) = log2(|x|) = log(|x|) / log(2)
  */
 ENTRY fp64_logb
-GCC_ENTRY __logb
+ENTRY_DOUBLE logb logbl
 	andi rA7, 0x80				; clear sign
 	; let log2 do the rest
 
@@ -49,7 +49,7 @@ GCC_ENTRY __logb
    log2(A) = log(A) / log(2)
  */
 ENTRY fp64_log2
-GCC_ENTRY __log2
+ENTRY_DOUBLE log2 log2l
 
 	XCALL _U(fp64_log)
 

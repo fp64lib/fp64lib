@@ -37,8 +37,8 @@
 FUNCTION fp64_exp10
 ENTRY fp64_exp10
 ENTRY fp64_pow10
-GCC_ENTRY __exp10
-GCC_ENTRY __pow10
+ENTRY_DOUBLE exp10 exp10l
+ENTRY_DOUBLE pow10 pow10l
 	XCALL _U(__fp64_pushB)		; preserve registers
 
 #ifdef ARDUINO_AVR_MEGA2560
