@@ -81,7 +81,7 @@ FUNCTION fp64_ilogb
 	returns the natural logarithm ln of x
 */
 ENTRY fp64_ilogb
-GCC_ENTRY __ilogb
+ENTRY_DOUBLE ilogb ilogbl
 	andi rA7, 0x7f				; ignore sign
 	XCALL _U(__fp64_splitA)
 	brcs .L_nf					; handle cases 1-2 (NaN, Inf)

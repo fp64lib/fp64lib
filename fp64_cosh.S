@@ -39,7 +39,7 @@
 
 FUNCTION fp64_cosh
 ENTRY fp64_sinh
-GCC_ENTRY __sinh
+ENTRY_DOUBLE sinh sinhl
 	ldi XL, 0x80
 	rjmp .L_common
 
@@ -50,7 +50,7 @@ GCC_ENTRY __sinh
  */
 
 ENTRY fp64_cosh
-GCC_ENTRY __cosh
+ENTRY_DOUBLE cosh coshl
 	clr XL
 
 .L_common:						; calculate sinh or cosh, depending on XL

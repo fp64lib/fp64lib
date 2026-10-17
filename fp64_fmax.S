@@ -47,7 +47,7 @@ FUNCTION fp64_fmin
 */
 
 ENTRY fp64_fmin
-GCC_ENTRY __fmin
+ENTRY_DOUBLE fmin fminl
 	set							; set flag for fmin
 	rjmp .L_common
 
@@ -66,7 +66,7 @@ GCC_ENTRY __fmin
 */
 
 ENTRY fp64_fmax
-GCC_ENTRY __fmax
+ENTRY_DOUBLE fmax fmaxl
    clt							; clear flag for fmin
 .L_common:
 	push rB7

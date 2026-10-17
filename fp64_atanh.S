@@ -37,7 +37,7 @@
 
 FUNCTION fp64_atanh
 ENTRY fp64_atanh
-GCC_ENTRY __atanh
+ENTRY_DOUBLE atanh atanhl
 	; check for |x| < 1
 	push rA7
 	andi rA7, 0x7f				; get rid of sign

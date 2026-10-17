@@ -65,7 +65,7 @@ FUNCTION fp64_log
 	returns the natural logarithm ln of x
 */
 ENTRY fp64_log
-GCC_ENTRY __log
+ENTRY_DOUBLE log logl
 	XCALL _U(__fp64_splitA)
 	brcs .L_nf					; case 1-3: return NaN for x=NaN,-Inf, +Inf for +Inf
 	breq .L_inf					; case 4: return -Inf for x = 0

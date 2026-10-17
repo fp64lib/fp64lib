@@ -37,8 +37,8 @@
 FUNCTION fp64_exp2
 ENTRY fp64_exp2
 ENTRY fp64_pow2
-GCC_ENTRY __exp2
-GCC_ENTRY __pow2
+ENTRY_DOUBLE exp2 exp2l
+ENTRY_DOUBLE pow2 pow2l
 	XCALL _U(__fp64_pushB)		; preserve registers
 
 #ifdef ARDUINO_AVR_MEGA2560
