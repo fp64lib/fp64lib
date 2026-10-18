@@ -62,8 +62,8 @@
      fp64_lround(-1.5) --> -2L
  */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 FUNCTION fp64_lround
 	; handle NaN and +/-Inf

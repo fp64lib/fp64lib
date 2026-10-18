@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /*	float64_t_intern __fp64_ldb_log2()
 	load B register with log(2) in internal, unpacked format
@@ -42,15 +42,8 @@ FUNCTION __fp64_ldb_log2
 ENTRY __fp64_ldb_log2
 	push ZL
 	push ZH
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ
-	push ZL
-	ldi zl, byte3(.L_const_1)
-	out  RAMPZ, ZL
-#endif
 
-	ldi ZL, lo8(.L_const_1)
-	ldi ZH, hi8(.L_const_1)
+	LPMX_INIT ZL, .L_const_1
 	XJMP _U(__fp64_ldb_const)
 
 	; log(2) with 56 bits precision in unpacked format

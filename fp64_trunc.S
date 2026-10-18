@@ -53,8 +53,8 @@
      fp64_trunc(-1.9) --> -1.0
  */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 FUNCTION fp64_trunc
 	; handle NaN and +/-Inf

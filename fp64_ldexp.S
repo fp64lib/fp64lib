@@ -29,8 +29,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* float64_t fp64_ldexp (float64_t x, int exp)
    The fp64_ldexp() function returns the result of multiplying the

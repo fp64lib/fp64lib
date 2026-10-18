@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /*	float64_t fp64_sin( float64_4 phi )
 	returns the sine of phi
@@ -125,13 +125,9 @@ ENTRY_DOUBLE sin sinl
 15:	; approximate sin(x) by Taylor series
 	sts __funcCode, XH
 	; rcall __fp64_saveAB
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L_tableSin)
-	out RAMPZ, XL
-#endif
-	ldi XL, lo8(.L_tableSin)
-	ldi XH, hi8(.L_tableSin)
+	LPMX_INIT XL, .L_tableSin
 	XCALL _U(__fp64_powsodd)
+	LPMX_FINI r1
 
 	; restore used registers and return
 	lds r0, __funcCode

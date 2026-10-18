@@ -32,14 +32,6 @@
 #ifndef	_FP64DEF_H
 #define	_FP64DEF_H
 
-// For Arduino IDE, using gcc7.3.1, where the definition of RAMPZ
-// is commented out by default
-#ifdef ARDUINO_AVR_MEGA2560
-#ifndef RAMPZ
-#define RAMPZ	0x3b
-#endif
-#endif
-
 /*
 Registers
 	A packed:	rA7, rA6, rA5, rA4, rA3, rA2, rA1, rA0			8 registers
@@ -153,16 +145,5 @@ Registers
 #define rR7 r7
 #define rR6 r8
 #define rR5 r9
-
-/* Put functions at this section.	*/
-#ifdef	FUNCTION
-# error	"The FUNCTION macro must be defined after FUNC_SEGNAME"
-#endif
-// #define FUNC_SEGNAME	MLIB_SECTION
-#define FUNC_SEGNAME	.text.libfp64.asm
-
-/* Put constant tables at low addresses in program memory, so they are
-   reachable for "lpm" without using RAMPZ on >64K devices.  */
-//#define PGM_SECTION	.section  .progmem.gcc_fplib, "a", @progbits
 
 #endif	/* !_FP64DEF_H */

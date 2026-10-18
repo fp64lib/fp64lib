@@ -29,8 +29,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* GCC expects all these functions to return -1/0/1 as for __cmpsf2 -
    compare with gcc/config/fp-bit.c (the only difference is with NaNs

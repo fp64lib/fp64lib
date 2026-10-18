@@ -29,8 +29,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* float64_t fp64_pow(float64_t x, float64_t y);
      The fp64_pow() function returns the value of x raised to the power of y.

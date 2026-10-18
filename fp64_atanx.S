@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /*	float64_t fp64_atan(float64_4 phi )
 	returns the arcus tangens of phi (inverse function to fp64_tan(x)
@@ -142,13 +142,9 @@ ENTRY_DOUBLE atan atanl
 	push rAE1
 	push rAE0
 
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L_tableAtanDenom)
-	out RAMPZ, XL
-#endif
-	ldi XL, lo8(.L_tableAtanDenom)	; calculate Denominator
-	ldi XH, hi8(.L_tableAtanDenom)
+	LPMX_INIT XL, .L_tableAtanDenom	; calculate Denominator
 	XCALL _U(__fp64_powser)
+	;; LPMX_FINI pending...
 
 	pop rBE0					; retrieve x2 = x^2
 	pop rBE1
@@ -159,13 +155,10 @@ ENTRY_DOUBLE atan atanl
 	push rAE0
 
 	XCALL _U(__fp64_movABx)		; A = B = x2
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L_tableAtanNom)
-	out	 RAMPZ, XL
-#endif
-	ldi XL, lo8(.L_tableAtanNom); calculate Nominator
-	ldi XH, hi8(.L_tableAtanNom)
+
+	LPMX_INIT XL, .L_tableAtanNom	; calculate Nominator
 	XCALL _U(__fp64_powser)		; z = horner( x2, coeff_nominator )
+	LPMX_FINI r1
 
 	pop rBE0					; retrieve Denominator y = horner( x2, coeff_denominator )
 	pop rBE1

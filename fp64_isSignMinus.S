@@ -26,8 +26,8 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* bool fp64_isSignMinus(float64_t x);
 	 fp64_isSignMinus(x) is true if and only if x has negative sign.
