@@ -441,14 +441,12 @@ ENTRY __fp64_ftoa_pse
 	ret
 ENDFUNC
 
-.data
+.section .progmem.data, "a", @progbits
 .L_nan:		.asciz "NaN"
 .L_inf:		.asciz "INF"
 .L_zero:	.asciz "0.0E0"
-.global __do_copy_data
 
 NOINIT_SECTION
-;.L_zero:	.asciz "-0.0E0"
 .L_bufp:		.space 2	; pointer to current location in __fp64_ftoabuf
 .L_maxDigits:	.space 1	; maximum number of digits, working counter
 .L_maxDigits2:	.space 1	; maximum number of digits, original value
