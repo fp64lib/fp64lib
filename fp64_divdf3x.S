@@ -41,8 +41,8 @@
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 result = A / B
 */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 FUNCTION __fp64_divsd3x
 

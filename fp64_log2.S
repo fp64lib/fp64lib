@@ -29,8 +29,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 
 FUNCTION fp64_log2
@@ -55,19 +55,9 @@ GCC_ENTRY __log2
 
 	XCALL _U(__fp64_pushB)		; preserve registers
 
-#ifdef ARDUINO_AVR_MEGA2560
-	in ZL, RAMPZ
-	push ZL
-	ldi ZL, byte3(.L_log2)
-	out RAMPZ, ZL
-#endif
-	ldi ZL, lo8(.L_log2)
-	ldi ZH, hi8(.L_log2)
+	LPMX_INIT ZL, .L_log2
 	XCALL _U(__fp64_ldb8_const)
-#ifdef ARDUINO_AVR_MEGA2560
-	pop r0
-	out RAMPZ, r0	; restore RAMPZ
-#endif
+	LPMX_FINI r1
 
 	XCALL _U(fp64_div)
 

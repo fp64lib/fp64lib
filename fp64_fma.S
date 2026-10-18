@@ -29,8 +29,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* float64_t fp64_fma (float64_t A, float64_t B, float64_t C)
 	 The `fp64_fma' function performs floating-point multiply-add. This is the

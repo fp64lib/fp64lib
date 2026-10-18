@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* float64_t __fp64_powsodd (float64_t_intern x, float64_t_intern* XH.XL);
      The __fp64_powsodd() function calculates a polynom with only odd
@@ -86,6 +86,7 @@ ENTRY __fp64_powsodd
 
 #ifdef CHECK_POWSER
 .L_nf:
+	LPMX_FINI r1
 	brne	.L_nan			; +/-Inf? No --> return NaN
 .L_inf:
 	XJMP	_U(__fp64_inf)	; No, case 2 --> return Inf
@@ -99,12 +100,7 @@ ENTRY __fp64_check_powsodd3
 #else
 	push XL
 	push XH
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L__testTable3x)
-	out  RAMPZ, XL
-#endif
-	ldi XL, lo8(.L__testTable3x)
-	ldi XH, hi8(.L__testTable3x)
+	LPMX_INIT XL, .L__testTable3x
 
 ENTRY __fp64_check_powsoddn
 98:
@@ -116,6 +112,7 @@ ENTRY __fp64_check_powsoddn
 	push YH
 
 	XCALL _U(__fp64_powsodd)
+	LPMX_FINI r1
 
 	pop YH
 	pop YL
@@ -130,12 +127,7 @@ ENTRY __fp64_check_powsoddn
 ENTRY __fp64_check_powslog
 	push XL
 	push XH
-#ifdef ARDUINO_AVR_MEGA2560
-	ldi XL, byte3(.L__testTable3x)
-	out  RAMPZ, XL
-#endif
-	ldi XL, lo8(.L__testTableLogx)
-	ldi XH, hi8(.L__testTableLogx)
+	LPMX_INIT XL, .L__testTableLogx
 	rjmp 98b
 
 .L__testTable3x:

@@ -27,8 +27,8 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* struct fp64_debug* __fp64_debug (special)
 	 return sisgn, exponent and mantissa from internal registers

@@ -26,8 +26,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 /* float64_t fp64_exp (float64_t x);
 	 The fp64_exp() function returns the value of e (the base of natural
@@ -111,19 +111,9 @@ GCC_ENTRY __exp
 
 	push YL
 	push YH
-#ifdef ARDUINO_AVR_MEGA2560
-	in XL, RAMPZ
-	push XL
-	ldi XL, byte3(.L_expxTable)
-	out	 RAMPZ, XL
-#endif
-	ldi XL, lo8(.L_expxTable)
-	ldi XH, hi8(.L_expxTable)
+	LPMX_INIT XL, .L_expxTable
 	XCALL	_U(__fp64_powser)
-#ifdef ARDUINO_AVR_MEGA2560
-	pop YL
-	out RAMPZ, YL
-#endif
+	LPMX_FINI r1
 	pop YH
 	pop YL
 	pop rBE1					; load n into B
@@ -207,14 +197,7 @@ ENTRY __fp64_check_powserexp
 #else
 	push XL
 	push XH
-#ifdef ARDUINO_AVR_MEGA2560
-	in XL, RAMPZ
-	push XL
-	ldi XL, byte3(.L_expxTable)
-	out	 RAMPZ, XL
-#endif
-	ldi XL, lo8(.L_expxTable)
-	ldi XH, hi8(.L_expxTable)
+	LPMX_INIT XL, .L_expxTable
 	XJMP _U(__fp64_check_powsern)
 #endif
 

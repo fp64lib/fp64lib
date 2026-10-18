@@ -55,8 +55,8 @@
 	 rA7.rA6.rA5.rA4				 - arg. A in IEEE 754 - 32-bit format
  */
 
-#include "fp64def.h"
 #include "fp64asm.h"
+#include "fp64def.h"
 
 FUNCTION fp64_ds
 	; handle NaN and +/-Inf

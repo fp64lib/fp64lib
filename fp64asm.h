@@ -29,8 +29,30 @@
 #ifndef	FP64ASM_H
 #define FP64ASM_H
 
+/* Put functions at this section.	*/
+#ifdef	FUNCTION
+#error	"The FUNCTION macro must be defined after FUNC_SEGNAME"
+#endif
+
+#define FUNC_SEGNAME	.text.libfp64.asm
+
+
 /* Get all the good stuff from AVR-LibC */
 #include "asmdef.h"
+
+
+/* Arduino is spoiling SFR definitions, so build them from scratch.  */
+#undef SREG
+#undef SREG_IO_ADDR
+#define SREG_IO_ADDR 0x3f
+#define SREG SREG_IO_ADDR
+
+#undef RAMPZ
+#undef RAMPZ_IO_ADDR
+#if defined (__AVR_HAVE_RAMPZ__)
+#define RAMPZ_IO_ADDR 0x3b
+#define RAMPZ RAMPZ_IO_ADDR
+#endif
 
 .macro  ALIAS_ENTRY name
     .global _U(\name)
@@ -46,7 +68,8 @@ _U(\name):
 
 #define NOINIT_SECTION .section .noinit, "a", @nobits
 
-.macro _SWAP	dst, src	/* swap two registers without need of temporary register */
+/* swap two registers without need of temporary register */
+.macro _SWAP	dst, src
 	eor dst, src
 	eor src, dst
 	eor dst, src
@@ -59,14 +82,102 @@ _U(\name):
 	X_movw \dst, r0
 .endm
 
-/* alias to be compatible with AVR programming manual */
-// #define byte3(x)	pm_hh8(x)
-#define byte3(x)	hh8(x)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Loading constants from program memory and RAMPZ
+
+;;; We only have to init RAMPZ when we also have ELPM since we only
+;;; use it for ELPM and not for LD Z / ST Z.
+#if defined(RAMPZ) && defined(__AVR_HAVE_ELPM__)
+#define LPMX_USES_RAMPZ
+#endif
+
+;;; On EBI devices, RAMPZ has to be restored to 0 after, since it is
+;;; also used by LD Z / ST Z.  On devices without EBI, there is on need
+;;; to restore RAMPZ since the next ELPM access will set it as needed.
+#if defined(__AVR_HAVE_RAMPD__) && defined(LPMX_USES_RAMPZ)
+#define MUST_RESTORE_RAMPZ
+#endif
+
+/*  This is a bit of a mess.  We have the following functions:
+    __fp64_ldb8_const   // fp64_ldb_pi2.S
+        Load an 8-bit big-endian constant to B.
+        This is a row of LPMX Z+ insns that don't change SREG,
+        where Z is post-incremented, and RAMPZ is NOT restored.
+
+    __fp64_ldb_const   // fp64_ldb_pi2.S
+        Load a 10-bit big-endian constant to B + rBE1/0.
+        This function MUST BE JMP-ed to since it POPs Z at the end.
+        As a consequence, Z (or two other regs) must be PUSHed prior
+        to the invocation.  Restores RAMPZ as needed.
+
+    __fp64_powser      // fp64_powserx.S
+        Gets the table address in XH.XL.  Caller restores RAMPZ.
+
+    Some CHECK_POWSER functions are also reading from flash and restore RAMPZ.
+    In any case, RAMPZ is initialized by the caller as needed.
+
+	For an overview over the RAMPx registers' relation to the ABI, see
+	https://gcc.gnu.org/onlinedocs/gcc/AVR-Options.html#ramp
+*/
+
+.macro LPMX reg, zz
+#if defined (__AVR_HAVE_ELPMX__)
+    elpm \reg, \zz
+#elif defined (__AVR_HAVE_ELPM__)
+    .error ".require_lpmx"
+#elif defined (__AVR_HAVE_LPMX__)
+    lpm \reg, \zz
+#else
+    .error ".require_lpmx"
+#endif
+.endm
+
+;;; Load the byte address of TAB to REG, and init RAMPZ as needed.
+.macro LPMX_INIT reg, tab
+    REGNO .regno, \reg
+#ifdef LPMX_USES_RAMPZ
+    ldi .regno, hh8 (\tab)
+    out RAMPZ_IO_ADDR, .regno
+#endif
+    ldi .regno+0, lo8 (\tab)
+    ldi .regno+1, hi8 (\tab)
+.endm
+
+.macro LPMX_FINI reg
+#ifdef MUST_RESTORE_RAMPZ
+    .ifb \reg
+        ;; No reg provided: Cook one up.
+        push    r31
+        ldi     r31, 0
+        out     RAMPZ_IO_ADDR, r31
+        pop     r31
+    .else
+        ;; REG provided.
+        REGNO .regno, \reg
+        .if .regno >= 16
+            ;; Upper reg: Zero without disturbing SREG.
+            ldi .regno, 0
+        .elseif .regno == 1
+            ;; Assume zero_reg is intact.
+        .else
+            .error "LPMX_FINI regno??"
+        .endif
+        out RAMPZ_IO_ADDR, .regno
+    .endif
+#endif
+.endm
+
+;;; Please don't use Arduino internals.  All what needs be expressed
+;;; can be expressed with AVR GCC / AVR-LibC macros.
+#pragma GCC poison ARDUINO_AVR_MEGA2560
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Handling 3-byte PC and XICALL according to the AVR GCC ABI
 ;;; The ABI disallows to change EIND since it would break all
-;;; kind of stuff like ISRs.
+;;; kind of stuff like ISRs.  For an overview of the EIND ABI, see
+;;; https://gcc.gnu.org/onlinedocs/gcc/AVR-Options.html#eind
 
 #if defined (__AVR_2_BYTE_PC__)
 #define PC_SIZE 2
