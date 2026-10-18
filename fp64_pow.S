@@ -66,7 +66,7 @@ FUNCTION fp64_pow
 	ret
 
 ENTRY fp64_pow
-GCC_ENTRY __pow
+ENTRY_DOUBLE pow powl
 	; ZH.ZL := exponent of y without sign
 	X_movw ZL, rB6				; save exponent and sign
 	andi ZH, 0x7f				; get rid of sign bit

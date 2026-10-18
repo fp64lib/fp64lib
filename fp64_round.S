@@ -80,7 +80,7 @@ FUNCTION fp64_round
 	ret
 
 ENTRY	fp64_round
-GCC_ENTRY __round
+ENTRY_DOUBLE round roundl
 	XCALL _U(__fp64_splitA)
 	brcs .L_NaN					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0

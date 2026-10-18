@@ -36,7 +36,7 @@
 
 FUNCTION fp64_tanh
 ENTRY fp64_tanh
-GCC_ENTRY __tanh
+ENTRY_DOUBLE tanh tanhl
 	XCALL _U(__fp64_pushB)		; preserve registers
 	XCALL _U(__fp64_pushA)		; save x
 

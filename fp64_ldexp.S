@@ -69,8 +69,8 @@ FUNCTION fp64_ldexp
 */
 ENTRY fp64_ldexp
 ENTRY fp64_scalbn
-GCC_ENTRY __ldexp
-GCC_ENTRY __scalbn
+ENTRY_DOUBLE ldexp ldexpl
+ENTRY_DOUBLE scalbn scalbnl
 	XCALL _U(__fp64_splitA)
 	brcs .L_NaN					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0

@@ -140,7 +140,7 @@ FUNCTION fp64_atan2
 	XJMP _U(__fp64_szero)
 
 ENTRY	fp64_atan2
-GCC_ENTRY __atan2
+ENTRY_DOUBLE atan2 atan2l
 	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)
 	brcs .L_nf				; handle special cases A or B being non-finite

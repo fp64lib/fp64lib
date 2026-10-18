@@ -70,7 +70,7 @@ FUNCTION fp64_ceil
 	XJMP _U(__fp64_one)			; case 4: return 1.0 for x < 1.0
 
 ENTRY	fp64_ceil
-GCC_ENTRY __ceil
+ENTRY_DOUBLE ceil ceill
 	.sbrc_callj rA7, 7			; negative number? (including -NaN, -Inf, -0)
 	XJMP _U(fp64_trunc)			; yes, case 0: return trunc(x)
 	XCALL _U(__fp64_splitA)

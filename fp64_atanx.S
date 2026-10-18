@@ -88,7 +88,7 @@ FUNCTION fp64_atan
 	returns the arcus tangens of phi (inverse function to fp64_tan(x)
 */
 ENTRY fp64_atan
-GCC_ENTRY __atan
+ENTRY_DOUBLE atan atanl
 	XCALL _U(__fp64_splitA)
 	brcs .L_nan					; NaN or +/- INF
 	breq .L_zero				; x = 0 --> result of atan = 0

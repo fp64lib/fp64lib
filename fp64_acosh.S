@@ -37,7 +37,7 @@
 
 FUNCTION fp64_acosh
 ENTRY fp64_acosh
-GCC_ENTRY __acosh
+ENTRY_DOUBLE acosh acoshl
 	; check for x < 1
 	.sbrc_callj rA7, 7			; is x < 0
 .L_nan:
@@ -71,7 +71,7 @@ GCC_ENTRY __acosh
  */
 
 ENTRY fp64_asinh
-GCC_ENTRY __asinh
+ENTRY_DOUBLE asinh asinhl
 	clr XL						; clear sign bit
 
 .L_common:

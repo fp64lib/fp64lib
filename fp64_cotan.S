@@ -36,7 +36,7 @@
 
 FUNCTION fp64_cotan
 ENTRY fp64_cotan
-GCC_ENTRY __cotan
+;; ENTRY_DOUBLE cotan cotanl	; cotan / cotanl are not in math.h.
 	XCALL _U(fp64_tan)			; calculate tan(x)
 	XJMP _U(fp64_inverse)		; cotan(x) = 1 / tan(x)
 ENDFUNC

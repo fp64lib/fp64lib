@@ -59,10 +59,33 @@
 _U(\name):
 .endm
 
-/* Create an entry that is use by GCC standard arithmetik */
+;;; Create an entry as used / expected by libgcc / GCC.
 .macro  GCC_ENTRY name
 	.global	_U(\name)
 _U(\name):
+.endm
+
+;;; An entry for math.h, FD for double and FL for long double.
+;;; Other than ENTRY_FLOAT, we don't .weak-en the symbols so that
+;;; they are stronger than libgcc/libf7's, which are all weak.
+.macro  ENTRY_DOUBLE fd, fl
+#if __SIZEOF_DOUBLE__ == 8
+	.global	\fd
+	.type	\fd, "function"
+#ifdef HAVE_LD_GNU_ATTRIBUTE_8
+	.gnu_attribute Tag_GNU_AVR_BITS_DOUBLE,64
+#endif
+\fd:
+#endif /* __SIZEOF_DOUBLE__ == 8 */
+
+#if __SIZEOF_LONG_DOUBLE__ == 8
+	.global	\fl
+	.type	\fl, "function"
+#ifdef HAVE_LD_GNU_ATTRIBUTE_12
+	.gnu_attribute Tag_GNU_AVR_BITS_LONG_DOUBLE,64
+#endif
+\fl:
+#endif /* __SIZEOF_LONG_DOUBLE__ == 8 */
 .endm
 
 

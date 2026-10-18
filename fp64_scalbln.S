@@ -68,7 +68,7 @@ FUNCTION fp64_ldexp
    but can be called with n being of type long instead of int.
 */
 ENTRY fp64_scalbln
-GCC_ENTRY __scalbln
+ENTRY_DOUBLE scalbln scalblnl
 	rcall __fp64_saveAB
 
 	; check for INF or NAN

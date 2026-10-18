@@ -36,7 +36,7 @@
 
 FUNCTION fp64_cbrt
 ENTRY fp64_cbrt
-GCC_ENTRY __cbrt
+ENTRY_DOUBLE cbrt cbrtl
 	XCALL _U(__fp64_pushB)		; preserve registers
 
 	push rA7					; save original sign

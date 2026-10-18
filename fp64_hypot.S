@@ -37,7 +37,7 @@
 
 FUNCTION fp64_hypot
 ENTRY fp64_hypot
-GCC_ENTRY __hypot
+ENTRY_DOUBLE hypot hypotl
 	XCALL _U(__fp64_pushB)
 	XCALL _U(fp64_square)		; calc x^2
 	XCALL _U(__fp64_pushA)		; save x^2
