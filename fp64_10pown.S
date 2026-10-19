@@ -46,8 +46,7 @@ ENTRY __fp64_10pown
 	ldi YL, 3					; pot_exp2 = 3	// first 3 bits of pot are the leading bits
 	clr YH
 
-	ldi ZL, lo8(.L_10)			; pot = 10 << 60
-	ldi ZH, hi8(.L_10)
+	LPMX_INIT ZL, .L_10			; pot = 10 << 60
 
 	bst XH, 7					; neg = 0
 	brtc 0f						; if( n < 0 ) {
