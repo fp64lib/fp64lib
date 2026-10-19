@@ -196,6 +196,7 @@ float64_t fp64_acosh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_atanh( float64_t x ) __ATTR_CONST__;
 
 // functions with 2 arguments
+float64_t fp64_copysign (float64_t x, float64_t y) __ATTR_CONST__;
 float64_t fp64_fmodx_pi2( float64_t x, unsigned long *np ) __ATTR_CONST__;
 float64_t fp64_ldexp( float64_t x, int exp ) __ATTR_CONST__;
 float64_t fp64_scalbln(float64_t x, long ex) __ATTR_CONST__; 	// [all added with C99]
