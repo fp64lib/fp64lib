@@ -38,17 +38,17 @@
 .endif
 
 ENTRY __ledf2.bool
-    XCALL _U(__fp64_pushB)
-    XCALL _U(__fp64_cmp)
-    XCALL _U(__fp64_popB)
-    brcs    0f                  ; NaN?
-    ;; return ret_lo <= 0  /  0 >= ret_lo
-    cp      r1, ret_lo
-    brge 1f
-0:  clr     ret_lo
-    ret
-1:  ldi     ret_lo, 1
-    ret
+	XCALL _U(__fp64_pushB)
+	XCALL _U(__fp64_cmp)
+	XCALL _U(__fp64_popB)
+	brcs	0f					; NaN?
+	;; return ret_lo <= 0  /  0 >= ret_lo
+	cp		r1, ret_lo
+	brge 1f
+0:	clr		ret_lo
+	ret
+1:	ldi		ret_lo, 1
+	ret
 ENDFUNC
 
 #ifdef DOUBLE_COMPARE_BOOL

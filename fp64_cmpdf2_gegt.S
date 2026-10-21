@@ -53,12 +53,12 @@
 
 ENTRY __gedf2.tristate
 ENTRY __gtdf2.tristate
-    XCALL _U(__fp64_pushB)
-    XCALL _U(__fp64_cmp)
-    XCALL _U(__fp64_popB)
-    brcc    1f
-    ldi ret_lo, -1              ; for NaN
-1:  ret
+	XCALL _U(__fp64_pushB)
+	XCALL _U(__fp64_cmp)
+	XCALL _U(__fp64_popB)
+	brcc	1f
+	ldi ret_lo, -1				; for NaN
+1:	ret
 ENDFUNC
 
 #ifdef DOUBLE_COMPARE_TRISTATE

@@ -55,9 +55,9 @@ ENTRY  __eqdf2.tristate
 ENTRY  __nedf2.tristate
 ENTRY  __ltdf2.tristate
 ENTRY  __ledf2.tristate
-	XCALL _U(__fp64_pushB)
+	XCALL	_U(__fp64_pushB)
 	XCALL	_U(__fp64_cmp)
-	XCALL _U(__fp64_popB)
+	XCALL	_U(__fp64_popB)
 	brcc	1f
 	ldi		r24, 1
 1:	ret

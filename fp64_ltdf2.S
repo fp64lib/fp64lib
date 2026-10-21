@@ -38,17 +38,17 @@
 .endif
 
 ENTRY __ltdf2.bool
-    XCALL _U(__fp64_pushB)
-    XCALL _U(__fp64_cmp)
-    XCALL _U(__fp64_popB)
-    brcs    0f                  ; NaN?
-    ;; return ret_lo < 0
-    tst     ret_lo
-    brmi 1f
-0:  ldi     ret_lo, 0
-    ret
-1:  ldi     ret_lo, 1
-    ret
+	XCALL _U(__fp64_pushB)
+	XCALL _U(__fp64_cmp)
+	XCALL _U(__fp64_popB)
+	brcs	0f					; NaN?
+	;; return ret_lo < 0
+	tst		ret_lo
+	brmi 1f
+0:	ldi		ret_lo, 0
+	ret
+1:	ldi		ret_lo, 1
+	ret
 ENDFUNC
 
 #ifdef DOUBLE_COMPARE_BOOL
