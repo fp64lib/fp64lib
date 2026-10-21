@@ -41,7 +41,7 @@ FUNCTION fp64_log2
  */
 ENTRY fp64_logb
 ENTRY_DOUBLE logb logbl
-	andi rA7, 0x80				; clear sign
+	andi rA7, 0x7f				; clear sign
 	; let log2 do the rest
 
 /* float64_t fp64_log2(float64_t A);
