@@ -53,83 +53,39 @@
 
  */
 
-FUNCTION fp64_ldexp
+#define S0  r14
+#define S1  r15
+#define S2  r16
+#define S3  r17
 
-.L_Inf:
-	XJMP _U(__fp64_inf)			; case 2: return +/-Inf
-
-.L_szero:
-	bst rA7, 7					; save sign
-	rcall __fp64_saveAB
-	XJMP _U(__fp64_szero)		; case 3: return +0
-
-/* float64_t fp64_scalbln (float64_t x, long n)
-   fp64_scalbln behaves identical to fp64_ldexp() or fp64_scalbn,
-   but can be called with n being of type long instead of int.
-*/
 ENTRY fp64_scalbln
 ENTRY_DOUBLE scalbln scalblnl
-	rcall __fp64_saveAB
+    push    r17
+    push    r16
+    ;; R0 = signs (lo16 (S)).
+    mov     r0, S1
+    lsl     r0
+    sbc     r0, r0
+    ;; Test whether S == sign_extend (lo16 (S)).
+    cp      S2, r0
+    cpc     S3, r0
+    ;; If yes, scalbn (lo16 (S)) will do the job.
+    breq 1f
 
-	; check for INF or NAN
-	bst rA7, 7					; save sign
-	andi rA7, 0x7f
+    ;; Otherwise, saturate S to a signed 16-bit value.
+    ;; sign S = 0 ->  hi16 = 0x7fff
+    ;; sign S = 1 ->  hi16 = 0x8000
+    cpi     S3, 0x80
+    sbc     S2, S2
+    sbc     S3, S3
+    subi    S3, 0x80
+    rjmp 2f
 
-	; check for INF or NaN
-	cpi rA7, 0x7f
-	brne 1f						; not INF or NaN, check for 0
-	cpi rA6, 0xf0
-	brlo 2f						; just a regular very high number
-	brne .L_NaN					; case 1: it's a NaN --> return it
-	XCALL _U(__fp64_cpc0A5)		; check whether it is really INF or another NaN
-	breq .L_Inf					; case 3: INF --> return it
+1:  ;; scalbn() with a 16-bit exponent is just fine.
+    X_movw  S2, S0
 
-	; case 1: number is NaN, return it
-.L_NaN:
-	ret
-
-1:	; check for 0
-	XCALL _U(__fp64_cpc0A5)
-	brne 2f
-	cpc r1, rA6
-	cpc r1, rA7
-	bld rA7, 7					; restore sign of x
-	breq .L_szero				; case 3: return 0.0, independant of n
-
-2:	; handle regular numbers
-	; check for huge n outside the range of integer, i.e. |n| > 0x7fff
-	bld rA7, 7					; restore sign of x
-	; rcall __fp64_saveAB
-	tst rB7
-	brmi 3f						; test for huge negative values
-	tst rB7
-	brne .L_Inf					; n > 0xffffff --> return INF or 0.0
-	tst rB6
-	brne .L_Inf					; n > 0xffff --> return INF or 0.0
-	tst rB5
-	brmi .L_Inf					; n > 0x7fff --> return INF or 0.0
-	rjmp .L_common				; n fits in int, let fp64_ldexp handle the rest
-
-3:	; check for huge negative values, lead to underflow, i.e. +/-0
-	bst	rB7, 7					; save sign of n
-
-	inc rB7
-	brne .L_szero				; n < 0xff000000 --> return +/-0.0
-	inc rB6
-	brne .L_szero				; n < -0xffff --> return +/-0.0
-	tst rB5
-	rcall __fp64_saveAB
-	brpl .L_szero				; -0xffff <= n < -0x7fff --> return +/-0.0
-	ldi XL, 0x80
-	cp rB5, XL
-	breq .L_szero
-
-	; n fits in int, handle sign bit correctly
-	bld rB5, 7
-
-.L_common:
-	; n fits in int, move relevant bits of long n to int name
-	X_movw rB6, rB4
-	; let fp64_ldexp handle the rest
-	XJMP _U(fp64_ldexp)
+2:  XCALL   _U(fp64_scalbn)
+    pop     r16
+    pop     r17
+    ret
 ENDFUNC
