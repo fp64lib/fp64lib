@@ -55,14 +55,14 @@ ENTRY_DOUBLE cosh coshl
 
 .L_common:						; calculate sinh or cosh, depending on XL
 	; A = exp(x))
-	sts .L_sign, XL
+	push XL
 	XCALL	_U(fp64_exp)
 	XCALL _U(__fp64_pushB)		; preserve registers
 
 	XCALL _U(__fp64_movBA)		; save exp(-fabs(x))
 
 	XCALL _U(fp64_inverse)		; calculate exp(fabs(x))
-	lds XL, .L_sign				; retrieve sign
+	pop XL						; retrieve sign
 	sub rA7, XL					; for sinh, exp(-x) becomes -exp(-x)
 	XCALL _U(fp64_add)			; exp(x) +/- exp(-x)
 	ldi rB7, hi8(-1)
@@ -71,6 +71,3 @@ ENTRY_DOUBLE cosh coshl
 
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC
-
-NOINIT_SECTION
-.L_sign:	.skip 1				; storage for saving sign
