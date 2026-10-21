@@ -51,8 +51,11 @@ ENTRY_DOUBLE log10 log10l
 	XCALL _U(fp64_mul)
 
 	XJMP _U(__fp64_popBret)		; restore registers and return
-
-.L_log10: ; 1/log(10) = 0x3fdbcb7b1526e50d = 0.43429448190325176
-	.byte 0x3f, 0xdb, 0xcb, 0x7b, 0x15, 0x26, 0xe5, 0x0d
-
 ENDFUNC
+
+PGMX_SECTION (fp64.log10)
+
+;; 1/log(10) = 0x3fdbcb7b1526e50d = 0.43429448190325176
+OBJECT .L_log10
+	.byte 0x3f, 0xdb, 0xcb, 0x7b, 0x15, 0x26, 0xe5, 0x0d
+ENDOBJ .L_log10

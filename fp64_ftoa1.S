@@ -441,16 +441,21 @@ ENTRY __fp64_ftoa_pse
 	ret
 ENDFUNC
 
-.section .progmem.data, "a", @progbits
+PGMX_SECTION (fp64.ftoa1)
+
+OBJECT .L_ftoa1.strings
 .L_nan:		.asciz "NaN"
 .L_inf:		.asciz "INF"
 .L_zero:	.asciz "0.0E0"
+ENDOBJ .L_ftoa1.strings
 
 NOINIT_SECTION
+OBJECT .L_ftoa1.data
 .L_bufp:		.space 2	; pointer to current location in __fp64_ftoabuf
 .L_maxDigits:	.space 1	; maximum number of digits, working counter
 .L_maxDigits2:	.space 1	; maximum number of digits, original value
 .L_sepExp:		.space 1	; flag to seperate significand and exponent
+ENDOBJ .L_ftoa1.data
 
 OBJECT .global __fp64_ftoabuf
 	.space 2+MAX_SIGNIFICAND+3+MAX_EXPONENT, 0	; max 26 bytes needed:
