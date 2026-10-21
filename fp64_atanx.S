@@ -194,11 +194,14 @@ ENTRY_DOUBLE atan atanl
 
 .L_retA:
 	XJMP _U(__fp64_rpretA)		; return res
+ENDFUNC
+
+PGMX_SECTION (fp64.atanx)
 
 	; approximation by MiniMax polynom, as discussed on
 	; https://www.mikrocontroller.net/topic/480840#6003520
 
-.L_tableAtanNom:
+OBJECT .L_tableAtanNom
 	; Ideal polynom:
 	; +	  0.09762721591717633036983 * x^6
 	; +	 11.3221594116764655236245	* x^5
@@ -215,9 +218,9 @@ ENTRY_DOUBLE atan atanl
 	.byte 0x00, 0xac, 0x9b, 0x84, 0x66, 0xd0, 0x77, 0xc4, 0x04, 0x0a	; 2761.719824613883495905211629128928052523
 	.byte 0x00, 0xbd, 0x71, 0x31, 0x8b, 0x2a, 0xfd, 0xa7, 0x04, 0x0a	; 3031.074595611508304421159720742906529267
 	.byte 0x00, 0x97, 0x37, 0xe7, 0x70, 0x3b, 0x21, 0xbc, 0x04, 0x09	; 1209.747001758090732437267433851957321167
-	.byte 0x00												; byte needed for code alignment to even adresses!
+ENDOBJ .L_tableAtanNom
 
-.L_tableAtanDenom:
+OBJECT .L_tableAtanDenom
 	; Ideal polynom:
 	; +	  1.0000000000000000000000 * x^6
 	; +	 39.9178842486537981501999 * x^5
@@ -234,5 +237,4 @@ ENTRY_DOUBLE atan atanl
 	.byte 0x00, 0xe5, 0x08, 0xb8, 0x24, 0x20, 0x81, 0xe7, 0x04, 0x0a	; 3664.544956328375008069997420534491539001
 	.byte 0x00, 0xd6, 0xa5, 0x2d, 0x73, 0x34, 0xd8, 0x60, 0x04, 0x0a	; 3434.323596197535171654739716284865380658
 	.byte 0x00, 0x97, 0x37, 0xe7, 0x70, 0x3b, 0x21, 0xbc, 0x04, 0x09	; 1209.747001758090732437267433851957321167
-	.byte 0x00												; byte needed for code alignment to even adresses!
-ENDFUNC
+ENDOBJ .L_tableAtanDenom
