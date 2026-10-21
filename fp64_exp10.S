@@ -43,7 +43,7 @@ ENTRY_DOUBLE pow10 pow10l
 
 	LPMX_INIT ZL, .L_log10
 	XCALL _U(__fp64_ldb8_const)
-	LPMX_FINI
+	LPMX_FINI r1
 
 	XCALL _U(fp64_mul)
 	XCALL _U(__fp64_popB)
