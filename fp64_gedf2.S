@@ -50,14 +50,21 @@
      else // A < B || isnan(A) || isnan(B)
         -1
  */
-FUNCTION __fp64_gesd2
-GCC_ENTRY __gedf2
-GCC_ENTRY __gtdf2
-    XCALL _U(__fp64_pushB)
-	XCALL	_U(__fp64_cmp)
-    XCALL _U(__fp64_popB)
-	brcc	1f
-	ldi	ret_lo, -1
-1:	ret
 
+ENTRY __gedf2.bool
+    XCALL _U(__fp64_pushB)
+    XCALL _U(__fp64_cmp)
+    XCALL _U(__fp64_popB)
+    brcs    0f                  ; NaN?
+    ;; return ret_lo >= 0
+    tst     ret_lo
+    brpl 1f
+0:  ldi     ret_lo, 0
+    ret
+1:  ldi     ret_lo, 1
+    ret
 ENDFUNC
+
+#ifdef DOUBLE_COMPARE_BOOL
+	GCC_DEFSYM __gtdf2, __gtdf2.bool
+#endif

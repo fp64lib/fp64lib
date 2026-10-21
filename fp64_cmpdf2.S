@@ -51,15 +51,21 @@ FUNCTION fp64_compare
 
 ENTRY	fp64_compare
 ENTRY	__fp64_cmpsd2
-GCC_ENTRY  __eqdf2
-GCC_ENTRY  __nedf2
-GCC_ENTRY  __ltdf2
-GCC_ENTRY  __ledf2
+ENTRY  __eqdf2.tristate
+ENTRY  __nedf2.tristate
+ENTRY  __ltdf2.tristate
+ENTRY  __ledf2.tristate
 	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_cmp)
 	XCALL _U(__fp64_popB)
 	brcc	1f
 	ldi		r24, 1
 1:	ret
-
 ENDFUNC
+
+#ifdef DOUBLE_COMPARE_TRISTATE
+	GCC_DEFSYM __eqdf2, __eqdf2.tristate
+	GCC_DEFSYM __nedf2, __nedf2.tristate
+	GCC_DEFSYM __ltdf2, __ltdf2.tristate
+	GCC_DEFSYM __ledf2, __ledf2.tristate
+#endif

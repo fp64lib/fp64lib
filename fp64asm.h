@@ -65,6 +65,13 @@ _U(\name):
 _U(\name):
 .endm
 
+;;; Define a global symbol SYM for libgcc / GCC.
+.macro GCC_DEFSYM sym, val
+	.global \sym
+	.type \sym, "function"
+	\sym = \val
+.endm
+
 ;;; An entry for math.h, FD for double and FL for long double.
 ;;; Other than ENTRY_FLOAT, we don't .weak-en the symbols so that
 ;;; they are stronger than libgcc/libf7's, which are all weak.
