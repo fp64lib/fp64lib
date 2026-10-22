@@ -47,9 +47,10 @@
 FUNCTION __fp64disd
 ENTRY fp64_int64_to_float64
 ENTRY __fp64disd
+GCC_ENTRY __floatdidf
 	bst rA7, 7					; set sign
 	brtc	1f
-	XCALL	_U(__fp_negdi)		; if x < 0, negate x (routine from 32bit fp library
+	XCALL	_U(__negdi2)		; if x < 0, negate x (routine from libgcc)
 1:	XJMP	_U(__fp64_di2sd)	; do conversion
 
 /* float64_t __fp64unsdisd ( unsigned long long x );
@@ -65,6 +66,7 @@ ENTRY __fp64disd
 
 ENTRY fp64_uint64_to_float64
 ENTRY __fp64unsdisd
+GCC_ENTRY __floatundidf
 	clt							; result sign = +
 
 __fp64_di2sd:
