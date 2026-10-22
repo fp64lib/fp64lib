@@ -490,19 +490,23 @@ ENTRY __fp64_load_xconst
 	pop ZH
 	pop ZL
 	ret
+ENDFUNC
+
+PGMX_SECTION (fp64.fmodx)
 
 	; PI/2 with 96 bits precision
 	; digits of PI:3243F6A88 85A308D3 13198A2E 03707344 A4093822 299F31D0 082EFA98 EC4E6C89
 	; MSB aligned: C90FDAA22 168C234C 4C6628B8
-__xpi_o_2:
+
+OBJECT __xpi_o_2
 	;     rBx11 rBx10 rBx9  rBx8  rBx7  rBx6  rBx5  rBx4  rBx3  rBx2  rBx1  rBx0  rBE1  rBE0
 	.byte 0xC9, 0x0F, 0xDA, 0xA2, 0x21, 0x68, 0xC2, 0x34, 0xC4, 0xC6, 0x62, 0x8C, 0x03, 0xff
+ENDOBJ __xpi_o_2
 
 	; ln2 with 96 bits precision from http://www.numberworld.org/digits/Log(2)/
 	; MSB aligned: b17217f7d1 cf79abc9e3 b39803f2f6 af40f34326 7298b62d8a
 	; 0.6931471805599453094172321214581790787926
-__xln2:
+OBJECT __xln2
 	;     rBx11 rBx10 rBx9  rBx8  rBx7  rBx6  rBx5  rBx4  rBx3  rBx2  rBx1  rBx0  rBE1  rBE0
 	.byte 0xb1, 0x72, 0x17, 0xf7, 0xd1, 0xcf, 0x79, 0xab, 0xc9, 0xe3, 0xb3, 0x98, 0x03, 0xfe
-
-ENDFUNC
+ENDOBJ __xln2

@@ -43,9 +43,13 @@ ENTRY __fp64_ldb_log2
 	push ZL
 	push ZH
 
-	LPMX_INIT ZL, .L_const_1
+	LPMX_INIT ZL, .L_const_ln2
 	XJMP _U(__fp64_ldb_const)
-
-	; log(2) with 56 bits precision in unpacked format
-.L_const_1:	.byte  0x00, 0xB1, 0x72, 0x17, 0xF7, 0xD1, 0xCF, 0x7A, 0x03, 0xfe	; log(2) = 0.69314718055994531
 ENDFUNC
+
+PGMX_SECTION (fp64.ldb_log2)
+
+;; log(2) with 56 bits precision in unpacked format
+OBJECT .L_const_ln2
+	.byte  0x00, 0xB1, 0x72, 0x17, 0xF7, 0xD1, 0xCF, 0x7A, 0x03, 0xfe	; log(2) = 0.69314718055994531
+ENDOBJ .L_const_ln2

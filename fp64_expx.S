@@ -200,13 +200,16 @@ ENTRY __fp64_check_powserexp
 	LPMX_INIT XL, .L_expxTable
 	XJMP _U(__fp64_check_powsern)
 #endif
+ENDFUNC
+
+PGMX_SECTION (fp64.expx)
 
 	; exp is calculated by Taylor Approximation
 	; exp(x) ~ SUM(n = 1 to 16; x^n/n! ) = 1/0!*1 + 1/1!*x + 1/2!*x^2 + 1/3!*x^3 + ... + 1/16!*x^16
 	; the coefficients were computed with python with 40 (decimal) digits precision
 	; and then rounded to 56 Bits
 	; 0xd73f9f399dc0f9p-116	 = Decimal(0xd73f9f399dc0f9) / 2**116
-.L_expxTable:
+OBJECT .L_expxTable
 	.byte 16	; polynom power = 16 --> 17 entries
 	;	  rB7	rB6	  rB5	rB4	  rB3	rB2	  rB1	rB0	  rBE1	rBE0
 														; C16 = 1/16! = 1/20.922.789.888.000 = 4.779477332387385297438207491117544027596E-14
@@ -244,5 +247,4 @@ ENTRY __fp64_check_powserexp
 														; C0 = 1/0!	 = 1/1					 = 1.0
 	.byte 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xff ; 0x80000000000000p-71	 = 1.0
 
-	.byte 0x00					; byte needed for code alignment to even adresses!
-ENDFUNC
+ENDOBJ .L_expxTable
