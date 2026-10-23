@@ -95,11 +95,9 @@ ENTRY_DOUBLE atan atanl
 
 	push rA7					; save sign of x
 
-	XCALL _U(__fp64_pushCB)		; as all registers may be used, save them
+	XCALL _U(__fp64_pushCB)		; save the used callee-saved regs
 	push YH
 	push YL
-	push XH
-	push XL
 
 	cpi rAE1, 0x03				; fabs(x) < 1.0?
 	brmi 10f					; definitely yes, x < 2^-255 --> go ahead with approximation
@@ -183,9 +181,7 @@ ENTRY_DOUBLE atan atanl
 	subi rA7, 0x80
 
 19:
-	pop XL						; restore all used registers
-	pop XH
-	pop YL
+	pop YL						; restore all callee-saved regs
 	pop YH
 	XCALL _U(__fp64_popBC)		; restore register set
 
