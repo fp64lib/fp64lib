@@ -93,8 +93,6 @@ ENTRY __fp64_ftoa_nan
 	tst rA7
 	brne 1b
 
-	st X+, rA7				; store additional '\0' to terminate exponent string
-
 	LPMX_FINI r1
 
 	sec						; flag for special case
@@ -110,33 +108,27 @@ ENTRY __fp64_ftoa_nan
 
 4:	; handle 0
 
-	LPMX_INIT ZL, .L_zero
 	brtc 5f
 	ldi rA7, '-'			; '-0.0E0'
 	st X+, rA7
 
-5:	; copy "0."
-	LPMX rA7, Z+
-	st X+, rA7
-	LPMX rA7, Z+
-	st X+, rA7
-	LPMX rA7, Z+
+5:	; write "0."
+	ldi	ZL, '0'
+	ldi	ZH, '.'
+	st X+, ZL				; '0'
+	st X+, ZH				; '.'
 
 	; add as many "0" as needed for filling up the precision
 40:	dec rB6
 	breq 41f
-	st X+, rA7
+	st X+, ZL				; '0'
 	rjmp 40b
 
 41:	; now add the "E0"
-	LPMX rA7, Z+
-	st X+, rA7
-	LPMX rA7, Z+
-	st X+, rA7
-	LPMX rA7, Z+
-	st X+, rA7
-
-	LPMX_FINI r1
+	ldi	ZH, 'E'
+	st X+, ZH				; 'E'
+	st X+, ZL				; '0'
+	st X+, r1				; \0
 
 	X_movw ZL, rB2			; if exp10 != NULL, store exponent base 10 here
 	adiw ZL, 0
@@ -259,6 +251,7 @@ ENTRY __fp64_ftoa_pse
 	brpl 51f				; while( exp2 < 0 ) {
 	rcall .L_initB10		; 	B = 10;
 	rcall .L_nextDigit		;	A = A * 10; exp2 += 4 - shiftLeft(A)
+	adiw rExp2L, 4
 	sbiw rExp10L, 1			;	exp10--
 	rjmp 50b				; }
 
@@ -275,19 +268,9 @@ ENTRY __fp64_ftoa_pse
 	X_movw rB2, rB6
 	X_movw rB0, rB6
 
-	push r1
-	clr r1
-	XCALL _U(__fp64_mul64AB)	; C = A * 0.1
-	XCALL _U(__fp64_lshift64)	; shift left C until bit63 is set
-	pop r1
-	XCALL _U(__fp64_movAC)		; move result back to A
-
-	adiw rExp10L, 1				; exp10++
-
-	; exp2 = exp2 - 3 - numberOfShifts in r0
-	sbiw rExp2L, 3
-	sub rExp2L, r0
-	sbci rExp2H, 0
+	rcall .L_nextDigit
+	adiw rExp10L, 1			; exp10++
+	sbiw rExp2L, 3			; exp2 -= 3
 	rjmp 51b
 
 59:	rcall .L_initB10		; preload B with 10
@@ -311,6 +294,7 @@ ENTRY __fp64_ftoa_pse
 	st Y+, r0			; TemporaryMemory[len++] = digit + '0'
 
 	rcall .L_nextDigit
+	adiw rExp2L, 4
 
 	lds r0, .L_maxDigits
 	dec r0
@@ -434,8 +418,7 @@ ENTRY __fp64_ftoa_pse
 	pop r1
 	XCALL _U(__fp64_movAC)		; move result back to A
 
-	; exp2 = exp2 + 4 - numberOfShifts in r0
-	adiw rExp2L, 4
+	; exp2 -= numberOfShifts in r0
 	sub rExp2L, r0
 	sbci rExp2H, 0
 	ret
@@ -446,7 +429,6 @@ PGMX_SECTION (fp64.ftoa1)
 OBJECT .L_ftoa1.strings
 .L_nan:		.asciz "NaN"
 .L_inf:		.asciz "INF"
-.L_zero:	.asciz "0.0E0"
 ENDOBJ .L_ftoa1.strings
 
 NOINIT_SECTION
