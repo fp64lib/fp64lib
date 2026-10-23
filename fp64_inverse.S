@@ -42,12 +42,7 @@ ENTRY fp64_inverse
 
 	XCALL _U(__fp64_movBA)		; B = x
 
-	ldi	rA7, 0x3f				; set A = +1.0 = 0x3ff000..00
-	ldi rA6, 0xf0
-	clr rA5
-	clr rA4
-	X_movw	rA2, rA4
-	X_movw	rA0, rA4
+	XCALL _U(__fp64_one)		; set A = +1.0 = 0x3ff000..00
 
 	XCALL	_U(__fp64_divsd3)	; calculate 1.0 / x
 

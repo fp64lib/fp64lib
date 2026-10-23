@@ -186,6 +186,7 @@ float64_t fp64_exp10( float64_t x ) __ATTR_CONST__;
 float64_t fp64_pow10( float64_t x ) __ATTR_CONST__;
 float64_t fp64_log2( float64_t x ) __ATTR_CONST__;
 float64_t fp64_exp2( float64_t x ) __ATTR_CONST__;
+float64_t fp64_pow2( float64_t x ) __ATTR_CONST__;
 float64_t fp64_logb( float64_t x ) __ATTR_CONST__;
 float64_t fp64_sinh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_cosh( float64_t x ) __ATTR_CONST__;

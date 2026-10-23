@@ -151,8 +151,8 @@ ENTRY   fp64_cut_noninteger_fraction
 	pop rAE0
 
 .L_ret:
-	subi rAE0, -0xff			; add base 1023
-	sbci rAE1, -0x04
+	subi rAE0, lo8(-1023)		; add bias 1023
+	sbci rAE1, hi8(-1023)
 	XJMP _U(__fp64_pretA)		; pack and return x
 
 ENDFUNC
