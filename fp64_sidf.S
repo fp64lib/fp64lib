@@ -68,16 +68,10 @@ GCC_ENTRY __floatsidf
 	bst	rA7, 7		; save sign
 	brtc .L_common	; if x > 0, start conversion
 	; negate A
-	com	rA7
-	com	rA6
-	com	rA5
-	neg	rA4
-	sbci rA5, -1
-	sbci rA6, -1
-	sbci rA7, -1
+	XCALL	_U(__negsi2)	; libgcc: R22[4] = -R22[4]
 
 .L_common:
-	clr rAE0			; exponent = 0
+	clr rAE0				; exponent = 0
 	clr rAE1
 	X_movw rA0, rAE0		; set lower 32 bits to 0
 	X_movw rA2, rAE0
@@ -116,7 +110,7 @@ GCC_ENTRY __floatsidf
 	mov	rA6, rA5
 	mov	rA5, rA4
 	mov	rA4, rA3	; rA3 is 0
-	rjmp 2b		; loop until one bit is set
+	rjmp 2b			; loop until one bit is set
 					; (loop will terminate, as it is guaranteed that A <> 0)
 
 	; rA6 is not 0.  It is needed shift to left by 0..7 positions.
@@ -129,7 +123,7 @@ GCC_ENTRY __floatsidf
 
 	; pack and return
 .L_pack:
-	subi rAE0, -0xFF	; add exponent base 0x3ff
-	sbci rAE1, -0x04
+	subi rAE0, lo8(-1023)	; add exponent bias 0x3ff
+	sbci rAE1, hi8(-1023)
 	XJMP _U(__fp64_pretA)
 ENDFUNC

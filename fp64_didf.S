@@ -114,7 +114,7 @@ __fp64_di2sd:
 
 	; Round and pack
 .L_round:
-	subi rAE0, -0xFF			; add exponent base 0x3ff
-	sbci rAE1, -0x04
+	subi rAE0, lo8(-1023)		; add exponent bias 0x3ff
+	sbci rAE1, hi8(-1023)
 	XJMP _U(__fp64_rpretA)
 ENDFUNC
