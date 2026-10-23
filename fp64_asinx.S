@@ -73,10 +73,13 @@ FUNCTION fp64_asin
 	XJMP _U(__fp64_nan)
 
 	; case 2: 0 --> 0 (for asin) or PI/2 (for acos)
-.L_zero:
-	.sbrs_callj r0, 1			; acos?
+.L_x_zero:
+	.sbrs_callj XH, 1			; acos?
+.L_szero:
 	XJMP _U(__fp64_szero)		; no: return 0.0 for asin
+.L_pi2:
 	clt							; yes: return +PI/2 for acos
+.L_pm_pi2:
 	XJMP _U(__fp64_pi2)
 
 /*	float64_t fp64_acos(float64_4 phi )
@@ -92,57 +95,49 @@ ENTRY_DOUBLE acos acosl
 */
 ENTRY fp64_asin
 ENTRY_DOUBLE asin asinl
-	sts __sinFlags, r1			; either r1 = 0 (default) or r1 = 0x02 (acos)
-	clr r1
-	XCALL _U(__fp64_splitA)
-	lds r0, __sinFlags
-	bld r0, 7					; save sign of x in __sinFlags
-	sts __sinFlags, r0
-	brcs .L_nan					; NaN or +/- INF
-	breq .L_zero				; x = 0 --> result of asin = 0
+	bst rA7, 7			 		; T := sign (x)
+	mov XH, r1					; Either r1 = 0 (default) or r1 = 0x02 (acos)
+	bld XH, 7					; Transfer sign to the flags
+	clr r1						; Restore zero_reg
 
-	cpi rAE1, 0x03				; fabs(x) < 1.0?
-	brmi 10f					; definitely yes, x < 2^-255 --> go ahead with approximation by poly(2*x^2)*x
-	brne .L_nan					; definitely no, x >= 2.0 --> cases 3,4, return NaN
+	;; As it turns out, working on the packed IEEE format for
+	;; a while is more convenient than unpacking too early.
 
-	; maybe yes, 2^-255 < x < 2.0
-	cpi rAE0, 0xfe
-	brlo 10f					; |x| < 0.5 --> go ahead with approximation by poly(2*x^2)*x
-	breq 20f					; 0.5 <= |x| < 1.0 --> --> go ahead with approximation by poly(1-x)*sqrt(2*x)
-
-	; now here: 1 <= |x| < 2
-	; check, whether |x| is == 1.0, i.e. significand = 0x80....0
-
+	cbr rA7, 0x80				; x := |x|
+	;; Compare 1.0 <=> |x|.
 	XCALL _U(__fp64_cpc0A5)
-	brne .L_nan
-	cpi rA6, 0x80
-	brne .L_nan
+	ldi	ZL, lo8(0x3ff0)  $  cpc ZL, rA6
+	ldi	ZH, hi8(0x3ff0)  $  cpc ZH, rA7
+	brlt .L_nan					; 1.0 < |x| --> NaN
+	brne 1f						; 1.0 > |x| --> do the math
 
-	; cases 5,6: fabs(x) = 1.0 --> return +/- PI/2 for asin, 0 or PI for acos
-	.sbrs_callj r0,1			; acos?
-	XJMP _U(__fp64_pi2)			; no: return +/- PI/2
+	;; cases 5,6: |x| = 1.0 --> return +/- PI/2 for asin, 0 or PI for acos
+	sbrs XH, 1					; acos?
+	rjmp .L_pm_pi2				; no: return +/- PI/2
 
-	.sbrs_callj r0, 7			; x == -1?
-	XJMP _U(__fp64_szero)		; no --> x == 1 --> return +0
-	clt
-	XCALL _U(__fp64_pi2)		; yes, return +PI/2
+	brtc .L_szero				; x == +1 --> return +0
+	rcall .L_pi2				; x == -1 --> return +PI
 	adiw rA6, 0x10				; modify exponent to become 0x400
 	ret
 
-	; 0.5 < fabs(x) < 1.0
-	; approximate asin(x) with MiniMax(1-x)*sqrt(2*x)
-20: inc r0						; set bit 0 --> |x| > 0.5
+1:
+	;; |x| < 1.0
+	;; Compare 0.5 <=> |x|.
+	XCALL _U(__fp64_cpc0A5)
+	ldi	ZL, lo8(0x3fe0)  $  cpc ZL, rA6
+						 $  cpc ZH, rA7 ; ZH is already 0x3f
+	adc XH, r1					; XH.0 := |x| > 0.5
+	sts __sinFlags, XH
+	bld	rA7, 7					; Restore sign of x, only needed for -0.0
 
-10: ; fabs(x) < 0.5 approximate asin(x) with MiniMax
-	; bld r0, 7
-	sts __sinFlags, r0			; save sign and function
+	XCALL _U(__fp64_splitA)
+	breq .L_x_zero				; x == 0 --> result of asin(0) / acos(0)
+
 	clt
 
 	XCALL _U(__fp64_pushCB)		; as all registers may be used, save them
 	push YH
 	push YL
-	push XH
-	push XL
 
 	XCALL _U(__fp64_movBAx)		; B = A = x1
 
@@ -161,10 +156,10 @@ ENTRY_DOUBLE asin asinl
 	adiw rAE0, 1				; x2 = 2*x1*x1
 	rjmp 12f
 
+21:
 	; x1 > 0.5
 	; compute x2 = 1 - x
 	; and put sqrt(2*x2) as factor on the stack
-21:
 	mov rA7, r1					; A = 1.0
 	ldi rA6, 0x80
 	mov rA5, r1
@@ -254,9 +249,7 @@ ENTRY_DOUBLE asin asinl
 	subi rA7, 0x80
 
 19:
-	pop XL						; restore all used registers
-	pop XH
-	pop YL
+	pop YL						; restore all used registers
 	pop YH
 	XCALL _U(__fp64_popBC)
 
