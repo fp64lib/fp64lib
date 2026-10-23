@@ -548,7 +548,7 @@ ENTRY   fp64_strtod
 	breq .L_RetInf			; exponent = 0x7ff --> overflow
 
 .L_ret:	; everything is "normal" now
-	call .L_savePtr			; save last parsed position
+	rcall .L_savePtr		; save last parsed position
 	pop YL					; restore Y
 	pop YH
 	; pack and return number
@@ -556,7 +556,7 @@ ENTRY   fp64_strtod
 
 	; exponent to big, return +/-INF
 .L_RetInf:
-	call .L_savePtr			; save last parsed position and restore sign
+	rcall .L_savePtr		; save last parsed position and restore sign
 	pop YL					; restore Y
 	pop YH
 	XJMP _U(__fp64_inf)		; and return +/- INF
