@@ -535,8 +535,8 @@ ENTRY   fp64_strtod
 	XCALL _U(__fp64_popBC)	; restore saved registers
 
 	; check whether exponent is in range
-	subi rAE0, lo8(-(0x3ff))		; exp += 1023 (exponent base)
-	sbci rAE1, hi8(-(0x3ff))
+	subi rAE0, lo8(-1023)	; exp += 1023 (exponent bias)
+	sbci rAE1, hi8(-1023)
 	adiw rAE0,0
 	; rcall __fp64_saveAB
 	brmi .L_subn			; exponent < 0 --> handle subnormal number / underflow

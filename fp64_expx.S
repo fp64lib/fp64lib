@@ -62,10 +62,10 @@ FUNCTION fp64_exp
 	XJMP	_U(__fp64_nan)
 
 .L_one:
-	XCALL _U(__fp64_zero)
-	ldi rA7, 0x3f				; return 1
-	ldi rA6, 0xf0
-	ret
+	XJMP	_U(__fp64_one)		; return 1
+
+.L_inf:
+	XJMP	_U(__fp64_inf)		; No, case 2 --> return Inf
 
 ENTRY fp64_exp
 ENTRY_DOUBLE exp expl
@@ -83,14 +83,6 @@ ENTRY_DOUBLE exp expl
 	brne .L_tb					; exponent to big --> return +Inf
 	; exponent exactly on boundary
 	; check mantissa?
-	brts 0f
-	rjmp 1f
-
-.L_inf:
-	XJMP	_U(__fp64_inf)		; No, case 2 --> return Inf
-
-0:	; check for negative numbers
-
 
 1:	; x is in valid range
 	XCALL _U(__fp64_pushCB)		; preserve register set

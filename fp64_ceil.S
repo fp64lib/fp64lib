@@ -124,8 +124,8 @@ ENTRY_DOUBLE ceil ceill
 	ldi rA6, 0x80				; create a new leading bit (due to overflow all other bits are 0)
 
 .L_ret:
-	subi rAE0, -0xff			; add base 1023
-	sbci rAE1, -0x04
+	subi rAE0, lo8(-1023)		; add base 1023
+	sbci rAE1, hi8(-1023)
 	XJMP _U(__fp64_pretA)		; pack and return x
 
 ENDFUNC
