@@ -35,8 +35,36 @@
  */
 
 FUNCTION fp64_tanh
+
+.L_NaN:
+	brne .L_ret					; x is definitely a NaN --> return x
+	XCALL _U(__fp64_cpc0A5)		; check for +/-INF
+	brne .L_ret					; no, it's a NaN --> return NaN
+
+.L_ret1:
+	; return +/-1 for |x| >= 20, including INF
+	XCALL _U(__fp64_one)		; get +1.0
+.L_ret:
+	bld rA7,7 					; adjust to sign of x
+	ret
+
 ENTRY fp64_tanh
 ENTRY_DOUBLE tanh tanhl
+	bst rA7, 7					; preserve sign
+	andi rA7, 0x7f
+	cpi rA7, hi8(0x7ff0)		; check for NaN/Inf
+	brlo .L_noNaN
+	cpi rA6, lo8(0x7ff0)
+	brsh .L_NaN
+
+.L_noNaN:
+	cpi rA7, hi8(0x4034)		; check, if abs(x) >= 20 (0x4034)
+	brlo 0f
+	cpi rA6, lo8(0x4034)
+	breq .L_ret1				; yes, return +/-1
+
+0:	; no, we have to calculate tanh(x) = sinh(x) / cosh(x)
+	bld rA7, 7					; restore sign	
 	XCALL _U(__fp64_pushB)		; preserve registers
 	XCALL _U(__fp64_pushA)		; save x
 
