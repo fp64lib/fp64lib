@@ -33,8 +33,8 @@
 #include "fp64def.h"
 
 /* 64 bit *********************************************************************/
-/* long long __fp64_fixsddi( float64_t A );
-   long long fp64_to_int64( float64_t A );
+/* long long __fixdfdi( float64_t A );
+   int64_t fp64_to_int64( float64_t A );
 	The fp64_to_int64() function converts A to the signed integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
 	Besides a normal 64-bits value, the carry is returned as extra error flag.
@@ -59,8 +59,8 @@ ENTRY fp64_to_int64
 	ldi rBE0, 63
 	XJMP _U(__fp64_fixxdfxi)
 
-/* unsigned long long __fp64_fixunssddi( float64_t A );
-   unsigned long long fp64_to_uint64( float64_t A );
+/* unsigned long long __fixunsdfdi( float64_t A );
+   uint64_t fp64_to_uint64( float64_t A );
 	The fp64_to_uint64() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
 	Negative input is permissable (like GCC/x86).
@@ -87,8 +87,8 @@ ENTRY fp64_to_uint64
 	XJMP _U(__fp64_fixxdfxi)
 
 /* 16 bit *********************************************************************/
-/* int __fp64_fixsdsi( float64_t A );
-   int fp64_to_int16( float64_t A );
+/* int __fixdfsi( float64_t A );
+   int16_t fp64_to_int16( float64_t A );
 	The fp64_to_int16() function converts A to the signed integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
 	Besides a normal 16-bits value, the carry is returned as extra error flag.
@@ -106,13 +106,14 @@ ENTRY fp64_to_uint64
 	  5 | |A|<2^15	| 0 | (int) A
  */
 
+GCC_ENTRY __fixdfsi
 ENTRY fp64_to_int16
 	push rBE0
 	ldi rBE0, 15
 	XJMP _U(__fp64_fixxdfxi)
 
-/* unsigned int __fp64_fixunssdsi( float64_t A );
-   unsigned int fp64_to_uint16( float64_t A );
+/* unsigned int __fixunsdfsi( float64_t A );
+   uint16_t fp64_to_uint16( float64_t A );
 	The fp64_to_uint16() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
 	Negative input is permissable (like GCC/x86).
@@ -132,6 +133,7 @@ ENTRY fp64_to_int16
 	  6 | -2^16<A<0 | 0 | -((unsigned int) (-A)
  */
 
+GCC_ENTRY __fixunsdfsi
 ENTRY fp64_to_uint16
 	push rBE0
 	ldi rBE0, 16
@@ -139,7 +141,7 @@ ENTRY fp64_to_uint16
 
 /*	8 bit *********************************************************************/
 /* char __fp64_fixsdsc( float64_t A );
-   char fp64_to_int8( float64_t A );
+   int8_t fp64_to_int8( float64_t A );
 	The fp64_to_int8() function converts A to the signed integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
 	Besides a normal 8-bits value, the carry is returned as extra error flag.
@@ -164,7 +166,7 @@ ENTRY fp64_to_int8
 	XJMP _U(__fp64_fixxdfxi)
 
 /* unsigned char __fp64_fixunssdsc( float64_t A );
-   unsigned char fp64_to_uint8( float64_t A );
+   uint8_t fp64_to_uint8( float64_t A );
 	The fp64_to_uint8() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
 	Negative input is permissable (like GCC/x86).
@@ -193,7 +195,7 @@ ENTRY fp64_to_uint8
 /* 32 bit *********************************************************************/
 /* long __fp64_fixsdli( float64_t A );
    long fp64_float64_to_long( float64_t A );
-   long fp64_to_int32( float64_t A );
+   int32_t fp64_to_int32( float64_t A );
 	The fp64_to_int32() function converts A to the signed integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
 	Besides a normal 32-bits value, the carry is returned as extra error flag.
@@ -214,13 +216,12 @@ ENTRY fp64_to_uint8
 ENTRY __fp64_fixsdli
 ENTRY fp64_to_int32
 ENTRY fp64_float64_to_long
-GCC_ENTRY __fixdfsi
 	push rBE0
 	ldi rBE0, 31
 	XJMP _U(__fp64_fixxdfxi)
 
 /* unsigned long __fp64_fixunssdli( float64_t A );
-   unsigned long fp64_to_uint32( float64_t A );
+   uint32_t fp64_to_uint32( float64_t A );
 	The fp64_to_uint32() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
 	Negative input is permissable (like GCC/x86).
@@ -242,7 +243,6 @@ GCC_ENTRY __fixdfsi
 
 ENTRY __fp64_fixunssdli
 ENTRY fp64_to_uint32
-GCC_ENTRY __fixunsdfsi
 	push rBE0
 	ldi rBE0, 32
 

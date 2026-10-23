@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 /* float64_t __fp64disd (long long x)
-   float64_t int64_to_float64( long long x );
+   float64_t int64_to_float64( int64_t x );
    Convert a signed 64-bit integer (long long) to float64_t.
    Overflow cannot occur, but loss of precision, if abs(x) > 2^53
 
@@ -54,7 +54,7 @@ GCC_ENTRY __floatdidf
 1:	XJMP	_U(__fp64_di2sd)	; do conversion
 
 /* float64_t __fp64unsdisd ( unsigned long long x );
-   float64_t fp64_uint64_to_float64( unsigned long long x );
+   float64_t fp64_uint64_to_float64( uint64_t x );
    Convert an unsigned 64-bit integer (unsigned long long) to float64_t.
    Overflow cannot occur, but loss of precision, if abs(x) > 2^53
 
