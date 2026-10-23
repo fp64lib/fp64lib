@@ -1,4 +1,4 @@
-/* Copyright (c) 2017-2020  Uwe Bissinger
+/* Copyright (c) 2017-2026  Uwe Bissinger
    Based on 32bit floating point arithmetic routines which are:
    Copyright (c) 2002  Michael Stumpf  <mistumpf@de.pepperl-fuchs.com>
    Copyright (c) 2006  Dmitry Xmelkov
@@ -32,9 +32,9 @@
 #include "fp64asm.h"
 #include "fp64def.h"
 
-/*  __fp64_one() returns 1.0
-	__fp64_zero() returns 0.0
-	__fp64_szero() returns +/-0.0, based on sign bit in T register.
+/*  __fp64_one()   returns +1.0,   T flag left untouched
+	__fp64_zero()  returns +0.0,   T flag cleared
+	__fp64_szero() returns +/-0.0, based on sign bit in T flag, T flag left untouched
  */
 
 FUNCTION __fp64_zero
