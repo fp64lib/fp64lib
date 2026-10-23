@@ -76,11 +76,9 @@ ENTRY_DOUBLE sin sinl
 	clt					; further calculations on fabs(x)
 	andi rA7, 0x7f
 
-	XCALL _U(__fp64_pushCB)	; as all registers may be used, save them
+	XCALL _U(__fp64_pushCB)	; save the used callee-saved regs
 	push YH
 	push YL
-	push XH
-	push XL
 
 	; reduce argument to range 0 - pi/2
 	; use argument reduction with extended precision
@@ -137,9 +135,7 @@ ENTRY_DOUBLE sin sinl
 	subi rA7, 0x80			; reverse it
 	bst rA7,7				; and set it accordingly
 
-	pop XL					; restore all used registers
-	pop XH
-	pop YL
+	pop YL					; restore the used callee-saved regs
 	pop YH
 	XCALL _U(__fp64_popBC)	; restore register set
 
