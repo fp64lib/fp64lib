@@ -87,18 +87,18 @@ FUNCTION fp64_asin
 */
 ENTRY fp64_acos
 ENTRY_DOUBLE acos acosl
-	ldi XH, 1 << 1				; XH.1 = 1: do acos.
-	rjmp .L_common
+	inc r1
+	inc r1						; set bit 1 of r1 as flag for acos
 
 /*	float64_t fp64_asin(float64_4 phi )
 	returns the arcus sine of phi (inverse function to fp64_sin(x)
 */
 ENTRY fp64_asin
 ENTRY_DOUBLE asin asinl
-	ldi XH, 0 << 1				; XH.1 = 0: do asin.
-.L_common:
 	bst rA7, 7			 		; T := sign (x)
+	mov XH, r1					; Either r1 = 0 (default) or r1 = 0x02 (acos)
 	bld XH, 7					; Transfer sign to the flags
+	clr r1						; Restore zero_reg
 
 	;; As it turns out, working on the packed IEEE format for
 	;; a while is more convenient than unpacking too early.
@@ -123,10 +123,9 @@ ENTRY_DOUBLE asin asinl
 1:
 	;; |x| < 1.0
 	;; Compare 0.5 <=> |x|.
-	sbiw ZL, 0x10				; Z := 0x3fe0 = hi16(0.5)
 	XCALL _U(__fp64_cpc0A5)
-	cpc ZL, rA6
-	cpc ZH, rA7
+	ldi	ZL, lo8(0x3fe0)  $  cpc ZL, rA6
+						 $  cpc ZH, rA7 ; ZH is already 0x3f
 	adc XH, r1					; XH.0 := |x| > 0.5
 	sts __sinFlags, XH
 	bld	rA7, 7					; Restore sign of x, only needed for -0.0
@@ -136,7 +135,7 @@ ENTRY_DOUBLE asin asinl
 
 	clt
 
-	XCALL _U(__fp64_pushCB)		; save the used callee-saved registers
+	XCALL _U(__fp64_pushCB)		; as all registers may be used, save them
 	push YH
 	push YL
 
@@ -250,7 +249,7 @@ ENTRY_DOUBLE asin asinl
 	subi rA7, 0x80
 
 19:
-	pop YL						; restore the used callee-saved registers
+	pop YL						; restore all used registers
 	pop YH
 	XCALL _U(__fp64_popBC)
 
