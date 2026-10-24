@@ -127,8 +127,8 @@ ENTRY_DOUBLE log logl
 
 	bst rA7, 7					; sign is sign of (x-1), as (x+1) is always > 0
 	tst rA6						; is (x-1) == 0?
-	breq 23f					; yes, (x-1) / (x-1) is also 0 (__fp64_divsd3_pse does not handle 0)
-	XCALL _U(__fp64_divsd3_pse)	; y = (x-1) / (x+1)
+	breq 23f					; yes, (x-1) / (x-1) is also 0 (__fp64_divdf3_pse does not handle 0)
+	XCALL _U(__fp64_divdf3_pse)	; y = (x-1) / (x+1)
 	bld rA7, 7
 	; rcall __fp64_saveAB
 
@@ -155,7 +155,7 @@ ENTRY_DOUBLE log logl
 	XCALL _U(__fp64_ldb_log2)	; B = log(2)
 	bld rA7, 7
 	; rcall __fp64_saveAB
-	XCALL _U(__fp64_mulsd3_pse)
+	XCALL _U(__fp64_muldf3_pse)
 
 	pop rBE0					; restore B = log(y)
 	pop rBE1

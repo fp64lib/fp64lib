@@ -179,7 +179,7 @@ ENTRY_DOUBLE atan2 atan2l
 							; r0 = 0x00 --> add nothing
 							; r0 = 0x80 --> add PI
 							; r0 = 0x81 --> add PI/2
-	XCALL _U(__fp64_divsd3_pse)
+	XCALL _U(__fp64_divdf3_pse)
 	brcs .L_atan
 	XCALL _U(__fp64_rpretA)
 .L_atan:

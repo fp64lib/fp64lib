@@ -30,7 +30,7 @@
    POSSIBILITY OF SUCH DAMAGE. */
 
 /*
-	float64_t __fp64_divsd3( float64_t A, float64_t B )
+	float64_t __fp64_divdf3( float64_t A, float64_t B )
 	Divides two 64 bit floating point numbers
 	and rounds result to a 64bit floating point number
 
@@ -44,7 +44,7 @@
 #include "fp64asm.h"
 #include "fp64def.h"
 
-FUNCTION __fp64_divsd3x
+FUNCTION __fp64_divdf3x
 
 	; do special case handling
 	; A or B is NaN and/or Inf or A is 0
@@ -91,7 +91,7 @@ FUNCTION __fp64_divsd3x
 
 ENTRY fp64_div
 GCC_ENTRY __divdf3
-ENTRY	__fp64_divsd3
+ENTRY	__fp64_divdf3
 	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)
 	brcs	0b					; handle special cases NaN / Inf
@@ -99,7 +99,7 @@ ENTRY	__fp64_divsd3
 	XCALL	_U(__fp64_pscB)
 	breq	.L_inf				; finite (!=0) / 0.0 --> Inf
 
-	XCALL _U(__fp64_divsd3_pse)
+	XCALL _U(__fp64_divdf3_pse)
 
 	XCALL _U(__fp64_popB)
 	brcs 99f					; underflow/overflow --> return already packed result
@@ -107,7 +107,7 @@ ENTRY	__fp64_divsd3
 99: ret
 
 /*
-	float64_t_intern __fp64_divsd3( float64_t_intern A, float64_t_intern B )
+	float64_t_intern __fp64_divdf3( float64_t_intern A, float64_t_intern B )
 	Internal routine to divide two 64 bit floating point numbers
 	and rounds result to a 64bit floating point number
 	Does not handle special cases NaN, +Inf, -Inf, +/-0 (neither for A or B)
@@ -128,7 +128,7 @@ ENTRY	__fp64_divsd3
 */
 
 
-ENTRY	__fp64_divsd3_pse	; post split entry
+ENTRY	__fp64_divdf3_pse	; post split entry
 	; exp(result) = exp(A) - exp(B)
 	sub rAE0, rBE0
 	sbc rAE1, rBE1

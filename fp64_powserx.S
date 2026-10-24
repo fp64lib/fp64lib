@@ -94,7 +94,7 @@ ENTRY __fp64_powser
 	push rR7
 	push rR8
 	push rZero
-	XCALL	_U(__fp64_mulsd3_pse)	; create x*Cn (1st run: x*C3, 2nd: (x*C3+C2)*x, 3rd: ((x*C3+C2)*x+C1)*x )
+	XCALL	_U(__fp64_muldf3_pse)	; create x*Cn (1st run: x*C3, 2nd: (x*C3+C2)*x, 3rd: ((x*C3+C2)*x+C1)*x )
 	pop rZero
 	pop rR8				; restore used registers and return
 	pop rR7

@@ -124,7 +124,7 @@ GCC_ENTRY __subdf3
 	*/
 ENTRY fp64_add
 GCC_ENTRY __adddf3
-ENTRY __fp64_addsd3x
+ENTRY __fp64_adddf3x
 	clr r0						; set mode to addition
 1:	XCALL _U(__fp64_pushB)
 	XCALL _U(__fp64_split3)		; split A and B into parts for exponent and mantissa

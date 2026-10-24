@@ -43,7 +43,7 @@ ENTRY fp64_square
 	push rBE0
 
 	XCALL _U(__fp64_movBA)		; B = A = x
-	XCALL	_U(__fp64_mulsd3x)	; A * B = x * x
+	XCALL	_U(__fp64_muldf3x)	; A * B = x * x
 
 	pop rBE0
 	pop rBE1
