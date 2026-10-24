@@ -74,7 +74,16 @@ ENTRY __fp64_powser
 
 	rcall	.Load10				; load first factor into B (in our example C3)
 
-	rjmp 1f
+	sbrs rB7, 0					; monic?
+	rjmp 1f						; no: vanilla horner expansion
+
+	;; This is a monic polynomial:  Instead of
+	;;     y = C0 + x * (C1 + x * (C2 + x * C3))
+	;; we calculate
+	;;     y = C0 + x * (C1 + x * (C2 + x))
+	;; x is already in A.
+	push rcntr					; prepare to enter horner after the first mul
+	rjmp .L_monic
 
 .Loop:
 	XCALL _U(__fp64_movBC)		; restore x (was overwritten by loaded constants Cn)
@@ -105,6 +114,7 @@ ENTRY __fp64_powser
 	brcs .L_ret					; C is set on overflow and result is already packed
 
 	rcall .Load10
+.L_monic:
 	mov r0, rB7					; set sign for operation A+B or A-B = sign(A)^sign(B)
 	eor r0, rA7
 	bst r0,7
