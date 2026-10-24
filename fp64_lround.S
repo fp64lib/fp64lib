@@ -85,7 +85,6 @@ FUNCTION fp64_lround
 	X_movw rA4, rA6
 	inc rA4						; create 1L
 	rjmp .L_sign
-	ret
 
 ENTRY	fp64_lround
 ENTRY_DOUBLE lround lroundl
@@ -129,13 +128,7 @@ ENTRY_DOUBLE lround lroundl
   ; restore the sign and return
 .L_sign:
 	brtc	.L_ret
-	com	rA7
-	com	rA6
-	com	rA5
-	neg	rA4
-	sbci rA5, -1
-	sbci rA6, -1
-	sbci rA7, -1
+	XJMP _U(__negsi2)			; libgcc: R22[4] = -R22[4]
 .L_ret:
 	ret
 
