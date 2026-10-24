@@ -51,7 +51,7 @@
 
 .require_mul
 
-FUNCTION __fp64_mulsd3x
+FUNCTION __fp64_muldf3x
 
 	; A or B is NaN and/or Inf
 	; do special case handling
@@ -93,7 +93,7 @@ FUNCTION __fp64_mulsd3x
 	XJMP	_U(__fp64_szero)
 
 	/*
-	fp64 __fp64_mulsd3x( fp64 A, fp64 B )
+	fp64 __fp64_muldf3x( fp64 A, fp64 B )
 	fp64 fp64_mul( fp64 A, fp64 B )
 	Multiplies two 64 bit floating point numbers
 	and rounds result to a 64bit floating point number
@@ -103,7 +103,7 @@ FUNCTION __fp64_mulsd3x
 	*/
 ENTRY fp64_mul
 GCC_ENTRY __muldf3
-ENTRY   __fp64_mulsd3x
+ENTRY   __fp64_muldf3x
 	XCALL _U(__fp64_pushB)
 	XCALL	_U(__fp64_split3)	; split A and B into parts for exponent and mantissa
 	brcs	0b					; A or B is NaN and/or InF --> manage special result
@@ -114,7 +114,7 @@ ENTRY   __fp64_mulsd3x
 	push rR8
 	push rZero
 
-	rcall __fp64_mulsd3_pse0
+	rcall __fp64_muldf3_pse0
 
 	pop rZero
 	pop rR8			; restore used registers
@@ -129,7 +129,7 @@ ENTRY   __fp64_mulsd3x
 3:	ret				; overflow, return already packed result +/-Inf
 
 	/*
-	fp64 __fp64mulsd3_pse( fp64_splitted_t A, fp64_splitted_t B )
+	fp64 __fp64muldf3_pse( fp64_splitted_t A, fp64_splitted_t B )
 	Multiplies two 64 bit floating point numbers  that are splitted
 	and rounds result to a 64bit floating point integer
 	A and B must not be NaN or +/-Inf --> A and B are both finite
@@ -137,10 +137,10 @@ ENTRY   __fp64_mulsd3x
 	Return:
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A * B
 	*/
-ENTRY   __fp64_mulsd3_pse			; post split entry
+ENTRY   __fp64_muldf3_pse			; post split entry
 	; check zero (subnormal have exp == 1)
 	XCALL _U(__fp64_pscA)
-ENTRY   __fp64_mulsd3_pse0			; post split entry for Z flag already set
+ENTRY   __fp64_muldf3_pse0			; post split entry for Z flag already set
 	; rcall __fp64_saveAB
 	breq	2b				; A = 0 --> A*B = 0
 	XCALL _U(__fp64_pscB)

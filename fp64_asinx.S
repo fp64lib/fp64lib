@@ -152,7 +152,7 @@ ENTRY_DOUBLE asin asinl
 	push rAE1
 	push rAE0
 
-	XCALL _U(__fp64_mulsd3_pse)
+	XCALL _U(__fp64_muldf3_pse)
 	adiw rAE0, 1				; x2 = 2*x1*x1
 	rjmp 12f
 
@@ -221,13 +221,13 @@ ENTRY_DOUBLE asin asinl
 	pop rBE1
 	XCALL _U(__fp64_popB)
 
-	XCALL _U(__fp64_divsd3_pse) ; res = res / x3
+	XCALL _U(__fp64_divdf3_pse) ; res = res / x3
 
 	pop rBE0					; retrieve either x1 = fabs(x) or x1 = sqrt(2*fabs(x))
 	pop rBE1
 	XCALL _U(__fp64_popB)
 
-	XCALL _U(__fp64_mulsd3_pse) ; res = res / x3 * x1 or res = res / x3 * sqrt(2*fabs(x))
+	XCALL _U(__fp64_muldf3_pse) ; res = res / x3 * x1 or res = res / x3 * sqrt(2*fabs(x))
 
 	lds r0, __sinFlags			; retrieve sign(x)
 	sbrc r0, 1					; acos?

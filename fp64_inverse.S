@@ -44,7 +44,7 @@ ENTRY fp64_inverse
 
 	XCALL _U(__fp64_one)		; set A = +1.0 = 0x3ff000..00
 
-	XCALL	_U(__fp64_divsd3)	; calculate 1.0 / x
+	XCALL	_U(__fp64_divdf3)	; calculate 1.0 / x
 
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC

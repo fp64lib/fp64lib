@@ -67,7 +67,7 @@ ENTRY __fp64_powsodd
 	X_movw  rBE0, YL
 	;rcall __fp64_saveAB
 	clt							; clear sign as x^2 is always positive
-	XCALL	_U(__fp64_mulsd3_pse)	; calculate x^2
+	XCALL	_U(__fp64_muldf3_pse)	; calculate x^2
 
 	pop	XL						; retrieve pointer to table
 	pop	XH
@@ -82,7 +82,7 @@ ENTRY __fp64_powsodd
 	bst r0,7
 
 	; rcall __fp64_saveABC
-	XJMP	_U(__fp64_mulsd3_pse)	; multiply polynom by x --> polynom is calculated with odd powers of x
+	XJMP	_U(__fp64_muldf3_pse)	; multiply polynom by x --> polynom is calculated with odd powers of x
 
 #ifdef CHECK_POWSER
 .L_nf:

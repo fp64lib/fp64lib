@@ -120,7 +120,7 @@ ENTRY_DOUBLE atan atanl
 	ldi rAE1, 0x03
 	ldi rAE0, 0xff
 	clt
-	XCALL _U(__fp64_divsd3_pse) ; 1/|x|
+	XCALL _U(__fp64_divdf3_pse) ; 1/|x|
 	inc r1						; flag = true
 
 10: ; here: A = |x| or 1/|x|
@@ -134,7 +134,7 @@ ENTRY_DOUBLE atan atanl
 	push rAE1
 	push rAE0
 
-	XCALL _U(__fp64_mulsd3_pse) ; x2 = x^2
+	XCALL _U(__fp64_muldf3_pse) ; x2 = x^2
 
 	XCALL _U(__fp64_pushA)		; save x2 = x^2
 	push rAE1
@@ -162,13 +162,13 @@ ENTRY_DOUBLE atan atanl
 	pop rBE1
 	XCALL _U(__fp64_popB)
 
-	XCALL _U(__fp64_divsd3_pse) ; res = z / y
+	XCALL _U(__fp64_divdf3_pse) ; res = z / y
 
 	pop rBE0					; retrieve res = |x| or 1/|x|
 	pop rBE1
 	XCALL _U(__fp64_popB)
 
-	XCALL _U(__fp64_mulsd3_pse) ; res = z / y * res
+	XCALL _U(__fp64_muldf3_pse) ; res = z / y * res
 
 	pop r0						; retrieve flag
 	tst r0
