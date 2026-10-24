@@ -86,8 +86,8 @@ ENTRY   fp64_cut_noninteger_fraction
 	; now x is in range 1 <= |x| < 2^52
 	; clear out the fractional bits
 
-	ldi rA7, 0xff				; inital mask
-	ldi rAE1, 55				; counter = (52 digits + 3 saveguard digits) - exp2(x)
+	ldi rA7, 0xff				; initial mask
+	ldi rAE1, 55				; counter = (52 digits + 3 safeguard digits) - exp2(x)
 	sub rAE1, rAE0				; as |x| < 2^52, this is always > 1
 	andi rAE1 ,0x07
 0:	breq 1f
@@ -112,7 +112,7 @@ ENTRY   fp64_cut_noninteger_fraction
 	sbci ZH, hi8(-(pm(.L_mask)))
 	XIJMP
 #else /* PC_SIZE == 3 */
-	;; Mimick an indirect jump since we must not change EIND.
+	;; Mimic an indirect jump since we must not change EIND.
 	lsr ZL  $  subi ZL, lo8(-(pm(.L_mask)))  $  push ZL
 	clr ZL  $  sbci ZL, hi8(-(pm(.L_mask)))  $  push ZL
 	clr ZL  $  sbci ZL, hh8(-(pm(.L_mask)))  $  push ZL

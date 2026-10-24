@@ -39,7 +39,7 @@
    Input:
      rA7.rA6.rA5.rA4					- an 'x' arg as unsigned 32-bit long
    Output:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754-64 bit format
+     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754 64-bit format
 										  no overflow will occur, as 32bit long will
 										  always fit into the 53-bit significand
  */
@@ -60,7 +60,7 @@ GCC_ENTRY __floatunsidf
    Input:
      rA7.rA6.rA5.rA4					- an 'x' arg as signed 32-bit long
    Output:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754-64 bit format
+     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754 64-bit format
 */
 ENTRY fp64_int32_to_float64
 ENTRY fp64_long_to_float64

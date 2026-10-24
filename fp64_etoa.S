@@ -40,10 +40,10 @@
 			rB6:		maximum number of digits in significand
 						NOTE: this function supports conversion of up to 17 digits
 							  however, accuracy of IEEE754 is only 52 bit which is 15-16 decimal digits
-			rB4:		flag to store significand and exponent seperately
+			rB4:		flag to store significand and exponent separately
 			rB2:		int16_t *Exp10 // if != NULL, store exponent base 10 here
 	output: rA7..rA6	pointer to result, '\0' terminated C-string
-	modfies: rAx
+	modifies: rAx
 
 	WARNING:	function returns a pointer to a static temporary scratch area which might be used
 				also for other functions. The returned string might become invalid/scrambled
@@ -139,9 +139,9 @@ ENTRY	fp64_etoa
 	; assumption: exponent is already normalized and contains abs(exponent)
 	; highest exponent is 385, which fits into 9 bits = 2^9 = 512
 	; x/3 = (x*512/3)/512 = x*171 >> 9
-	; x is a 16 bit value, x = rAE1 << 8 + rAE0
+	; x is a 16-bit value, x = rAE1 << 8 + rAE0
 	; and rAE1 is either 0 or 1 (as exponent is 9 bits at max)
-	; --> rAE1*171 is always an 8 bit result (as it is 0 or 171)
+	; --> rAE1*171 is always an 8-bit result (as it is 0 or 171)
 	; x/3 = ((rAE1 << 8) * 171 >> 9) + (rAE0 * 171 >> 9)
 	; due to >>9, the lowbyte of rAE0*171 is irrelevant
 	;	  = lowbyte(rAE1 * 171) >> 1 + highbyte(rAE0*171) >> 1

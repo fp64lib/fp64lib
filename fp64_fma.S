@@ -42,14 +42,14 @@
 
 FUNCTION fp64_fma
 ENTRY fp64_fma
-	XCALL	_U(fp64_mul)
+	XCALL _U(fp64_mul)
 	XCALL _U(__fp64_pushB)		; save used registers
 
 	; with gcc, only up to 16 bytes of parameters are passed via registers
 	; as 3 float64_t as parameters exceed that limit, the last parameter is
-	; passed via the stack (pushed by the caller), pointed to by the frame pointer Y
+	; passed on stack (pushed by the caller), pointed to by the frame pointer Y
 	; So we have to access C via the stack
-	sbiw YL, 7					; get to start of paramter
+	sbiw YL, 7					; get to start of parameter
 	ld rB0, Y+					; get parameter from stack
 	ld rB1, Y+
 	ld rB2, Y+

@@ -77,10 +77,10 @@ ENTRY_DOUBLE exp expl
 
 	cpi rAE1, hi8(X2BIG)
 	brlo 1f						; exponent lower --> all ok
-	brne .L_tb					; exponent to big --> return +Inf
+	brne .L_tb					; exponent too big --> return +Inf
 	cpi rAE0, lo8(X2BIG)
 	brlo 1f						; exponent lower --> all ok
-	brne .L_tb					; exponent to big --> return +Inf
+	brne .L_tb					; exponent too big --> return +Inf
 	; exponent exactly on boundary
 	; check mantissa?
 
@@ -95,7 +95,7 @@ ENTRY_DOUBLE exp expl
 	; now we got:
 	; rA7..rA0 rAE1.rAE0	y = fmod(x,ln(2))
 	; rC7..rC4				n
-	push rC4					; save n (only lower 12bits are needed)
+	push rC4					; save n (only lower 12 bits are needed)
 	push rC5
 
 	; now calculate exp(y) via taylor approximation

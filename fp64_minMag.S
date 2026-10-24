@@ -84,7 +84,7 @@ ENTRY fp64_minimumMagnitude
 0:	ret
 
 .L_min:						; jump to fp64_minimum routine
-	; having this seperate allows for more room between jump targets
-	XJMP(_U(__fp64_min_intern))
+	; having this separate allows for more room between jump targets
+	XJMP _U(__fp64_min_intern)
 
 ENDFUNC

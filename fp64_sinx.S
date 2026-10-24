@@ -29,7 +29,7 @@
 #include "fp64asm.h"
 #include "fp64def.h"
 
-/*	float64_t fp64_sin( float64_4 phi )
+/*	float64_t fp64_sin( float64_t phi )
 	returns the sine of phi
 */
 FUNCTION fp64_sin
@@ -47,7 +47,7 @@ FUNCTION fp64_sin
 0:	; handle special case NaN and +/- INF
 	XJMP	_U(__fp64_nan)
 
-/*	float64_t fp64_cos( float64_4 phi )
+/*	float64_t fp64_cos( float64_t phi )
 	returns the cosine of phi
 */
 ENTRY fp64_cos
@@ -59,7 +59,7 @@ ENTRY_DOUBLE cos cosl
 	rjmp .L_common
 
 
-/*	float64_t fp64_sin( float64_4 phi )
+/*	float64_t fp64_sin( float64_t phi )
 	returns the sine of phi
 */
 ENTRY fp64_sin

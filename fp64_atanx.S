@@ -29,8 +29,8 @@
 #include "fp64asm.h"
 #include "fp64def.h"
 
-/*	float64_t fp64_atan(float64_4 phi )
-	returns the arcus tangens of phi (inverse function to fp64_tan(x)
+/*	float64_t fp64_atan( float64_t phi )
+	returns the arcus tangent of phi (inverse function to fp64_tan(x))
 
 	Basic algorithm:
 	fp64_atan (const f7_t *x) {
@@ -84,8 +84,8 @@ FUNCTION fp64_atan
 .L_zero:
 	XJMP _U(__fp64_szero)		; no: return 0.0 for asin
 
-/*	float64_t fp64_atan(float64_4 phi )
-	returns the arcus tangens of phi (inverse function to fp64_tan(x)
+/*	float64_t fp64_atan( float64_t phi )
+	returns the arcus tangens of phi (inverse function to fp64_tan(x))
 */
 ENTRY fp64_atan
 ENTRY_DOUBLE atan atanl

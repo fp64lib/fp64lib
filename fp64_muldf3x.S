@@ -40,10 +40,10 @@
 	34 multiplications, 33*3 = 99 additions
 
    todo:
-	rA0 und rb0 haben nur die top 4 bits gesetzt,
+	rA0 und rb0 haben nur die top 4 Bits gesetzt,
 	d.h. evtl. kann Multiplikation noch weiter gekürzt werden
-	Algorithmus für Runden und Addition müssen fertig gestellt werden,
-	die routinen hier runden nicht
+	Algorithmus für Runden und Addition müssen fertiggestellt werden,
+	die Routinen hier runden nicht.
  */
 
 #include "fp64asm.h"
@@ -95,8 +95,8 @@ FUNCTION __fp64_muldf3x
 	/*
 	fp64 __fp64_muldf3x( fp64 A, fp64 B )
 	fp64 fp64_mul( fp64 A, fp64 B )
-	Multiplies two 64 bit floating point numbers
-	and rounds result to a 64bit floating point number
+	Multiplies two 64-bit floating point numbers
+	and rounds result to a 64-bit floating point number
 
 	Return:
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A * B
@@ -130,17 +130,17 @@ ENTRY   __fp64_muldf3x
 
 	/*
 	fp64 __fp64muldf3_pse( fp64_splitted_t A, fp64_splitted_t B )
-	Multiplies two 64 bit floating point numbers  that are splitted
-	and rounds result to a 64bit floating point integer
-	A and B must not be NaN or +/-Inf --> A and B are both finite
+	Multiplies two 64-bit floating point numbers that are split,
+	and rounds the result to a 64-bit floating point integer.
+	A and B must not be NaN or +/-Inf --> A and B are both finite.
 
 	Return:
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A * B
 	*/
-ENTRY   __fp64_muldf3_pse			; post split entry
+ENTRY   __fp64_muldf3_pse			; post-split entry
 	; check zero (subnormal have exp == 1)
 	XCALL _U(__fp64_pscA)
-ENTRY   __fp64_muldf3_pse0			; post split entry for Z flag already set
+ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	; rcall __fp64_saveAB
 	breq	2b				; A = 0 --> A*B = 0
 	XCALL _U(__fp64_pscB)
@@ -375,8 +375,8 @@ ENTRY   __fp64_muldf3_pse0			; post split entry for Z flag already set
 
 	; temporary result is in rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5
 	; shift mantissa left until topmost bit is set
-	; as multiplication result is only 72bits instead of 104bits
-	; multiplication with subnormal numbers may result into
+	; as multiplication result is only 72 bits instead of 104 bits
+	; multiplication with subnormal numbers may result in
 	; 72 bits of 0 --> no topmost bit
 	; therefore we have to check whether there are some valid bits
 	tst 	rB4		; in normal cases, test on rB4 will be sufficient
@@ -432,7 +432,7 @@ ENTRY   __fp64_muldf3_pse0			; post split entry for Z flag already set
 	sec					; set carry as flag for error and returning of packed result
 	ret
 
-	; underflow, can not even expressed as denormilzed number --> return +/-0
+	; underflow, cannot even be expressed as denormilzed number --> return +/-0
 12: mov rAE1, r1
 	mov rAE0, r1
 	clc

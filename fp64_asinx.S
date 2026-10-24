@@ -29,8 +29,8 @@
 #include "fp64asm.h"
 #include "fp64def.h"
 
-/*	float64_t fp64_asin(float64_4 phi )
-	returns the arcus cos of phi (inverse function to fp64_sin(x)
+/*	float64_t fp64_asin( float64_t phi )
+	returns the arcus cos of phi (inverse function to fp64_sin(x))
 
 	Basic algorithm:
 	fp64_asin( x ) {
@@ -82,16 +82,16 @@ FUNCTION fp64_asin
 .L_pm_pi2:
 	XJMP _U(__fp64_pi2)
 
-/*	float64_t fp64_acos(float64_4 phi )
-	returns the arcus cosine of phi (inverse function to fp64_cos(x)
+/*	float64_t fp64_acos( float64_t phi )
+	returns the arcus cosine of phi (inverse function to fp64_cos(x))
 */
 ENTRY fp64_acos
 ENTRY_DOUBLE acos acosl
 	ldi XH, 1 << 1				; XH.1 = 1: do acos.
 	rjmp .L_common
 
-/*	float64_t fp64_asin(float64_4 phi )
-	returns the arcus sine of phi (inverse function to fp64_sin(x)
+/*	float64_t fp64_asin( float64_t phi )
+	returns the arcus sine of phi (inverse function to fp64_sin(x))
 */
 ENTRY fp64_asin
 ENTRY_DOUBLE asin asinl

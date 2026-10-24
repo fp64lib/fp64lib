@@ -165,7 +165,7 @@ ENTRY __fp64_fmodx_pi2_pse
 	; and return
 
 /* float64_t_intern __fp64_f96_to_f64 (float96_t x)
-	 Convert a number from extended 96 bit representation into
+	 Convert a number from extended 96-bit representation into
 	  unpacked float64_t representation .
 	 Input:  rAx11..rAx0, rAE1.rAE0 	number to convert
 	 Output: rA6..rA0, rAE1.rAE0		converted number
@@ -189,7 +189,7 @@ ENTRY __fp64_f96_to_f64
 
 /* float96_t __fp64_f64_to_f96 (float64_t x)
 	 Convert a number from unpacked float64_t representation into
-	 extended 96 bit  representation.
+	 extended 96-bit  representation.
 	 Input:   rA6..rA0, rAE1.rAE0		number to convert
 	 Output:  rAx11..rAx0, rAE1.rAE0 	converted number
 */
@@ -251,13 +251,13 @@ ENTRY __fp64_f64_to_f96
 	 result will be returned in rAx11..rAx0, rAE1.rAE0
 	 rC7.rC6.rC5.rC4 are modified and contain the lower 4 bytes of n
  */
-ENTRY	__fp64_fmodx
 
 #define Cnt0	XL
 #define Cnt1	XH
 #define Cnt2	YL
 #define Cnt3	YH
 
+ENTRY	__fp64_fmodx
 	clr r0
 	inc r0		; r0 will contain 1 to aid +1 / -1 operations
 
@@ -284,11 +284,11 @@ ENTRY	__fp64_fmodx
 	sub rAE0, rBE0	; exponent(A) - exponent(B)
 	sbc rAE1, rBE1
 	tst rAE1
-	brne .L_sz		; A > 2^256*B --> fmod(A,B) can not exactly be determined , return 0
+	brne .L_sz		; A > 2^256*B --> fmod(A,B) can not exactly be determined, return 0
 	cpi rAE0, 96
-	brsh .L_sz		; A > 2^96*B --> fmod(A,B)  can not exactly be determined , return 0
+	brsh .L_sz		; A > 2^96*B --> fmod(A,B)  can not exactly be determined, return 0
 
-	push Cnt0		; we ned these for the counter
+	push Cnt0		; we need these for the counter
 	push Cnt1
 	push Cnt2
 	push Cnt3
@@ -448,7 +448,7 @@ ENTRY	__fp64_fmodx
 
 /* float96_t_intern __fp64_load_xln2();
 	 load ln2 with extended precision
-	 Output: rBx11..rB0, rBE1.rBE0	ln2 in internal 96 bit format
+	 Output: rBx11..rB0, rBE1.rBE0	ln2 in internal 96-bit format
 */
 ENTRY __fp64_load_xln2
 	push ZL				; load b with ln2
@@ -458,7 +458,7 @@ ENTRY __fp64_load_xln2
 
 /* float96_t_intern __fp64_load_xpio2();
 	 load pi/2 with extended precision
-	 Output: rBx11..rB0, rBE1.rBE0	PI/2 in internal 96 bit format
+	 Output: rBx11..rB0, rBE1.rBE0	PI/2 in internal 96-bit format
 */
 ENTRY __fp64_load_xpio2
 	push ZL				; load b with PI/2
@@ -468,7 +468,7 @@ ENTRY __fp64_load_xpio2
 /* float96_t_intern __fp64_load_xconst();
 	 load extended precision constant out of flash space in rBX11..
 	 Input:  ZH.ZL Pointer to constant in progmem
-	 Output: rBx11..rB0, rBE1.rBE0	loaded constant in internal 96 bit format
+	 Output: rBx11..rB0, rBE1.rBE0	loaded constant in internal 96-bit format
 */
 ENTRY __fp64_load_xconst
 	LPMX rBx11, Z+

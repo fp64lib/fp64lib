@@ -88,7 +88,7 @@ ENTRY_DOUBLE ceil ceill
 	; now x is in range 1 <= |x| < 2^52
 	; clear out the fractional bits
 
-	ldi rAE1, 55				; counter = (52 digits + 3 saveguard digits) - exp2(x)
+	ldi rAE1, 55				; counter = (52 digits + 3 safeguard digits) - exp2(x)
 	sub rAE1, rAE0				; as |x| < 2^52, this is always > 1
 	push rAE1
 	clr r0						; save flag for fraction

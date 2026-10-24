@@ -29,8 +29,8 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* <non_standart> __fp64addsf3x (float_64 A, float_64 B);
-     Internal function to add 64-bit float point numbers.
+/* <non_standard> __fp64addsf3x (float64_t A, float64_t B);
+     Internal function to add 64-bit floating point numbers.
 
    Input:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0.rAE  - arg. A
@@ -61,9 +61,9 @@ FUNCTION __fp64addsf3x
 	; 7	  |	any  |	0	 |	any  | any  | any ok
 
 0:	brne	.L_nan				; as NaN has priority, result will be NaN (cases 1&2)
-	; from  now on, neither A nor B are NaN
+	; from now on, neither A nor B are NaN
 	; so one or both are +Inf/-Inf
-	; check wether both are Inf
+	; check whether both are Inf
 	XCALL	_U(__fp64_pscA)
 	;call __fp64_saveA
 
@@ -101,8 +101,8 @@ FUNCTION __fp64addsf3x
 
 	/*
 	float64_t fp64_sub( float64_t A, float64_t B )
-	Subtracts two 64 bit floating point numbers
-	and rounds result to a 64bit floating point number
+	Subtracts two 64-bit floating point numbers
+	and rounds result to a 64-bit floating point number
 
 	Return:
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A - B
@@ -116,8 +116,8 @@ GCC_ENTRY __subdf3
 
 	/*
 	float64_t fp64_add( float64_t A, float64_t B )
-	Adds two 64 bit floating point numbers
-	and rounds result to a 64bit floating point number
+	Adds two 64-bit floating point numbers
+	and rounds result to a 64-bit floating point number
 
 	Return:
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A + B
@@ -160,7 +160,7 @@ ENTRY __fp64_adddf3x
 
 	/*
 	float64_t_intern __fp64_add_pse( float64_t_intern A, float64_t_intern B )
-	Adds two 64 bit floating point numbers, both numbers have to be finite,
+	Adds two 64-bit floating point numbers, both numbers have to be finite,
 	no special case handling is done except handling subnormal numbers!
 	Input:
 		rA6.rA5.rA4.rA3.rA2.rA1.rA0		significand of A
@@ -311,7 +311,7 @@ __fp64_add_pse_r0:
 
 .L_add:
 	XCALL _U(__fp64_addAB)		; add B to A
-	brcc	.L_ret				; no overflow occured, so A is already the final result, including subnormals
+	brcc	.L_ret				; no overflow occurred, so A is already the final result, including subnormals
 	ror  rA6
 	XCALL _U(__fp64_rorA5) 		; overflow --> shift mantissa of result with 1st bit set (could be discarded)
 

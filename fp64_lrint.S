@@ -134,7 +134,7 @@ ENTRY_DOUBLE lrint lrintl
 	ror rA4
 	ror rA3
 	ror r0						; save dropped out bit of fraction
-	brcc 2f						; about to loose infomation that there is a fraction != 0 ?
+	brcc 2f						; about to loose information that there is a fraction != 0 ?
 	sbrs r0, 0					; is the lowest bit still set?
 	inc	r0						; no: set lowest bit
 2:	dec rAE1

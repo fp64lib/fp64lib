@@ -36,8 +36,8 @@
    Input:
      rA7.rA6							- an 'x' arg as unsigned 16-bit short
    Output:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754-64 bit format
-										  no overflow will occur, as 16bit short will
+     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754 64-bit format
+										  no overflow will occur, as 16-bit short will
 										  always fit into the 53-bit significand
  */
 
@@ -57,7 +57,7 @@ ENTRY   __fp64unsssd
    Input:
      rA7.rA6							- an 'x' arg as signed 16-bit short
    Output:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754-64 bit format
+     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	- x converted to IEEE 754 64-bit format
 */
 ENTRY fp64_int16_to_float64
 ENTRY __fp64sssd

@@ -92,7 +92,7 @@ ENTRY	__fp64_cmp
 	brne	4f					; evaluate sign(B)
 	ret
 
-   ; A < B (if C=1) or A > B (C=0), view argument signes
+   ; A < B (if C=1) or A > B (C=0), view argument signs
 3:	eor r0, rBE0				; C is not changed
 	brne	4f					; signs are different
 	sbci	rBE0, 1				; rBE[0] = (A < B && A > 0) ? 0 : 1

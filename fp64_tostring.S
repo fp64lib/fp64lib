@@ -301,7 +301,7 @@ ENTRY   fp64_to_string
 
 	add ZL, rPrec				; pos = prec - exp10
 	adc ZH, r1
-	X_movw YL, ZL					; YH.YL now points to s[prec]
+	X_movw YL, ZL				; YH.YL now points to s[prec]
 	sub ZL, rExp10L
 	sbc ZH, rExp10H				; ZH.ZL now points to s[pos]
 	push ZH						; save pos
@@ -346,7 +346,7 @@ ENTRY   fp64_to_string
 	adiw ZL, 1					; pos = 1; // start at "."
 								; ZH.ZL now points to s[pos]
 
-	X_movw YL, ZL					; endPos = pos + prec;
+	X_movw YL, ZL				; endPos = pos + prec;
 	add YL, rPrec
 	adc YH, r1					; YH.YL now points to s[endPos]
 
@@ -367,7 +367,7 @@ ENTRY   fp64_to_string
 	ldi rExp10H, '.'			;	s[pos] = '.';
 	st Z, rExp10H
 
-	X_movw ZL, YL					; set endpos that was saved in YL
+	X_movw ZL, YL				; set endpos that was saved in YL
 	rjmp .L_cut
 
 	; digits after '.' do not fit in, so terminate the string one character earlier
@@ -379,7 +379,7 @@ ENTRY   fp64_to_string
 	add ZL, rPrec				; endpos = prec + 1
 	adc ZH, r1
 	adiw ZL, 1					; ZL.ZH now points to s[endPos]
-	X_movw XL, ZL					; pos = endPos
+	X_movw XL, ZL				; pos = endPos
 
 	; remove trailing 0s
 .L_cut:
@@ -394,7 +394,7 @@ ENTRY   fp64_to_string
 	brne 91f
 	sbiw ZL, 1					;	endPos--
 91:
-	sbrc rFlags, fAbove1		; iif( below1 || above1 )
+	sbrc rFlags, fAbove1		; if( below1 || above1 )
 	rjmp 92f
 	sbrs rFlags, fBelow1
 	rjmp 93f

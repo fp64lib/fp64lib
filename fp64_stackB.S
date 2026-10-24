@@ -109,7 +109,7 @@ ENTRY __fp64_L_ret
 	push r1				; push return address back to stack
 	push r0
 
-	lds r1, __fp64_saver01+1	; retore r0 & r1
+	lds r1, __fp64_saver01+1	; restore r0 & r1
 	lds r0, __fp64_saver01
 	ret
 

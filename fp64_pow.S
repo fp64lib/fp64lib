@@ -186,7 +186,7 @@ ENTRY_DOUBLE pow powl
 	sbci ZH, hi8(-(pm(.L_mask)))
 	XIJMP
 #else /* PC_SIZE == 3 */
-	;; Mimick an indirect jump since we must not change EIND.
+	;; Mimic an indirect jump since we must not change EIND.
 	lsr rBE1  $  subi rBE1, lo8(-(pm(.L_mask)))  $  push rBE1
 	clr rBE1  $  sbci rBE1, hi8(-(pm(.L_mask)))  $  push rBE1
 	clr rBE1  $  sbci rBE1, hh8(-(pm(.L_mask)))  $  push rBE1
