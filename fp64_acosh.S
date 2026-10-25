@@ -52,6 +52,7 @@ ENTRY_DOUBLE acosh acoshl
 
 1:
 	; x is now >=1
+	clr XH						; XH.7 = sign(acosh(x)) = 0
 	ldi XL, 0x80				; set sign bit
 	rjmp .L_common
 
@@ -72,6 +73,7 @@ ENTRY_DOUBLE acosh acoshl
 
 ENTRY fp64_asinh
 ENTRY_DOUBLE asinh asinhl
+	mov XH, rA7					; XH.7 = sign(asinh(x)) = sign(x)
 	clr XL						; clear sign bit
 
 .L_common:
@@ -85,6 +87,11 @@ ENTRY_DOUBLE asinh asinhl
 
 .L_notInf:						; calculate asinh or acosh, depending on XL
 	XCALL _U(__fp64_pushB)		; preserve registers
+	;; One problem with asinh is that for large (by absolute value)
+	;; negative x values cancellation occurs in  sqrt(x*x + 1) + x
+	;; so we use that  asinh(x) = sign(x) * asinh(|x|).
+	cbr rA7, 0x80				; x := |x|
+	push XH						; save result sign
 	XCALL _U(__fp64_pushA)		; save x
 	push XL						; save sign bit
 
@@ -100,6 +107,10 @@ ENTRY_DOUBLE asinh asinhl
 	XCALL _U(__fp64_popB)		; retrieve x
 	XCALL _U(fp64_add)			; sqrt( x*x +/- 1 ) + x
 	XCALL _U(fp64_log)			; ln( sqrt( x*x +/- 1 ) + x )
+
+	pop XH						; install result sign
+	bst XH, 7
+	bld rA7, 7
 
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC
