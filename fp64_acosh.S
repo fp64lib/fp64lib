@@ -75,16 +75,15 @@ ENTRY_DOUBLE asinh asinhl
 	clr XL						; clear sign bit
 
 .L_common:
-	; cases NaN and +Inf are handled properly inside the calculations
-	; but we have to treat -Inf specially
-	cpi rA7, 0xff
-	brne .L_notInf
-	cpi rA6, 0xf0
-	brne .L_notInf
-	ret							; case 2b: asinh(-Inf) = -Inf
+	;; Cases NaN and +/-Inf are handled properly by the calculations.
+	;; Calculate asinh or acosh, depending on XL.
 
-.L_notInf:						; calculate asinh or acosh, depending on XL
 	XCALL _U(__fp64_pushB)		; preserve registers
+	;; One problem with asinh is that for large (by absolute value)
+	;; negative x values cancellation occurs in  sqrt(x*x + 1) + x
+	;; so we use that  asinh(x) = sign(x) * asinh(|x|).
+	push rA7					; save result sign
+	cbr rA7, 0x80				; x := |x|
 	XCALL _U(__fp64_pushA)		; save x
 	push XL						; save sign bit
 
@@ -100,6 +99,10 @@ ENTRY_DOUBLE asinh asinhl
 	XCALL _U(__fp64_popB)		; retrieve x
 	XCALL _U(fp64_add)			; sqrt( x*x +/- 1 ) + x
 	XCALL _U(fp64_log)			; ln( sqrt( x*x +/- 1 ) + x )
+
+	pop r0						; install result sign
+	bst r0, 7
+	bld rA7, 7
 
 	XJMP _U(__fp64_popBret)		; restore registers and return
 ENDFUNC
