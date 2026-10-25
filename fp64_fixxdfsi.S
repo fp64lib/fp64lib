@@ -80,8 +80,8 @@ ENTRY fp64_to_int64
 	  6 | -2^64<A<0 | 0 | -((unsigned long long) (-A)
  */
 
-GCC_ENTRY __fixunsdfdi
 ENTRY fp64_to_uint64
+GCC_ENTRY __fixunsdfdi
 	push rBE0
 	ldi rBE0, 64
 	XJMP _U(__fp64_fixxdfxi)
@@ -106,7 +106,6 @@ ENTRY fp64_to_uint64
 	  5 | |A|<2^15	| 0 | (int) A
  */
 
-GCC_ENTRY __fixdfsi
 ENTRY fp64_to_int16
 	push rBE0
 	ldi rBE0, 15
@@ -133,7 +132,6 @@ ENTRY fp64_to_int16
 	  6 | -2^16<A<0 | 0 | -((unsigned int) (-A)
  */
 
-GCC_ENTRY __fixunsdfsi
 ENTRY fp64_to_uint16
 	push rBE0
 	ldi rBE0, 16
@@ -216,6 +214,7 @@ ENTRY fp64_to_uint8
 ENTRY __fp64_fixsdli
 ENTRY fp64_to_int32
 ENTRY fp64_float64_to_long
+GCC_ENTRY __fixdfsi
 	push rBE0
 	ldi rBE0, 31
 	XJMP _U(__fp64_fixxdfxi)
@@ -243,6 +242,7 @@ ENTRY fp64_float64_to_long
 
 ENTRY __fp64_fixunssdli
 ENTRY fp64_to_uint32
+GCC_ENTRY __fixunsdfsi
 	push rBE0
 	ldi rBE0, 32
 
