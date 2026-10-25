@@ -8,9 +8,9 @@
 ; //*********************************************************************************************************** //
 ; //*********************************************************************************************************** //
 ; //                                                                                                           //
-; // avr_f64.c and avr_f64.h : Contains ANSI C Funktions for handling of 64 bit IEEE 754 double precision      //
+; // avr_f64.c and avr_f64.h : Contains ANSI C Functions for handling of 64-bit IEEE 754 double precision      //
 ; // floating point numbers.                                                                                   //
-; // float64_t represents an IEEE 64 bit double precision floating point number.                               //
+; // float64_t represents an IEEE 64-bit double precision floating point number.                               //
 ; //                                                                                                           //
 ; // Compiler: avr-gcc                                                                                         //
 ; //                                                                                                           //
@@ -144,16 +144,16 @@ ENTRY __fp64_ftoa_nan
 			rB6:		maximum number of digits in significand
 						NOTE: this function supports conversion of up to 17 digits
 							  however, accuracy of IEEE754 is only 52 bit which is 15-16 decimal digits
-			rB4:		flag to store significand and exponent seperately
+			rB4:		flag to store significand and exponent separately
 			rB2:		int16_t *Exp10 // if != NULL, store exponent base 10 here
 	output: rA7..rA6	pointer to result, '\0' terminated C-string
-	modfies: rAE1.rAE0
+	modifies: rAE1.rAE0
 
 	WARNING: 	function returns a pointer to a static temporary scratch area which might be used
 				also for other functions. The returned string might become invalid/scrambled
 				if one of the other fp64_ functions will be called. So copy the result to some
 				other allocated memory that you have under control before calling further
-				fp64__ routines
+				fp64_ routines
  */
 ENTRY   __fp64_ftoa
 ENTRY	fp64_to_decimalExp
@@ -193,7 +193,7 @@ ENTRY __fp64_ftoa_pse
 	sts .L_maxDigits2, rB6		; and original value
 	sts .L_bufp, XH				; and current pointer
 	sts .L_bufp+1, XL
-	sts .L_sepExp, rB4			; save flag for seperating significand and mantissa
+	sts .L_sepExp, rB4			; save flag for separating significand and mantissa
 
 	subi rAE0, 0xff
 	sbci rAE1, 0x03			; remove base from exponent
@@ -344,7 +344,7 @@ ENTRY __fp64_ftoa_pse
 	sts __fp64_ftoabuf+2, rA7	; store the decimal point
 
 	clr r1						; restore some registers to confirm to libc conventions
-	lds r0, .L_sepExp			; do we have to seperate significand and exponent
+	lds r0, .L_sepExp			; do we have to separate significand and exponent
 	tst r0
 	breq 13f
 	st Y+, r1					; yes, terminate significand with '\0'
@@ -436,7 +436,7 @@ OBJECT .L_ftoa1.data
 .L_bufp:		.space 2	; pointer to current location in __fp64_ftoabuf
 .L_maxDigits:	.space 1	; maximum number of digits, working counter
 .L_maxDigits2:	.space 1	; maximum number of digits, original value
-.L_sepExp:		.space 1	; flag to seperate significand and exponent
+.L_sepExp:		.space 1	; flag to separate significand and exponent
 ENDOBJ .L_ftoa1.data
 
 OBJECT .global __fp64_ftoabuf

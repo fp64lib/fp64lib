@@ -43,7 +43,7 @@ ENTRY __fp64_mul64AB
 	push ZL				; need ZL, ZH
 	push ZH
 	clr ZL				; clear ZL as lowest 8 bits for multiplication result
-	clr ZH				; as r1 is used in mul, we use ZH as an alwys 0 register
+	clr ZH				; as r1 is used in mul, we use ZH as an always 0 register
 	X_movw rC6, ZL		; and result
 	X_movw rC4, rC6
 	X_movw rC2, rC6

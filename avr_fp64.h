@@ -8,9 +8,9 @@
 ; //*********************************************************************************************************** //
 ; //*********************************************************************************************************** //
 ; //                                                                                                           //
-; // avr_f64.c and avr_f64.h : Contains ANSI C Funktions for handling of 64 bit IEEE 754 double precision      //
+; // avr_f64.c and avr_f64.h : Contains ANSI C Functions for handling of 64-bit IEEE 754 double precision      //
 ; // floating point numbers.                                                                                   //
-; // float64_t represents an IEEE 64 bit double precision floating point number.                               //
+; // float64_t represents an IEEE 64-bit double precision floating point number.                               //
 ; //                                                                                                           //
 ; // Compiler: avr-gcc                                                                                         //
 ; //                                                                                                           //
@@ -95,7 +95,7 @@
 //    timing/delays, if your project used some relative waiting routines. Also, if you
 //    periodically did some floating point calculations on some sensor data, your
 //    calculations could fail now, as some sensors will not provide you new data if the
-//    intervall between two readings is too short.
+//    interval between two readings is too short.
 
 #ifdef avr_f64_h_included
 #error "Include either avr_f64.h or avr_fp64.h, but not both"

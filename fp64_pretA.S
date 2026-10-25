@@ -58,7 +58,7 @@ ENTRY __fp64_rcpretA
 	sbrs rA0, 0			; guard bit 1 is clear. what about guard bit 0
 	rjmp 0f				; guard bit 0 is also clear --> round to even
 	; at least one of the lower bits is set -> we have to round up
-1:	subi rA0, (-0x08)	; increase first bit of 53bit significand
+1:	subi rA0, (-0x08)	; increase first bit of 53-bit significand
 	brcs __fp64_pretA	; if no everflow, pack & return
 	sec					; handle overflow
 	adc rA1,r1

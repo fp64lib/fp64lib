@@ -32,7 +32,7 @@
 .require_lpmx
 
 /*	uint64_t __fp64_10pown (int16_t n);
-	internal function to return 64 bit significant of 10^n
+	internal function to return 64-bit significant of 10^n
 	input	XH.XL	n
 	output	rA7...rA0		significand of 10^n
 			rAE1.rAE0		exponent in base 2 of 10^n
@@ -138,7 +138,7 @@ ENTRY __fp64_10pown
 	ret
 
 /*	uint64_t fp64_10pown (int16_t n, int16_t *exp2);
-	return 64 bit significant of 10^n
+	return 64-bit significant of 10^n
 	input	rA7.rA6 n		exponent for 10^n
 			rA5.rA4 *exp2	point for saving exponent in base 2 of result
 	output	rA7...rA0		significand of 10^n

@@ -63,7 +63,7 @@ ENTRY fp64_to_int64
    uint64_t fp64_to_uint64( float64_t A );
 	The fp64_to_uint64() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
-	Negative input is permissable (like GCC/x86).
+	Negative input is permissible (like GCC/x86).
 	Besides a normal 64-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output: rA7..rA0	32-bit unsigned integer
@@ -115,7 +115,7 @@ ENTRY fp64_to_int16
    uint16_t fp64_to_uint16( float64_t A );
 	The fp64_to_uint16() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
-	Negative input is permissable (like GCC/x86).
+	Negative input is permissible (like GCC/x86).
 	Besides a normal 16-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output: rA7..rA6	16-bit unsigned integer
@@ -167,7 +167,7 @@ ENTRY fp64_to_int8
    uint8_t fp64_to_uint8( float64_t A );
 	The fp64_to_uint8() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
-	Negative input is permissable (like GCC/x86).
+	Negative input is permissible (like GCC/x86).
 	Besides a normal 8-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output: rA6 (!)		8-bit unsigned integer
@@ -223,7 +223,7 @@ GCC_ENTRY __fixdfsi
    uint32_t fp64_to_uint32( float64_t A );
 	The fp64_to_uint32() function converts A to the unsigned integer value,
 	rounding towards 0, the fractional part is lost. No saturation.
-	Negative input is permissable (like GCC/x86).
+	Negative input is permissible (like GCC/x86).
 	Besides a normal 32-bits value, the carry is returned as extra error flag.
 	input:	rA7...rA0	number to convert
 	output: rA7..rA4	32-bit unsigned integer
@@ -251,7 +251,7 @@ GCC_ENTRY __fixunsdfsi
 	This is the common subroutine for all conversions from float64_t to integer.
 	The __fp64_fixxdfxi() function converts A to the signed/unsigned integer value
 	with given length. rounding towards 0, the fractional part is lost. No saturation.
-	For conversion to unsigned, negative input is permissable (like GCC/x86).
+	For conversion to unsigned, negative input is permissible (like GCC/x86).
 	input:	rA7..rA0	float64_t number to convert
 			rBE0		bit length of result:	64/63 for unsigned/signed long long
 												32/31 for unsigned/signed long

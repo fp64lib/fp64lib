@@ -32,7 +32,7 @@
 #include "fp64def.h"
 
 /* <non_standard> __fp64_split3 (fp64 A, fp64 B);
-	Splits/Unpacks two 64 bit floating point numbers.
+	Splits/Unpacks two 64-bit floating point numbers.
 
    Return:
      rAE1, rAE0, rA6, rA5, rA5, rA3, rA2.rA1.rA0	- exponent and mantissa of A (see __fp64_splitA)
@@ -136,7 +136,7 @@ ENTRY	__fp64_split3
 	; rjmp eliminated by code rearrangement
 
 /* <non_standard> __fp64_splitA (fp64 A);
-     Splits an A 64bit floating point number, which conforms to IEEE float format double
+     Splits an A 64-bit floating point number, which conforms to IEEE float format double
 	   Bit 63: sign S 0 = + / 1 = -
 	   Bits 62-51: exponent E -1022 <= e <= 1023, base 1023
 	   Bits 51-0: mantissa M without leading 1 bit

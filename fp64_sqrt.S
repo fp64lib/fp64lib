@@ -174,7 +174,7 @@ ENTRY __fp64_sqrt_pse
 	pop rB1
 	pop rB0
 
-	pop msk2			; restore temporarely used registers
+	pop msk2			; restore temporarily used registers
 	pop msk3
 	pop msk4
 	pop msk5

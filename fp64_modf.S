@@ -114,7 +114,7 @@ ENTRY fp64_modff
 4:	; fabs(x) > 1.0 and < 2^53, there is a fraction part
 	; rcall __fp64_saveAB
 
-	ldi rB6, 0xff			; set mask to eleminate fraction
+	ldi rB6, 0xff			; set mask to eliminate fraction
 	mov rC7, rB6
 	mov rC6, r1
 	mov rC5, r1

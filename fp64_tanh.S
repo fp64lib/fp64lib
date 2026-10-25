@@ -65,7 +65,7 @@ ENTRY_DOUBLE tanh tanhl
 	brsh .L_ret1				; yes, return +/-1
 
 0:	; no, we have to calculate tanh(x) = sinh(x) / cosh(x)
-	bld rA7, 7					; restore sign	
+	bld rA7, 7					; restore sign
 	XCALL _U(__fp64_pushB)		; preserve registers
 	XCALL _U(__fp64_pushA)		; save x
 

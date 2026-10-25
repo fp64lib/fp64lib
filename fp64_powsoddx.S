@@ -54,7 +54,7 @@ ENTRY __fp64_powsodd
 
 	bld rA7, 7					; save T flag as sign
 	XCALL _U(__fp64_movBA)		; save x
-	X_movw  YL, rAE0			; save exponent temporarely in YH.YL as XH.XL is still occupied
+	X_movw  YL, rAE0			; save exponent temporarily in YH.YL as XH.XL is still occupied
 								; with pointer to polynom table
 
 	XCALL _U(__fp64_pushB)		; save x for later use

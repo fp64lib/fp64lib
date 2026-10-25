@@ -26,7 +26,7 @@
    ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
    POSSIBILITY OF SUCH DAMAGE. */
 
-/* Interprocedure convensions. In separate file: for math library
+/* Interprocedure conventions. In separate file: for math library
    developers.	*/
 
 #ifndef	_FP64DEF_H

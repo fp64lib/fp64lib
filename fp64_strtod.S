@@ -8,9 +8,9 @@
 ; //*********************************************************************************************************** //
 ; //*********************************************************************************************************** //
 ; //                                                                                                           //
-; // avr_f64.c and avr_f64.h : Contains ANSI C Funktions for handling of 64 bit IEEE 754 double precision      //
+; // avr_f64.c and avr_f64.h : Contains ANSI C Functions for handling of 64 bit IEEE 754 double precision      //
 ; // floating point numbers.                                                                                   //
-; // float64_t represents an IEEE 64 bit double precision floating point number.                               //
+; // float64_t represents an IEEE 64-bit double precision floating point number.                               //
 ; //                                                                                                           //
 ; // Compiler: avr-gcc                                                                                         //
 ; //                                                                                                           //
@@ -140,7 +140,7 @@ ENTRY   fp64_strtod
 	breq 3f				; NaN successfully detected
 	cpi rCh, 'n'
 	brne 90b			; incorrect string starting with "Na", return 0
-3:	; NaN successfull detected, adjust pointer position and return NaN
+3:	; NaN successfully detected, adjust pointer position and return NaN
 	adiw YL, 3			; s point to first character after NaN
 	rjmp .L_NaN
 
@@ -184,7 +184,7 @@ ENTRY   fp64_strtod
 	pop YH
 	XJMP _U(__fp64_nan)
 
-13:	; INF, +INF or -INF successfull detected, adjust pointer position and return INF with sign
+13:	; INF, +INF or -INF successfully detected, adjust pointer position and return INF with sign
 	adiw YL, 3			; s point to first character after INF
 	rcall .L_savePtr	; save current position and restore sign
 	pop YL
@@ -193,7 +193,7 @@ ENTRY   fp64_strtod
 
 .L_noInf:
 	; up to now, we only had an optional sign
-	; initalize some stuff and then enter our main loop
+	; initialize some stuff and then enter our main loop
 	clr rA7				; A = 0
 	clr rA6
 	X_movw rA4, rA6
@@ -331,7 +331,7 @@ ENTRY   fp64_strtod
 	dec rExp2H
 	brne 24b
 
-25:	pop rExp2H					; restore temporarely used register
+25:	pop rExp2H					; restore temporarily used register
 
 	add rC0, rB0				; now add the digit to the correct position:
 	adc rC1, rB1				; C = C + (ch << 63 - exp2)
@@ -353,7 +353,7 @@ ENTRY   fp64_strtod
 
 	breq 26f
 	XCALL _U(__fp64_lshift64)	; 	shift left C until bit63 is set, if C!= 0
-	sub rExp2L, r0				;	exp2 -= number of neccessary left shifts
+	sub rExp2L, r0				;	exp2 -= number of necessary left shifts
 	sbci rExp2H, 0
 
 26:
@@ -372,7 +372,7 @@ ENTRY   fp64_strtod
 
 	; the following is a custom n-digit atoi implementation that
 	; correctly handles +/- sign and exponents even beyond 32768
-29:	push rExp2H			; temporarely use rExp2H/L
+29:	push rExp2H			; temporarily use rExp2H/L
 	push rExp2L
 	clr rExp2L
 	clt
@@ -405,7 +405,7 @@ ENTRY   fp64_strtod
 	mul rExp2L, rExp2H
 	mov rExp2L, r0		; exp = first digit * 10
 	subi rCh, '0'
-	add rExp2L, rCh			; 		+ 2nd digit
+	add rExp2L, rCh		; 		+ 2nd digit
 
 	ld rCh, Y+			; get 3rd digit
 	cpi rCh, '0'
@@ -443,7 +443,7 @@ ENTRY   fp64_strtod
 	rjmp .L_cleanup		; cleanup and return +/-INF or +/-0
 
 36:
-	clr rExp2H				; for 1- and 2-digit exponents, clear high byte
+	clr rExp2H			; for 1- and 2-digit exponents, clear high byte
 37:
 	; stop parsing, sign adjust exponent
 	brtc 38f			; if( expSign )
@@ -511,7 +511,7 @@ ENTRY   fp64_strtod
 	adc rA5, r1
 	adc rA6, r1
 	adc rA7, r1
-	; check if we got an 64bit overflow
+	; check if we got a 64 bit overflow
 	; rcall __fp64_saveAB
 	brcc .L_noround
 	; 64bit overflow due to rounding --> rA7..rA1 are all 0
@@ -519,7 +519,7 @@ ENTRY   fp64_strtod
 	adiw rExp2L, 1		; goto next higher number
 
 .L_noround:
-	; create "normal" 56 bit significand in rA6..rA0
+	; create "normal" 56-bit significand in rA6..rA0
 	mov rA0, rA1
 	mov rA1, rA2
 	mov rA2, rA3
@@ -554,7 +554,7 @@ ENTRY   fp64_strtod
 	; pack and return number
 	XJMP _U(__fp64_rpretA)
 
-	; exponent to big, return +/-INF
+	; exponent too big, return +/-INF
 .L_RetInf:
 	rcall .L_savePtr		; save last parsed position and restore sign
 	pop YL					; restore Y
@@ -595,8 +595,7 @@ ENTRY   fp64_strtod
 	pop YL
 	pop YH
 	XJMP _U(__fp64_szero)
-
-	ENDFUNC
+ENDFUNC
 
 NOINIT_SECTION
 .L_endpH:	.space 1	; temp area to save endPtr

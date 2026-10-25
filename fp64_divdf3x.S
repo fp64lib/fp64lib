@@ -31,8 +31,8 @@
 
 /*
 	float64_t __fp64_divdf3( float64_t A, float64_t B )
-	Divides two 64 bit floating point numbers
-	and rounds result to a 64bit floating point number
+	Divides two 64-bit floating point numbers
+	and rounds result to a 64-bit floating point number
 
 	Input:
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 Nominator A
@@ -108,8 +108,8 @@ ENTRY	__fp64_divdf3
 
 /*
 	float64_t_intern __fp64_divdf3( float64_t_intern A, float64_t_intern B )
-	Internal routine to divide two 64 bit floating point numbers
-	and rounds result to a 64bit floating point number
+	Internal routine to divide two 64-bit floating point numbers
+	and rounds result to a 64-bit floating point number
 	Does not handle special cases NaN, +Inf, -Inf, +/-0 (neither for A or B)
 
 	Input:
