@@ -111,7 +111,7 @@ ENTRY __fp64_powser
 	pop rR5
 
 	bld rA7, 7					; save sign of result
-	brcs .L_ret					; C is set on overflow and result is already packed
+	brcs .L_pop_ret				; C is set on overflow and result is already packed
 
 	rcall .Load10
 .L_monic:
@@ -122,6 +122,7 @@ ENTRY __fp64_powser
 	XCALL	_U(__fp64_add_pse)	; create x*Cn + Cn-1 (1st run: x*C3 + C2, 2nd: (x*C3+C2)*x + C1, 3rd: ((x*C3+C2)*x+C1)*x + C0 )
 	bld rA7, 7					; save sign bit
 
+.L_pop_ret:
 	pop rcntr					; retrieve counter
 	brcs .L_ret					; C is set on overflow and result is already packed
 
