@@ -364,21 +364,7 @@ __fp64_fixxdfxi:
 	cpi rBE0, 9
 	brge 5f
 	mov rA6, rA0				;	for 8-bit: rA0..rA6 are 0
-5:	com rA7						;	res = -res;
-	com rA6
-	com rA5
-	com rA4
-	com rA3
-	com rA2
-	com rA1
-	neg rA0
-	sbci rA1, -1
-	sbci rA2, -1
-	sbci rA3, -1
-	sbci rA4, -1
-	sbci rA5, -1
-	sbci rA6, -1
-	sbci rA7, -1
+5:	XCALL _U(__negdi2)			;	libgcc: res = -res; R18[8] = -R18[8]
 6:	cpi rBE0, 9					; special case char/int8_t?
 	brge 7f
 	mov rA6, rA7				; yes: value has to be returned in rA6
