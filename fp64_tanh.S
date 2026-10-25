@@ -60,8 +60,9 @@ ENTRY_DOUBLE tanh tanhl
 .L_noNaN:
 	cpi rA7, hi8(0x4034)		; check, if abs(x) >= 20 (0x4034)
 	brlo 0f
+	brne .L_ret1
 	cpi rA6, lo8(0x4034)
-	breq .L_ret1				; yes, return +/-1
+	brsh .L_ret1				; yes, return +/-1
 
 0:	; no, we have to calculate tanh(x) = sinh(x) / cosh(x)
 	bld rA7, 7					; restore sign	
