@@ -42,7 +42,7 @@
 
 FUNCTION __fp64_cmp_1
 ENTRY __fp64_cmp_1
-	cpi rAE1, 0x03				; x < 2^-255 or x > 2^1\
+	cpi rAE1, 0x03				; x < 2^-255 or x > 2^1
 	brne .L_ret					; yes --> return Z=0, C=1 for x<2^-255, C=0 for x>2
 
 	cpi rAE0, 0xff				; x < 1.0
