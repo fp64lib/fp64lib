@@ -75,10 +75,9 @@ FUNCTION fp64_lround
 	XJMP _U(__fp_zero)			; case 3: return 0L (which is binary identical to 0.0f)
 
 0:	; |x| < 1.0, check for case 5
-	cpi rAE1, 0xff
-	brne .L_zr					; |x| < 2^-255, case 5, return 0
-	cpi rAE0, 0xff
-	brne .L_zr					; 2^-255 >= |x| > 0.5, case 5, return 0
+	; 0.5 <= |x| < 1.0  <=>  expo == -1
+	adiw rAE0, 1
+	brne .L_zr					; expo != -1 --> case 5, return 0
 .L_one:
 	mov rA7, r1					; get a zero (can't use __fp_zero as this clears the T flag)
 	mov rA6, r1
@@ -94,10 +93,9 @@ ENTRY_DOUBLE lround lroundl
 
 	subi rAE0, lo8(1023)		; remove exponent bias: exp -= 1023
 	sbci rAE1, hi8(1023)
-	tst rAE1
 	brmi 0b						; |x| < 1, check for cases 5 & 6
-	brne .L_err					; |x| > 2^255, case 4, return LONG_MIN
 	cpi rAE0, 31
+	cpc rAE1, r1
 	brge .L_err					; |x| >= 2^31, case 4, return LONG_MIN
 
 	; case 7: now x is in range 1 <= |x| < 2^31
