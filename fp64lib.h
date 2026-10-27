@@ -165,7 +165,9 @@ float64_t fp64_ceil( float64_t x ) __ATTR_CONST__;
 float64_t fp64_floor( float64_t x ) __ATTR_CONST__;
 float64_t fp64_round( float64_t x ) __ATTR_CONST__;
 long fp64_lround( float64_t A ) __ATTR_CONST__;
+long long fp64_llround( float64_t A ) __ATTR_CONST__;
 long fp64_lrint( float64_t A ) __ATTR_CONST__;
+long long fp64_llrint( float64_t A ) __ATTR_CONST__;
 float64_t fp64_cbrt( float64_t x ) __ATTR_CONST__;
 int fp64_ilogb(float64_t x) __ATTR_CONST__; 						// [all added with C99]
 
