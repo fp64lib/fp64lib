@@ -42,7 +42,7 @@
 	The following rules apply:
 
 	case|           A	       | result
-	----+----------------------+------------
+	----+----------------------+----------------------
 	  1 |          NaN         | LONG_MIN (0x80000000)
 	  2 |         +/-Inf       | LONG_MIN (0x80000000)
 	  3 |         +/-0.0	   | 0L
@@ -55,7 +55,7 @@
    Input:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - A in IEEE 754 - 64-bit format
    Output:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - lround(x)
+     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - lrint(x)
    Examples:
      fp64_lrint(1.25) --> 1L
      fp64_lrint(1.5)  --> 2L
@@ -84,16 +84,12 @@ FUNCTION fp64_lrint
 0:	; |x| < 1.0, check for case 5
 	; 0.5 <= |x| < 1.0  <=>  expo == -1
 	adiw rAE0, 1
-	brne .L_zr					; expo != -1 --> case 5, return 0
-	or r0, rA6
-	or r0, rA5
-	or r0, rA4
-	or r0, rA3
-	mov rA6, r1
-	mov rA5, r1
-	mov rA4, r1
-	mov rA3, r1
-	rjmp .L_round
+	brne .L_zr					; expo != -1 so |x| < 0.5 --> case 5, return 0
+	ldi rA7, 0x80				; |x| == 0.5?
+	XCALL _U(__fp64_cpc0A5)
+	cpc	rA6, rA7
+	breq .L_zr					; yes: case 5, return 0
+	;; no: 0.5 < |x| < 1.0 --> case 6, return +/-1
 
 .L_one:
 	mov rA7, r1					; get a zero (can't use __fp_zero as this clears the T flag)
@@ -125,9 +121,9 @@ ENTRY_DOUBLE lrint lrintl
 
 	ldi rAE1, 31				; counter = 31 digits - exp2(x)
 	sub rAE1, rAE0				; as |x| < 2^31, this is always >= 0
+	breq .L_round
 
-1:	breq .L_round
-	lsr rA6						; shift number downwards -> this clears the fraction
+1:	lsr rA6						; shift number downwards -> this clears the fraction
 	ror rA5
 	ror rA4
 	ror rA3
@@ -136,7 +132,7 @@ ENTRY_DOUBLE lrint lrintl
 	sbrs r0, 0					; is the lowest bit still set?
 	inc	r0						; no: set lowest bit
 2:	dec rAE1
-	rjmp 1b
+	brne 1b
 
 	; now round
 .L_round:
