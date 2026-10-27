@@ -82,10 +82,9 @@ FUNCTION fp64_lrint
 	XJMP _U(__fp_zero)			; case 3: return 0L (which is binary identical to 0.0f)
 
 0:	; |x| < 1.0, check for case 5
-	cpi rAE1, 0xff
-	brne .L_zr					; |x| < 2^-255, case 5, return 0
-	cpi rAE0, 0xff
-	brne .L_zr					; 2^-255 >= |x| > 0.5, case 5, return 0
+	; 0.5 <= |x| < 1.0  <=>  expo == -1
+	adiw rAE0, 1
+	brne .L_zr					; expo != -1 --> case 5, return 0
 	or r0, rA6
 	or r0, rA5
 	or r0, rA4
@@ -109,17 +108,16 @@ ENTRY_DOUBLE lrint lrintl
 	brcs .L_err					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0
 
-	subi rAE0, lo8(1023)		; remove exponent bias: exp -= 1023
-	sbci rAE1, hi8(1023)
-
 	mov r0, rA2					; save bits between 2^0 and 2^(52-31)
 	or r0, rA1
 	or r0, rA0
 
-	tst rAE1
+	subi rAE0, lo8(1023)		; remove exponent bias: exp -= 1023
+	sbci rAE1, hi8(1023)
 	brmi 0b						; |x| < 1, check for cases 5 & 6
-	brne .L_err					; |x| > 2^255, case 4, return LONG_MIN
+
 	cpi rAE0, 31
+	cpc rAE1, r1
 	brge .L_err					; |x| >= 2^31, case 4, return LONG_MIN
 
 	; case 7: now x is in range 1 <= |x| < 2^31
