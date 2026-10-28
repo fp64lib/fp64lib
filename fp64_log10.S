@@ -34,17 +34,17 @@
 
 /* float64_t fp64_log10(float64_t A);
    The fp64_log10() function returns the base 10 logarithm of A.
-   log10(A) = log(A) / log(10)
+   log10(A) = log2(A) * log(2) / log(10)
  */
 
 FUNCTION fp64_log10
 ENTRY fp64_log10
 ENTRY_DOUBLE log10 log10l
-	XCALL _U(fp64_log)
+	XCALL _U(fp64_log2)
 
 	XCALL _U(__fp64_pushB)		; preserve registers
 
-	LPMX_INIT ZL, .L_log10
+	LPMX_INIT ZL, .L_ln2_o_ln10
 	XCALL _U(__fp64_ldb8_const)
 	LPMX_FINI r1
 
@@ -55,7 +55,7 @@ ENDFUNC
 
 PGMX_SECTION (fp64.log10)
 
-;; 1/log(10) = 0x3fdbcb7b1526e50d = 0.43429448190325176
-OBJECT .L_log10
-	.byte 0x3f, 0xdb, 0xcb, 0x7b, 0x15, 0x26, 0xe5, 0x0d
-ENDOBJ .L_log10
+OBJECT .L_ln2_o_ln10
+	;; ln(2) / ln(10) = 0.30102999566398119802 = 0x9.a209a84fbcff80p-5
+	.byte 0x3f, 0xd3, 0x44, 0x13, 0x50, 0x9f, 0x79, 0xff
+ENDOBJ .L_ln2_o_ln10
