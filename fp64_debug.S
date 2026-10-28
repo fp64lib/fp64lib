@@ -275,6 +275,18 @@ ENTRY __fp64_proxy2_int8
 	ld rB7, Z+
 	rcall __fp64_proxy1
 	XJMP _U(__fp64_popBret)
+
+#if !defined(CHECK_POWSER)
+;;; Provide empty functions if !CHECK_POWSER so that they are
+;;; not part of productive code.
+ENTRY __fp64_check_powser3
+ENTRY __fp64_check_powser2
+ENTRY __fp64_check_powser1
+ENTRY __fp64_check_powsodd3
+ENTRY __fp64_check_powserexp
+	ret
+#endif /* !defined(CHECK_POWSER) */
+
 ENDFUNC
 
 NOINIT_SECTION

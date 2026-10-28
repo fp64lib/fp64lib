@@ -172,12 +172,8 @@ ENTRY __fp64_powser
 	XJMP	_U(__fp64_inf)	; No, case 2 --> return Inf
 .L_nan:	; x = NaN, case 1 --> return NaN
 	XJMP	_U(__fp64_nan)
-#endif
 
 ENTRY __fp64_check_powser3
-#ifndef CHECK_POWSER
-	ret
-#else
 	push XL
 	push XH
 	LPMX_INIT XL, __testTablex3
@@ -205,27 +201,19 @@ ENTRY __fp64_check_powsern
 	brcs 99f
 	XJMP _U(__fp64_rpretA)
 99:	ret
-#endif
 
 ENTRY __fp64_check_powser2
-#ifndef CHECK_POWSER
-	ret
-#else
 	push XL
 	push XH
 	LPMX_INIT XL, __testTablex2
 	rjmp 98b
-#endif
 
 ENTRY __fp64_check_powser1
-#ifndef CHECK_POWSER
-	ret
-#else
 	push XL
 	push XH
 	LPMX_INIT XL, __testTablex1
 	rjmp 98b
-#endif
+#endif /* CHECK_POWSER */
 ENDFUNC
 
 #ifdef CHECK_POWSER
