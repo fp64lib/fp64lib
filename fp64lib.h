@@ -237,6 +237,8 @@ uint8_t  fp64_to_uint8( float64_t A) __ATTR_CONST__; 	// float_t to uint8_t
 float64_t fp64_sd( float x ) __ATTR_CONST__;					// float to float64_t
 float fp64_ds( float64_t x ) __ATTR_CONST__;					// float64_t to float
 
+float64_t fp64_divmod2( float64_t, int8_t expo2, int16_t *pquot );
+
 // to and from string
 char *fp64_to_decimalExp( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 );
 char *fp64_etoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 );

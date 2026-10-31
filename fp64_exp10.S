@@ -35,25 +35,45 @@
  */
 
 FUNCTION fp64_exp10
+
+	;; Special cases
+	;; case | A     | pow10(A)
+	;;------+-------+--------------------------
+	;; 1    | NaN   | NaN
+	;; 2    | +Inf  | +Inf
+	;; 3    | -Inf  | 0
+	;; 4    | 0     | 1 no extra handling needed
+
+.L_nf:
+	XJMP	_U(__fp64_pow2_nf)
+
 ENTRY fp64_exp10
 ENTRY fp64_pow10
 ENTRY_DOUBLE exp10 exp10l
 ENTRY_DOUBLE pow10 pow10l
-	XCALL _U(__fp64_pushB)		; preserve registers
+	;; split and analyse A
+	XCALL _U(__fp64_splitA)
+	brcs .L_nf					; A is not finite: C = 1 means packed
 
-	LPMX_INIT ZL, .L_log10
-	XCALL _U(__fp64_ldb8_const)
-	LPMX_FINI r1
+	XCALL _U(__fp64_pushCB)     ; preserve registers
+	rcall .Ldb_ln10_o_ln2
+	XCALL _U(__fp64_muldf3_pse)	; 10^x = 2^{x * ln10 / ln2}
+	XCALL _U(__fp64_popBC)      ; restore registers
+	brcs 0f						; packed / overflow result?
+	XJMP  _U(__fp64_pow2_pse)
+0:	ret
 
-	XCALL _U(fp64_mul)
-	XCALL _U(__fp64_popB)
-
-	XJMP _U(fp64_exp)			; return with exp(x*ln10) = 10^x
+.Ldb_ln10_o_ln2:
+	push ZL
+	push ZH
+	LPMX_INIT ZL, .L_const_ln10_o_ln2
+	XJMP _U(__fp64_ldb_const)
 ENDFUNC
 
 PGMX_SECTION (fp64.exp10)
 
-OBJECT .L_log10
-	; log(10) = 0x40026BB1BBB55516 = 2.302585092994045684017994549539580913123
-	.byte 0x40, 0x02, 0x6B, 0xB1, 0xBB, 0xB5, 0x55, 0x16
-ENDOBJ .L_log10
+OBJECT .L_const_ln10_o_ln2
+	;; ln(10) / ln(2) with 56 bits precision in unpacked format.
+	;; "+ 6" added by hand to counteract finite precision artifacts.
+	.byte 0x00, 0xd4,0x9a,0x78,0x4b,0xcd,0x1b,0x8b + 6, 0x04,0x00 ; +3.32192809488736234824e+00 = +0x3.5269e12f346e2cp+0
+ENDOBJ .L_const_ln10_o_ln2
