@@ -81,11 +81,10 @@ ENTRY_DOUBLE log2 log2l
 	;; MiniMax polynomial with (x - 1) / (x + 1), so we
 	;; get exactly 0.
 
-	tst rA6						; subnormal number?
-	brmi 2f
-	XCALL _U(__fp64_norm2)		; yes, normalize it
+	.sbrs_callj rA6, 7
+	XCALL _U(__fp64_norm2)		; normalize if not already normalized
 
-2:	XCALL _U(__fp64_pushCB)		; save the used callee-saved regs
+	XCALL _U(__fp64_pushCB)		; save the used callee-saved regs
 	push YH
 	push YL
 
@@ -146,7 +145,7 @@ ENTRY_DOUBLE log2 log2l
 	push rAE0
 
 10:	X_movw rA6, rBE0			; convert exponent-base to double
-	sub rA6, r0				    ; exponent - base
+	sub rA6, r0				    ; exponent - bias
 	sbci rA7, 0x03
 
 	XCALL _U(__fp64sssd_pse) 	; int16 as a double
@@ -178,9 +177,7 @@ OBJECT .L__tableArtanhq
 	;;     w = (sqrt2 - 1) / (sqrt2 + 1) = 0.1715
 	;;     w^2 = 0.02943
 	;; That is:
-	;;     x * L(x^2) = 2 artanh(x) / ln2
-	;; and hence:
-	;;     y * L(y^2) = 2/ln2 artanh(y) / ln2
+	;;     y * L(y^2) = 2/ln2 artanh(y)
 	;;                = 2/ln2 artanh((x - 1) / (x + 1))  # y = (x - 1) / (x + 1)
 	;;                = ln(x) / ln2
 	;;                = log2(x)

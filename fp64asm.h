@@ -105,7 +105,7 @@ _U(\name):
 	eor dst, src
 .endm
 
-/* swap two words with the help of r0/r1 (default) or the help or REG */
+/* swap two words with the help of r0/r1 (default) or the help of REG */
 .macro _SWAPW	dst, src, reg=r0
 	X_movw \reg, \src
 	X_movw \src, \dst
