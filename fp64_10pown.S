@@ -161,10 +161,7 @@ ENTRY fp64_10pown
 	st X, rAE1
 
 1:
-	XCALL _U(__fp64_popBC)		; restore register set
-	nop							; hack to avoid tail call optimization
-	ret
-
+	XJMP _U(__fp64_popBCret)	; restore register set and return
 ENDFUNC
 
 PGMX_SECTION (fp64.10pown)
