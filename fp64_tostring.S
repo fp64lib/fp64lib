@@ -403,7 +403,7 @@ ENTRY   fp64_to_string
 	rjmp .L_ret
 								; else {
 								; 	// copy exponent part
-93:	adiw Z, 1
+93:	adiw ZL, 1
 94:	ld r0, X+					;	do {
 	st Z+, r0					; 		s[++endPos] = s[pos++];
 	tst r0						; 	} while( s[pos-1] != '\0' );

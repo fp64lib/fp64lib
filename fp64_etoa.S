@@ -101,7 +101,7 @@ ENTRY	fp64_etoa
 	push XL						; save X
 	push XH
 
-	X_movw X, rResL				; is *res == "0", i.e. is x == 0.0?
+	X_movw XL, rResL			; is *res == "0", i.e. is x == 0.0?
 	; call __fp64_saveAB
 	ld rChar, X
 	cpi rChar, '0'
@@ -220,7 +220,7 @@ ENTRY	fp64_etoa
 
 	; >= case 1b --> rChar is "."
 	ld rChar, X					; get first character after ".": either E or digit
-	sbiw X, 1					; and position back to "."
+	sbiw XL, 1					; and position back to "."
 	cp rChar, rExp
 	breq .L_case1b				; case 1b "a.Eeee"
 	tst rChar
@@ -249,7 +249,7 @@ ENTRY	fp64_etoa
 .L_case1a:	; 1a) "aEeee"		--> "a0Ee-1"
 	; rChar is "E" or "\0"
 	; X points to first digit of exponent
-	sbiw X, 1					; move back to exponent delimiter
+	sbiw XL, 1					; move back to exponent delimiter
 
 .L_case1b:	; 1b) "a.Eeee"		--> "a0Ee-1"
 	; rChar is "E" or "\0"
@@ -291,7 +291,7 @@ ENTRY	fp64_etoa
 
 	ldi r20, 0x0a				; convert to radix 10
 	X_movw r24, rAE0			; number to convert
-	X_movw r22, X				; pointer to string
+	X_movw r22, XL				; pointer to string
 	XCALL __itoa_ncheck			; and convert exponent it to string
 
 	pop rResH					; restore pointer to string result
@@ -342,7 +342,7 @@ ENTRY	fp64_etoa
 	; >= case 22 --> rChar has first decimal digit
 	;				 X points to "."
 	st X+, rChar				; copy first decimal digit over the "." --> "abb"
-	adiw X, 1					; move X to next char after "abb"
+	adiw XL, 1					; move X to next char after "abb"
 	ld rChar, X					; get either next digit or "E"
 	sbiw XL, 1					; and go back to "b"
 	cp rChar, rExp
