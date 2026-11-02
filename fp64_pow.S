@@ -106,46 +106,30 @@ ENTRY_DOUBLE pow powl
 	push rB7					; save sign of y
 	andi rB7, 0x7f				; continue with |y|
 
-	cpi rB7, 0x3f
-	brlo .L_nan					; |y| < 1 --> x^y result undefined
-	brne 7f						; |y| >= 2, check for |y| < 2^52
-	cpi rB6, 0xf0
-	brlo .L_nan					; |y| < 1 --> x^y result undefined
-	brne .L_nan					; |y| > 1 --> x^y result undefined
-
-7:	cpi rB7, 0x43
-	brlo 1f						; |y| < 2^52, ok
-	brne .L_nan					; |y| > 2^59, not an integer
-	cpi rB6, 0x40
-	brlo 1f						; 2^49 < |y| < 2^53, ok
-	rjmp .L_nan					; |y| >= 2^53, not an integer
-
-1:	; here |y|/B is between 1 and 2^52
-	; now check, whether |y| is an integer
-	; first get the exponent of |y|
 	X_movw rBE0, rB6			; get exponent from rB7.rB6 into rBE1.rBE0
-    andi rBE0, 0xf0 			; get rid of mantissa bits in exponent
+	subi rBE0, lo8(1023 << 4)	; remove exponent bias
+	sbci rBE1, hi8(1023 << 4)
+	ldi rB7,  hi8(53 << 4)		; 0 <= expo * 0x10 < 53 * 0x10 ?
+	cpi rBE0, lo8(53 << 4)
+	cpc rBE1, rB7
+	brsh .L_nan					; if |y| < 1 or |y| >= 2^53 --> x^y is undefined
 
-	lsr  rBE1       			; mov exponent downwards 4 bits
-	ror  rBE0
-	lsr  rBE1
-	ror  rBE0
-	lsr  rBE1
-	ror  rBE0
-	lsr  rBE1
-	ror  rBE0
+	;; now 1 <= |y|/B < 2^53 and 0 <= rBE < 53 * 0x10 = 0x0350
+	;; check whether |y| is an integer
 
-	subi rBE0, lo8(1023)		; remove exponent bias: exp -= 1023
-	sbci rBE1, hi8(1023)
+	;; exponent >>= 4			; A.B.C.D is rBE with A = 0 and expo in B.C
+	andi rBE0, 0xf0				; 0.B.C.0
+	eor  rBE0, rBE1				; _._.C.B  # _ = unused
+	swap rBE0					; _._.B.C
 
-	; now rBE1.rBE0 is < 53 --> rBE0 is < 53, rBE1 can be used
+	;; now expo is in rBE0 and < 53 --> rBE1 can be used
 	mov rBE1, rBE0 				; save the exponent
 
 	; we have to separate between rBE0 < 4 and >=4
-	ldi rB7, 0x0f				; load mask to be used on rB6 for 0 <= exponent < 4
+	ldi rB7, 0x0f				; load mask to be used on rB6 for 0 <= expo < 4
 	cpi rBE0, 4
 	brlo 3f
-	ldi rB7, 0xff				; load mask to be used on rB5..rB0 for exponent >= 4
+	ldi rB7, 0xff				; load mask to be used on rB5..rB0 for expo >= 4
 	subi rBE0, 4				; round down to nearest 8 bits
 	andi rBE0, 0x07
 
@@ -275,7 +259,7 @@ ENTRY_DOUBLE pow powl
 	or r0, rB0
 .L_check:
 	; here Z is set if r0<>0 --> y has a fraction
-	brne .L_nan					; if |y| has a fraction, then x^y is not defined
+	brne .L_nan					; if |y| has a fraction, then x^y is undefined
 
 	; so we have no fraction, now determine whether the number is odd or even
 	lsl rB7	   					; goto from the fraction to lower most bit of integer
@@ -290,8 +274,8 @@ ENTRY_DOUBLE pow powl
 	subi rA7, 0x80				; return -pow(abs(x),y)
 	ret
 
-3:	; we are here because rBE0 contains only fraction bits
-	; so we have to check the byte above, i.e. bit 0 of rBE1 as the LSB of the integer
+3:	; we are here because rBE0 contains only fraction bits so we have to
+	; check the byte above, i.e. bit 0 of rBE1 as the LSB of the integer
 	andi rBE1, 1
 	rjmp 2b
 
