@@ -56,19 +56,16 @@ ENTRY	__fp64_split3
 	sbrc rB7, 7		; is B negative?
 	subi rA7, 0x80	; yes: reverse sign of A
 
-	X_movw rBE0, rB6 	; get exponent from rB7.rB6 into rBE1.rBE0
-    andi rBE0, 0xf0 ; get rid of mantissa bits in exponent
-    eor  rB6, rBE0  ; and get rid of exponent bits in mantissa
-
-	andi rBE1, 0x7f	; clear sign bit
-	lsr  rBE1       ; mov exponent downwards 4 bits
-	ror  rBE0
-	lsr  rBE1
-	ror  rBE0
-	lsr  rBE1
-	ror  rBE0
-	lsr  rBE1
-	ror  rBE0
+	X_movw rBE0, rB6	; get exponent from rB7.rB6 into rBE1.rBE0
+	andi rB6, 0x0f		; and get rid of exponent bits in mantissa
+	andi rBE1, 0x7f		; clear sign bit
+	;; rBE				; A.B.C.D  shift >> 4 to extract exponent in A.B.C
+	swap rBE1
+	swap rBE0			; B.A.D.C
+	andi rBE0, 0x0f		; B.A.0.C
+	eor  rBE0, rBE1		; B.A.B.C^A
+	andi rBE1, 0x0f		; 0.A.B.C^A
+	eor  rBE0, rBE1		; 0.A.B.C
 
 	; from now on
 	; 	exponent is in rBE1,rBE0,
@@ -166,20 +163,15 @@ ENTRY   __fp64_splitA
 	;call __fp64_saveAB ; save value of registers
 	bst	rA7, 7		; store sign in T flag (or sign(a)^sign(B))
 	X_movw rAE0, rA6 	; get exponent from rA7.rA6 into rAE1.rAE0
-	mov  rAE1, rA7	; save exponent
 	andi rAE1, 0x7f	; clear sign bit
-	andi rAE0, 0xf0	; clear mantissa bits, keep exponent bits
-	lsr  rAE1		; mov exponent downwards 4 bits
-	ror  rAE0
+	;; rAE			; A.B.C.D  shift rAE >> 4 to extract exponent in A.B.C
+	swap rAE1
+	swap rAE0		; B.A.D.C
+	andi rAE0, 0x0f	; B.A.0.C
+	eor  rAE0, rAE1	; B.A.B.C^A
+	andi rAE1, 0x0f	; 0.A.B.C^A
+	eor  rAE0, rAE1	; 0.A.B.C
 
-	lsr  rAE1
-	ror  rAE0
-
-	lsr  rAE1
-	ror  rAE0
-
-	lsr  rAE1
-	ror  rAE0
 	andi rA6, 0x0f 	; get rid of exponent bits
 
 	; from now on
@@ -220,13 +212,8 @@ ENTRY   __fp64_splitA
 	XCALL _U(__fp64_lslA)	; otherwise it is possible that a NaN might be
 	XCALL _U(__fp64_lslA)	; converted to Inf
 
-	cp	rA6, r1		; Z = 1 if rAx = 0
-	cpc	rA5, r1
-	cpc	rA4, r1
-	cpc	rA3, r1
-	cpc	rA2, r1
-	cpc	rA1, r1
-	cpc	rA0, r1		; Z = 1 if rA0 = 0
+	XCALL _U(__fp64_cpc0A5)	; Z = 1 iff rAx = 0
+	cpc	r1, rA6
 	sec				; set C=1 to indicate NaN or Inf
 	ret
 ENDFUNC
