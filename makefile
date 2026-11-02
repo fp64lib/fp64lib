@@ -19,6 +19,11 @@
 #
 # Notice that the availability of symbols like sin and sinl depends on
 # command-line options like -mdouble=64/32 and -mlong-double=64/32.
+#
+# In order to show the sizes (including all dependencies) of some
+# functions, use the size target:
+#
+# make size SYM='fp64_log fp64_log2' CFLAGS='-mno-relax'
 
 MCU = atmega328p
 
@@ -53,10 +58,18 @@ libfp64-$(MCU).a: $(FP64_ASM_OBJECTS)
 libfp64.a: libfp64-$(MCU).a force
 	cp $< $@
 
-# Other Targets
+wlu = -Wl,-u,
+SIZE_UNDEFS = $(patsubst %,$(wlu)%,$(SYM))
+
+size: size-$(MCU).elf
+	avr-size $<
+
+size-$(MCU).elf: libfp64-$(MCU).a force
+	$(XCC) -mmcu=$(MCU) -o $@ $(FP64FLAGS) -nostartfiles -Wl,--defsym,main=0 $(SIZE_UNDEFS) -L. -lfp64-$(MCU)
+
 clean: clean-libfp64
 
 clean-libfp64:
-	-$(RM) $(wildcard libfp64*.a fp64_*.[iso])
+	-$(RM) $(wildcard libfp64*.a fp64_*.[iso] size*.elf)
 
-.PHONY: all force clean clean-libfp64
+.PHONY: all size force clean clean-libfp64
