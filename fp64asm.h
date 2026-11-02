@@ -239,6 +239,16 @@ _U(\name):
 #endif
 .endm
 
+.macro .get_SP reg
+    REGNO .regno, \reg
+	in .regno + 0, SPL_IO_ADDR
+#ifdef SPH
+	in .regno + 1, SPH_IO_ADDR
+#else
+	clr .regno + 1
+#endif
+.endm
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Chicken out when the code demands more than the hardware can do.
 
