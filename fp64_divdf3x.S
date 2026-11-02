@@ -168,8 +168,15 @@ ENTRY	__fp64_divdf3_pse	; post split entry
 	push rR7
 	push rR8
 
+#define QQ1 rBE0
+#define QQ2 rBE1
+#define QQ3 rR8		/* r6 */
+#define QQ4 rR7		/* r7 */
+#define QQ5 rR6		/* r8 */
+#define QQ6 rR5		/* r9 */
+
 	rcall	.L_div
-	mov rR5, r0					; save top 8 bits of result
+	mov QQ6, r0					; save top 8 bits of result
 	brmi 5f
 								; handle A < B --> A/B < 1.0
 4:	clr r0
@@ -179,32 +186,39 @@ ENTRY	__fp64_divdf3_pse	; post split entry
 	subi rAE0, lo8(1)			; as result < 1, adjust exponent
 	sbci rAE1, hi8(1)
 	lsr r0						; get result of division into C
-	rol rR5						; and add it to previous result
+	rol QQ6						; and add it to previous result
 	brpl 4b						; until we got a leading bit
 
 	; continue with all other digits
 5:	rcall	.L_div
-	mov rR6, r0					; save result
+	mov QQ5, r0					; save result
 	rcall	.L_div
-	mov rR7, r0					; save result
+	mov QQ4, r0					; save result
 	rcall	.L_div
-	mov rR8, r0					; save result
+	mov QQ3, r0					; save result
 	rcall	.L_div
-	mov rBE1, r0				; save result
+	mov QQ2, r0					; save result
 	rcall	.L_div
-	mov rBE0, r0				; save result
+	mov QQ1, r0					; save result
 	rcall	.L_div
 	; call __fp64_saveDiv
 
-	; now result is in R5.R6.R7.R8.BE1.BE0.r0
+	; now result is in QQ6.QQ5.QQ4.QQ3.QQ2.QQ1.r0
 	; move result to A
 	mov rA0, r0
-	mov rA1, rBE0
-	mov rA2, rBE1
-	mov rA3, rR8
-	mov rA4, rR7
-	mov rA5, rR6
-	mov rA6, rR5
+	mov rA1, QQ1
+	mov rA2, QQ2
+	mov rA3, QQ3
+	mov rA4, QQ4
+	mov rA5, QQ5
+	mov rA6, QQ6
+
+#undef QQ1
+#undef QQ2
+#undef QQ3
+#undef QQ4
+#undef QQ5
+#undef QQ6
 
 	pop rR8						; restore used registers
 	pop rR7
