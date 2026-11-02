@@ -70,7 +70,9 @@ ENTRY __fp64_pushCB
 
 /* __fp64_popBC() restore B & C register set
 	Does not rely on YL,YH being the frame pointer
-	Function must be called via rcall or call, cannot be a target of rjmp/jmp!
+	!!! Function MUST be called via XCALL and MUST NOT be a target of XJMP!
+	!!! Function call MUST NOT be followed by a RET instruction!  Use
+    !!! XJMP _U(__fp64_popBCret)  from below instead.
 	Input:
 		none
 	Return:
@@ -111,4 +113,12 @@ ENTRY   __fp64_popBC
 	pop rC7
 
 	XJMP _U(__fp64_L_ret)
+
+/* Run __fp64_popBC and return.
+   This fun MUST be invoked by JMP or RJMP!  */
+
+ENTRY   __fp64_popBCret
+	rcall __fp64_popBC
+	nop							; defeat RCALL+RET -> RJMP+RET relaxing
+	ret
 ENDFUNC

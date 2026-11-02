@@ -205,8 +205,6 @@ ENTRY fp64_modff
 	st Z+, rB6
 	st Z+, rB7
 
-99:	; restore used B registers and return with A = modf(x)
-	XCALL _U(__fp64_popBC)
-	nop						; hack to avoid tail call optimization
-	ret
+99:	; restore used B and C registers and return with A = modf(x)
+	XJMP _U(__fp64_popBCret)
 ENDFUNC

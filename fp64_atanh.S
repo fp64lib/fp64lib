@@ -83,6 +83,5 @@ ENTRY_DOUBLE atanh atanhl
 	X_movw rB0, rB4
 	XCALL _U(fp64_mul)			; 1/2 * ln( sqrt( x*x +/- 1 ) + x )
 
-	XCALL _U(__fp64_popBC)		; restore used registers
-	ret							; and return
+	XJMP _U(__fp64_popBCret)	; restore used registers and return
 ENDFUNC
