@@ -168,12 +168,12 @@ ENTRY	__fp64_divdf3_pse	; post split entry
 	push rR7
 	push rR8
 
-#define QQ1 rBE0
-#define QQ2 rBE1
-#define QQ3 rR8		/* r6 */
-#define QQ4 rR7		/* r7 */
-#define QQ5 rR6		/* r8 */
-#define QQ6 rR5		/* r9 */
+#define QQ1 rR5		/* r9 */
+#define QQ2 rBE0
+#define QQ3 rBE1
+#define QQ4 rR8		/* r6 */
+#define QQ5 rR7		/* r7 */
+#define QQ6 rR6		/* r8 */
 
 	rcall	.L_div
 	mov QQ6, r0					; save top 8 bits of result
@@ -207,10 +207,8 @@ ENTRY	__fp64_divdf3_pse	; post split entry
 	; move result to A
 	mov rA0, r0
 	mov rA1, QQ1
-	mov rA2, QQ2
-	mov rA3, QQ3
-	mov rA4, QQ4
-	mov rA5, QQ5
+	X_movw rA2, QQ2
+	X_movw rA4, QQ4
 	mov rA6, QQ6
 
 #undef QQ1
