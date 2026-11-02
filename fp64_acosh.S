@@ -84,6 +84,17 @@ ENTRY_DOUBLE asinh asinhl
 	;; so we use that  asinh(x) = sign(x) * asinh(|x|).
 	push rA7					; save result sign
 	cbr rA7, 0x80				; x := |x|
+
+	XCALL _U(__fp64_movBA)		; save x in B for the x > 2^23 path
+
+	;; The square below might overflow, so for x > 2^23 use
+	;;    acos(x) ~ asin(x) ~ ln(2x).
+	;; See https://github.com/fp64lib/fp64lib/issues/79 for rationale.
+	ldi XH,  hi8(0x3ff0 + 0x10 * 23)
+	cpi rA6, lo8(0x3ff0 + 0x10 * 23)
+	cpc rA7, XH
+	brge 1f						; if x >= 2^23 use sqrt(x^2 +/- 1) ~ x
+
 	XCALL _U(__fp64_pushA)		; save x
 	push XL						; save sign bit
 
@@ -92,12 +103,11 @@ ENTRY_DOUBLE asinh asinhl
 	XCALL _U(__fp64_one)		; load 1
 	pop r0						; retrieve sign
 	or rA7, r0					; for acosh make it a -1
-	XCALL _U(__fp64_swapAB)		; get operands in right order
 	XCALL _U(fp64_add)			; x*x +/- 1
 	XCALL _U(fp64_sqrt)			; sqrt( x*x +/- 1 )
 
 	XCALL _U(__fp64_popB)		; retrieve x
-	XCALL _U(fp64_add)			; sqrt( x*x +/- 1 ) + x
+1:	XCALL _U(fp64_add)			; sqrt( x*x +/- 1 ) + x or x + x when x >= 2^23
 	XCALL _U(fp64_log)			; ln( sqrt( x*x +/- 1 ) + x )
 
 	pop r0						; install result sign
