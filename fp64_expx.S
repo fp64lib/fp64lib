@@ -183,15 +183,13 @@ ENTRY_DOUBLE exp expl
 6:	; real underflow, return 0
 	rjmp .L_zr
 
+#ifdef CHECK_POWSER
 ENTRY __fp64_check_powserexp
-#ifndef CHECK_POWSER
-	ret
-#else
 	push XL
 	push XH
 	LPMX_INIT XL, .L_expxTable
 	XJMP _U(__fp64_check_powsern)
-#endif
+#endif /* CHECK_POWSER */
 ENDFUNC
 
 PGMX_SECTION (fp64.expx)

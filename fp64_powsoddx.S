@@ -92,12 +92,8 @@ ENTRY __fp64_powsodd
 	XJMP	_U(__fp64_inf)	; No, case 2 --> return Inf
 .L_nan:	; x = NaN, case 1 --> return NaN
 	XJMP	_U(__fp64_nan)
-#endif
 
 ENTRY __fp64_check_powsodd3
-#ifndef CHECK_POWSER
-	ret
-#else
 	push XL
 	push XH
 	LPMX_INIT XL, .L__testTable3x
@@ -129,7 +125,7 @@ ENTRY __fp64_check_powslog
 	push XH
 	LPMX_INIT XL, .L__testTableLogx
 	rjmp 98b
-#endif
+#endif /* CHECK_POWSER */
 ENDFUNC
 
 #ifdef CHECK_POWSER
