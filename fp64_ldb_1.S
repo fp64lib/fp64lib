@@ -31,24 +31,25 @@
 
 /*	float64_t_intern __fp64_ldb_1()
 	load B register with 1.0 in internal, unpacked format
-	does not modify any other registers except SREG
+	does not modify any other registers including SREG
 
 	input:		- none -
 	output:		rB7.rB6...rB0.rBE1.rBE0		1.0 in unpacked format
-
 */
 
-FUNCTION __fp64_ldb_1
 ENTRY __fp64_ldb_1
-	push ZL				; load b with PI/2
-	push ZH
-	LPMX_INIT ZL, .L_const_1
-	XJMP _U(__fp64_ldb_const)
+	;; +1.0 with 56 bits precision in unpacked format
+	;;        B7    B6    B5    B4    B3    B2    B1    B0    BE1   BE0
+	;; .byte  0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xff
+
+	;; Loading by hand is faster / smaller than __fp64_ldb_const.
+	ldi rBE0, lo8(0x03ff)
+	ldi rBE1, hi8(0x03ff)
+	ldi	rB7, 0x00
+	ldi rB6, 0x80
+	mov	rB5, rB7
+	mov	rB4, rB7
+	X_movw rB2, rB4
+	X_movw rB0, rB4
+	ret
 ENDFUNC
-
-PGMX_SECTION (fp64.ldb_1)
-
-;; +1.0 with 56 bits precision in unpacked format
-OBJECT .L_const_1
-	.byte  0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xff
-ENDOBJ .L_const_1
