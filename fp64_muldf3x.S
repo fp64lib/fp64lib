@@ -461,15 +461,12 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	X_movw rA2,rB0
 	mov rA1,rR8
 	mov rA0,rR7
-#if 0
-	;; FIXME: The "sbr rA0, 0" below is void (same like "ori rA0, 0").
-	;;        Should this be changed to "sbr rA0, 1", or just be removed?
+
 	or rR6, rR5		; are there any trailing bits set?
 	; rcall __fp64_saveAB
 	breq 151f
-	sbr rA0, 0 		; yes: set LSB to signal possible rounding
+	sbr rA0, 1 		; yes: set LSB to signal possible rounding
 151:
-#endif /* 0 */
 	clc
 	ret				; return with carry clear
 
