@@ -64,7 +64,6 @@ ENTRY_DOUBLE sqrt sqrtl
 
 	;call __fp64_saveA
 	; normalize, if A is subnormal
-	.sbrs_callj rA6, 7
 	XCALL	_U(__fp64_norm2)
 	;call __fp64_saveA
 

@@ -76,11 +76,10 @@ ENTRY_DOUBLE frexp frexpl
 
 	; rcall __fp64_saveAB
 
-	subi rAE0, lo8(1022)	; remove base 1023 - 1 from exponent
+	subi rAE0, lo8(1022)	; remove bias 1023 - 1 from exponent
 	sbci rAE1, hi8(1022)	; (-1 as result is in [0.5;1) )
 
-	.sbrs_callj rA6, 7		; is x a subnormal number
-	XCALL _U(__fp64_norm2)	; yes: normalize it
+	XCALL _U(__fp64_norm2)	; non-zero: normalize if subnormal
 
 	adiw	XL, 0			; skip if pointer is == NULL
 	breq	2f
@@ -89,7 +88,7 @@ ENTRY_DOUBLE frexp frexpl
 
 2:	; normalize the number to be in the range [0.5, 1)
 	; --> exponent has to be 0x3fe
-	ldi rAE1, 0x03
-	ldi rAE0, 0xfe
+	ldi rAE0, lo8(1022)
+	ldi rAE1, hi8(1022)
 	XJMP _U(__fp64_pretA)
 ENDFUNC

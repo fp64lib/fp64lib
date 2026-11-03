@@ -81,8 +81,7 @@ ENTRY_DOUBLE log2 log2l
 	;; MiniMax polynomial with (x - 1) / (x + 1), so we
 	;; get exactly 0.
 
-	.sbrs_callj rA6, 7
-	XCALL _U(__fp64_norm2)		; normalize if not already normalized
+	XCALL _U(__fp64_norm2)		; non-zero: normalize if subnormal
 
 	XCALL _U(__fp64_pushCB)		; save the used callee-saved regs
 	push YH
