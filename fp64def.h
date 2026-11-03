@@ -139,8 +139,9 @@ Registers
 #define rExp10L	XL
 #define rExp10H	XH
 
-// scratch registers used in multiplication
+// scratch registers used in multiplication...
 #define rZero r5
+// ...and in division, where the order of the definitions DOES matter
 #define rR8 r6
 #define rR7 r7
 #define rR6 r8
