@@ -90,6 +90,7 @@ FUNCTION __fp64_muldf3x
 
 	; handle A*B = 0
 2:	clr		r1				; r1 may contain garbage, clear it
+.L_szero:
 	XJMP	_U(__fp64_szero)
 
 	/*
@@ -410,9 +411,8 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 
 	; normalized result is in rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5
 	; exponent -= 1023 subtract exponent base
-11: subi 	rAE0, 0xfe	; subtract exponent base 1023 = 0x3ff
-	sbci 	rAE1, 0x03
-	adiw    rAE0, 0
+11: subi 	rAE0, lo8(1022)	; subtract exponent bias 1023 = 0x3ff
+	sbci 	rAE1, hi8(1022)
 	; rcall __fp64_saveMul
 	brmi	13f			; exponent negative --> denormal number / underflow
 	breq	15f		    ; exponent = 0 --> denormal number
@@ -420,23 +420,22 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	; result exponent > min ==> normalization is possible
 	; check for overflow
 	; rcall __fp64_saveMul
-	cpi rAE1, 7			; check if exponent < 0x7ff
+	ldi rA6, hi8(0x7ff)	; check if exponent < 0x7ff
+	cpi rAE0,lo8(0x7ff)
+	cpc rAE1, rA6
 	brlo 15f			; everything ok, no overflow
-	brne 111f			; exponent >= 0x800 -> overflow
-	cpi rAE0, 0xff		; exponent >= 0x700, check if < 0x7ff
-	brne 15f			; yes -> normalize number
 	;call __fp64_saveMul
 
 	; exponent >= 0x7ff --> overflow,
-111:XCALL _U(__fp64_inf)
-	sec					; set carry as flag for error and returning of packed result
-	ret
+111:
+	sec					; C = 1: error and returning of packed result
+	XJMP _U(__fp64_inf)
 
 	; underflow, cannot even be expressed as denormilzed number --> return +/-0
 12: mov rAE1, r1
 	mov rAE0, r1
 	clc
-	XJMP	_U(__fp64_szero)
+	rjmp .L_szero
 
 131: rcall 16f
 	rjmp 15f
@@ -454,21 +453,19 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	brmi 14b		; exponent still < 0
 	;call __fp64_saveMul
 
-	; shift mantissa 3 bits to prepare for packing
-	; (topmost bit is discarded as it is always 1, therefore only 3 shifts needed instead of 4)
+	;; shift mantissa 3 bits to prepare for packing (topmost bit is discarded
+	;; as it is always 1, therefore only 3 shifts needed instead of 4)
 15: ; call __fp64_saveMul
 	mov rA6,rB4		; move result into A
-	mov rA5,rB3
-	mov rA4,rB2
-	mov rA3,rB1
-	mov rA2,rB0
+	X_movw rA4,rB2
+	X_movw rA2,rB0
 	mov rA1,rR8
 	mov rA0,rR7
 
 	or rR6, rR5		; are there any trailing bits set?
 	; rcall __fp64_saveAB
 	breq 151f
-	sbr rA0, 0 		; yes: set LSB to signal possible rounding
+	sbr rA0, 1 		; yes: set LSB to signal possible rounding
 151:
 	clc
 	ret				; return with carry clear
