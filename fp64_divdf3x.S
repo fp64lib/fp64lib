@@ -183,8 +183,7 @@ ENTRY	__fp64_divdf3_pse	; post split entry
 	sec
 	ror r0						; r0 = 0x80
 	rcall .L_div1				; do 1 bit division at a time
-	subi rAE0, lo8(1)			; as result < 1, adjust exponent
-	sbci rAE1, hi8(1)
+	sbiw rAE0, 1				; as result < 1, adjust exponent
 	lsr r0						; get result of division into C
 	rol QQ6						; and add it to previous result
 	brpl 4b						; until we got a leading bit
@@ -223,7 +222,7 @@ ENTRY	__fp64_divdf3_pse	; post split entry
 	pop rR6
 	pop rR5
 
-	; adjust exponent to base 1023
+	; adjust exponent to bias 1023
 	subi rAE0, lo8(-1023)
 	sbci rAE1, hi8(-1023)
 	brmi	13f					; denormalization is needed
@@ -237,17 +236,17 @@ ENTRY	__fp64_divdf3_pse	; post split entry
 
 .L_inf2:						; overflow
 	XCALL _U(__fp64_inf)
+.L_sec_ret:
 	sec							; set carry to indicate overflow
 	ret
 
    ; return 0 for underflow
 12: XCALL	_U(__fp64_szero)
-	sec							; set carry to indicate packed result
-	ret
+	rjmp .L_sec_ret				; set carry to indicate packed result
 
-13: cpi rAE0,lo8(-51)			; check if result could fit into remaining 52 bits
+13: cpi rAE0,lo8(-51)			; check if result fits into remaining 52 bits
 	brlt 12b					; no --> return 0
-	cpi rAE1, 0xFF				; catch cases where exp(a)-exp(b)<-255
+	cpi rAE1, 0xFF				; catch cases where expo(a) - expo(b) < -255
 	brne 12b					; also return 0
 
 	; handle subnormal numbers
@@ -264,17 +263,17 @@ ENTRY	__fp64_divdf3_pse	; post split entry
 	; divide 8 times
 .L_div:
 	clr r0
-	inc r0
+	inc r0						; r0.0 heralds loop end after 8 ROLs
 .L_div1:
 	XCALL _U(__fp64_lslA)		; A <<= 1
 	rol rA7
-	XCALL _U(__fp64_cpcAB)		; is A > B
+	XCALL _U(__fp64_cpcAB)		; is A >= B
 	cpc rA7, rB7
-	brcs	2f					; no, skip subtraction
+	brlo	2f					; no, C is 1 and skip subtraction
 	XCALL _U(__fp64_subAB)		; yes, A -= B
-	sbc rA7, rB7				; as A > B, C will be 0 after this operation
+	sbc rA7, rB7				; as A >= B, C will be 0 after this operation
 2:	rol r0						; register result of operation, move C into r0
-	brcc	.L_div1				; continue up to 8 times
+	brcc	.L_div1				; continue 8 times
 
 	com r0						; convert result to positive logic
 	ret
