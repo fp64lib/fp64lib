@@ -43,14 +43,11 @@ ENTRY_DOUBLE acosh acoshl
 .L_nan:
 	XJMP	_U(__fp64_nan)		; yes --> return NaN
 
-	cpi rA7, 0x3f				; is x < 2^(-15) ?
-	brlo .L_nan					; yes --> return NaN
-	brne 1f						; x > 2^0 --> ok
-
-	cpi rA6, 0xf0				; is x < 2^0 ?
+	ldi XL,  hi8(0x3ff0)
+	cpi rA6, lo8(0x3ff0)		; is x < 2^0 ?
+	cpc rA7, XL
 	brlo .L_nan					; yes --> return NaN
 
-1:
 	; x is now >=1
 	ldi XL, 0x80				; set sign bit
 	rjmp .L_common
