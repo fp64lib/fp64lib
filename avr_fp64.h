@@ -1,43 +1,6 @@
 /* Copyright (c) 2019-2020  Uwe Bissinger
-   Based on code of avr_f64.h with:
-   Original Code by Detlef_a (Nickname in the www.mikrocontroller.net forum).
-   Extensions (trigonometric functions et al.) und changes by Florian Königstein, mail@virgusta.eu .
-
-  The following copyright information refers to the code developed by Florian Königstein.
-
-; //*********************************************************************************************************** //
-; //*********************************************************************************************************** //
-; //                                                                                                           //
-; // avr_f64.c and avr_f64.h : Contains ANSI C Functions for handling of 64-bit IEEE 754 double precision      //
-; // floating point numbers.                                                                                   //
-; // float64_t represents an IEEE 64-bit double precision floating point number.                               //
-; //                                                                                                           //
-; // Compiler: avr-gcc                                                                                         //
-; //                                                                                                           //
-; // Copyright:                                                                                                //
-; //      You may use this program free of charge for any purpose you wish provided you agree to the following //
-; //      License:                                                                                             //
-; //      Warranty of Provenance and Disclaimer of Warranty. Licensor warrants that the copyright              //
-; //      in and to the Original Work and the patent rights granted herein by Licensor are owned by the        //
-; //      Licensor or are sublicensed to You under the terms of this License with the permission of the        //
-; //      contributor(s) of those copyrights and patent rights. Except as expressly stated in the immediately  //
-; //      preceding sentence, the Original Work is provided under this License on an "AS IS" BASIS and WITHOUT //
-; //      WARRANTY, either express or implied, including, without limitation, the warranties of                //
-; //      non-infringement, merchantability or fitness for a particular purpose. THE ENTIRE RISK AS TO THE     //
-; //      QUALITY OF THE ORIGINAL WORK IS WITH YOU. This DISCLAIMER OF WARRANTY constitutes an essential part  //
-; //      of this License. No license to the Original Work is granted by this License except under this        //
-; //      disclaimer.                                                                                          //
-; //                                                                                                           //
-; //      Limitation of Liability. Under no circumstances and under no legal theory, whether in tort           //
-; //      (including negligence), contract, or otherwise, shall the Licensor be liable to anyone for any       //
-; //      indirect, special, incidental, or consequential damages of any character arising as a result of      //
-; //      this License or the use of the Original Work including, without limitation, damages for loss of      //
-; //      goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages    //
-; //      or losses. This limitation of liability shall not apply to the extent applicable law prohibits such  //
-; //      limitation.                                                                                          //
-; //                                                                                                           //
-; //*********************************************************************************************************** //
-; //*********************************************************************************************************** //
+   Copyright (c) 2007-2009  Detlef Schücker
+   Copyright (c) 2007-2009  Florian Königstein
 
    All rights reserved.
 
