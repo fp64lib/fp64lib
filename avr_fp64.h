@@ -1,43 +1,6 @@
 /* Copyright (c) 2019-2020  Uwe Bissinger
-   Based on code of avr_f64.h with:
-   Original Code by Detlef_a (Nickname in the www.mikrocontroller.net forum).
-   Extensions (trigonometric functions et al.) und changes by Florian Königstein, mail@virgusta.eu .
-
-  The following copyright information refers to the code developed by Florian Königstein.
-
-; //*********************************************************************************************************** //
-; //*********************************************************************************************************** //
-; //                                                                                                           //
-; // avr_f64.c and avr_f64.h : Contains ANSI C Functions for handling of 64-bit IEEE 754 double precision      //
-; // floating point numbers.                                                                                   //
-; // float64_t represents an IEEE 64-bit double precision floating point number.                               //
-; //                                                                                                           //
-; // Compiler: avr-gcc                                                                                         //
-; //                                                                                                           //
-; // Copyright:                                                                                                //
-; //      You may use this program free of charge for any purpose you wish provided you agree to the following //
-; //      License:                                                                                             //
-; //      Warranty of Provenance and Disclaimer of Warranty. Licensor warrants that the copyright              //
-; //      in and to the Original Work and the patent rights granted herein by Licensor are owned by the        //
-; //      Licensor or are sublicensed to You under the terms of this License with the permission of the        //
-; //      contributor(s) of those copyrights and patent rights. Except as expressly stated in the immediately  //
-; //      preceding sentence, the Original Work is provided under this License on an "AS IS" BASIS and WITHOUT //
-; //      WARRANTY, either express or implied, including, without limitation, the warranties of                //
-; //      non-infringement, merchantability or fitness for a particular purpose. THE ENTIRE RISK AS TO THE     //
-; //      QUALITY OF THE ORIGINAL WORK IS WITH YOU. This DISCLAIMER OF WARRANTY constitutes an essential part  //
-; //      of this License. No license to the Original Work is granted by this License except under this        //
-; //      disclaimer.                                                                                          //
-; //                                                                                                           //
-; //      Limitation of Liability. Under no circumstances and under no legal theory, whether in tort           //
-; //      (including negligence), contract, or otherwise, shall the Licensor be liable to anyone for any       //
-; //      indirect, special, incidental, or consequential damages of any character arising as a result of      //
-; //      this License or the use of the Original Work including, without limitation, damages for loss of      //
-; //      goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages    //
-; //      or losses. This limitation of liability shall not apply to the extent applicable law prohibits such  //
-; //      limitation.                                                                                          //
-; //                                                                                                           //
-; //*********************************************************************************************************** //
-; //*********************************************************************************************************** //
+   Copyright (c) 2007-2009  Detlef Schücker
+   Copyright (c) 2007-2009  Florian Königstein
 
    All rights reserved.
 
@@ -66,36 +29,49 @@
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE. */
 
-// This file contains definitions to easily port code based on avr_f64.h / avr_f64.c
-// to using fp64lib.
-//
-// Instead of
-// 	#include "avr_f64.h"
-// use
-//  #include "avr_fp64.h"
-//
-// All calls to routines to avr_f64 routines will be replaced by calls to fp64_lib
-// routines. Be aware of the following differences:
-// As fp64_lib is provided as a library, where the compiler/linker will automatically
-//   only pull in the routines that are needed, the #define F_WITH_... are ignored
-// Also, #define F_PREFER_SMALL_BUT_SLOWER_CODE will have no effect, as fp64_lib
-//	 code is already significandly smaller AND faster as it is written in assembly
-//   language, taking advantage of the AVR microprocessor architecture as much as possible.
-// fp64_lib fully supports IEEE754 denormalized numbers, avr_f64 interprets them as zero
-// fp64_lib handles and returns all kindes of IEEE NaNs (Not a Number), avr_64 returns
-//    always/only 0x7fffffffffffffff as NaN.
-// fp64_lib always and properly handles +INF and -INF, avr_f64 supports +/-INF only if
-//    F_ONLY_NAN_NO_INFINITY is NOT defined.
-// fp64_lib uses different algorithms for sin/cos/tan, so the results will differ slightly
-//    from avr_f64.
-// fp64_lib uses different algorithm for f_to_string, so the result will differ slightly,
-//    in most cases the string will fit better into the given length.
-// Due to the use of assembly language, all routines are significandly faster than avr_f64
-//    routines, in the range of factor 2 to 10 (-50% to -90%). Be aware to adjust your
-//    timing/delays, if your project used some relative waiting routines. Also, if you
-//    periodically did some floating point calculations on some sensor data, your
-//    calculations could fail now, as some sensors will not provide you new data if the
-//    interval between two readings is too short.
+/* This file contains definitions to easily port code based on
+   avr_f64.h / avr_f64.c to using fp64lib.
+
+   Instead of
+      #include "avr_f64.h"
+   use
+      #include "avr_fp64.h"
+
+   All calls to avr_f64 routines will be replaced by calls to
+   fp64lib routines.  Be aware of the following differences:
+
+   * As fp64lib is provided as a library, where the compiler/linker will
+     automatically only pull in the routines that are needed, the
+        #define F_WITH_...
+     are ignored. Also,
+        #define F_PREFER_SMALL_BUT_SLOWER_CODE
+     will have no effect as fp64lib code is already significandly smaller
+     AND faster as it is written in assembly language, taking advantage of
+     the AVR microprocessor architecture as much as possible.
+
+   * fp64lib fully supports IEEE 754 denormalized numbers, avr_f64 interprets
+     them as zero.
+
+   * fp64lib handles and returns all kinds of IEEE NaNs (Not a Number),
+     whereas avr_64 returns always/only 0x7fffffffffffffff as NaN.
+
+   * fp64lib always and properly handles +INF and -INF, whereas avr_f64
+     supports +/-INF only if F_ONLY_NAN_NO_INFINITY is NOT defined.
+
+   * fp64lib uses different algorithms for sin/cos/tan and asin/acos/atan,
+     so the results will differ slightly from avr_f64.
+
+   * fp64lib uses a different algorithm for f_to_string, so the result will
+     differ slightly.  In most cases, the string will fit better into the
+     given length.
+
+   Due to the use of assembly language, all routines are significandly faster
+   than avr_f64 routines, in the range of factor 2 to 10 (-50% to -90%).
+   Be aware to adjust your timing/delays, if your project uses some relative
+   waiting routines.  Also, if you periodically run some floating point
+   calculations on sensor data, your calculations could fail now, as some
+   sensors will not provide you new data if the interval between two readings
+   is too short.  */
 
 #ifdef avr_f64_h_included
 #error "Include either avr_f64.h or avr_fp64.h, but not both"
@@ -108,7 +84,7 @@
 #include "fp64lib.h"
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 #define	f_long_to_float64(n)			fp64_long_to_float64(x)
@@ -116,10 +92,10 @@ extern "C"{
 #define	f_sd(fx)						fp64_sd(fx)
 #define f_ds(x)							fp64_ds(x)
 
-#define	f_add(a, b)						fp64_add( (a), (b) )
-#define f_sub(a, b)						fp64_sub( (a), (b) )
-#define f_mult(a, b)					fp64_mul( (a), (b) )
-#define f_div(a, b)						fp64_div( (a), (b) )
+#define	f_add(a, b)						fp64_add((a), (b))
+#define f_sub(a, b)						fp64_sub((a), (b))
+#define f_mult(a, b)					fp64_mul((a), (b))
+#define f_div(a, b)						fp64_div((a), (b))
 
 #define f_abs(x)						fp64_abs(x)
 #define f_cut_noninteger_fraction(x)	fp64_cut_noninteger_fraction(x)
@@ -138,7 +114,7 @@ extern "C"{
 #define f_sqrt(x)						fp64_sqrt(x)
 #define f_exp(x)						fp64_exp(x)
 #define f_log(x)						fp64_log(x)
-#define f_pow(x, y) 					fp64_pow((x),(y))
+#define f_pow(x, y) 					fp64_pow((x), (y))
 
 #define f_sin(x) 						fp64_sin(x)
 #define f_cos(x) 						fp64_cos(x)
