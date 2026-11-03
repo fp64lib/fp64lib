@@ -33,9 +33,10 @@
 #include "fp64def.h"
 
 FUNCTION __fp64_norm2
-ENTRY __fp64_norm2
 1:	sbiw rAE0, 1			; exponent--
 	XCALL _U(__fp64_lslA)	; mantissa <<= 1
-	brpl	1b				; until mantissa starts with a leading 1 bit
+ENTRY __fp64_norm2
+	sbrs rA6, 7				; normalized?
+	rjmp	1b				; no: loop until mantissa starts with a leading 1
 	ret
 ENDFUNC
