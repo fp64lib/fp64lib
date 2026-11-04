@@ -196,6 +196,8 @@ float64_t fp64_tanh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_asinh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_acosh( float64_t x ) __ATTR_CONST__;
 float64_t fp64_atanh( float64_t x ) __ATTR_CONST__;
+float64_t fp64_sinpi( float64_t x ) __ATTR_CONST__; // C23
+float64_t fp64_cospi( float64_t x ) __ATTR_CONST__; // C23
 
 // functions with 2 arguments
 float64_t fp64_copysign (float64_t x, float64_t y) __ATTR_CONST__;
