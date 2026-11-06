@@ -283,9 +283,9 @@ GCC_ENTRY __fixunsdfsi
 __fp64_fixxdfxi:
 	XCALL _U(__fp64_splitA)
 	brcs .L_err					; return 0 for NaN and +/-INF
-	breq .L_zr					; return 0 for 0
+	breq .L_zr					; return 0 for 0, C = 0
 	tst rAE1
-	brmi .L_zr					; return 0 if exponent is < 0
+	brmi .L_zr					; return 0 if exponent is < 0, C = 0
 
 	; A is finite and abs(x) > 0
 	subi rAE0, lo8(1023)		; remove exponent bias: exp -= 1023
@@ -303,33 +303,8 @@ __fp64_fixxdfxi:
 	; up to rA7..rA0 and then back down.
 	sbrs rBE0, 0
 	dec rAE1
-	cpi rAE1, 8					; do we have to make >=8 shifts
-	brlo 2f						; no, bring number to correct position
-
-1:	mov rA7, r1					; yes, clear top 8 bits
-	subi rAE1, 8				; adjust counter, as 8 shifts are done
-	cpi rAE1, 8					; still more than 8 shifts to be done
-	brlo 3f						; no, do single bit shifting
-	mov rA0, rA1				; yes, shift down by 8 bits
-	mov rA1, rA2
-	mov rA2, rA3
-	mov rA3, rA4
-	mov rA4, rA5
-	mov rA5, rA6
-	mov rA6, rA7
-	rjmp 1b						; and continue byte-wise shifting
-
-	; return zero as regular value, error flag not set
-.L_zr:
-	pop rBE0
-	XJMP	_U(__fp_zero)		; return 0x00000000, clear carry
-
-	; on all errors: return 0 and set error flag
-.L_err:
-	XCALL	_U(__fp64_zero)		; float64_t zero is also long 0
-	sec							; set error flag
-	pop rBE0
-	ret
+	cpi rAE1, 8					; do we have to make >= 8 shifts?
+	brsh .L_lsr8x				; yes, bring number to correct position
 
 2:	; number was >= 2^56 --> less than 8 shifts to be made
 	; and we have to bring the number into rA7..rA0
@@ -342,16 +317,14 @@ __fp64_fixxdfxi:
 	mov rA1, rA0
 	mov rA0, r1					; clear bottom 8 bits
 
-3:	tst rAE1					; still any shifts to be done?
-4:	breq .L_sign				; no, set the sign
-	lsr rA7						; yes, shift down 1 bit
+	rjmp 4f
+3:	lsr rA7						; shift down 1 bit
 	ror rA6
 	XCALL _U(__fp64_rorA5)
-	dec rAE1
-	rjmp 4b
+4:	dec rAE1					; rAE1 is 0...7 prior to the DEC
+	brpl 3b						; still any shifts to be done?
 
   ; restore the sign and return
-.L_sign:
 	brtc 6f						; if( sign )
 	cpi rBE0, 33				;	clear out lower bits that are not used
 	brge 5f						;	otherwise negation will round towards next number
@@ -371,4 +344,27 @@ __fp64_fixxdfxi:
 7:	clc							; clear carry as error flag
 	pop rBE0
 	ret
+
+.L_lsr8x:
+	mov rA7, r1					; yes, clear top 8 bits
+8:	subi rAE1, 8				; adjust counter, as 8 shifts are done
+	cpi rAE1, 8					; still more than 8 shifts to be done
+	brlo 4b						; no, do single bit shifting
+	mov rA0, rA1				; yes, shift down by 8 bits
+	mov rA1, rA2
+	mov rA2, rA3
+	mov rA3, rA4
+	mov rA4, rA5
+	mov rA5, rA6
+	mov rA6, rA7
+	rjmp 8b						; and continue byte-wise shifting
+
+.L_err:
+	;; on all errors: return 0 and set error flag
+	sec							; set error flag
+
+.L_zr:
+	;; return zero as regular value, error flag according to C
+	pop rBE0
+	XJMP	_U(__fp_zero)		; return 0x00000000, keep carry
 ENDFUNC
