@@ -135,8 +135,16 @@ ENTRY   __fp64_muldf3x
 	and rounds the result to a 64-bit floating point integer.
 	A and B must not be NaN or +/-Inf --> A and B are both finite.
 
+	Input:	rAE1.rAE0 rA6..rA0	A in internal expanded format
+`			rAB1.rAB0 rB6..rB0	B in internal expanded format
 	Return:
-		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result = A * B
+			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 result = A * B
+			Sign must be handled by caller, T flag is neither read nor modified
+	Modifies (beside registers used for return):
+			rZero, rR8..rR5 (=r5..r9)
+			rB6..rB0
+			r0
+			all flags except T
 	*/
 ENTRY   __fp64_muldf3_pse			; post-split entry
 	; check zero (subnormal have exp == 1)
