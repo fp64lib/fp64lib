@@ -34,7 +34,8 @@
 
 /*  __fp64_one()   returns +1.0,   T flag left untouched
 	__fp64_zero()  returns +0.0,   T flag cleared
-	__fp64_szero() returns +/-0.0, based on sign bit in T flag, T flag left untouched
+	__fp64_szero() returns +/-0.0, based on sign bit in T flag, T is unchanged
+	In any case, all flags except T are untouched (neither read nor written).
  */
 
 FUNCTION __fp64_zero
