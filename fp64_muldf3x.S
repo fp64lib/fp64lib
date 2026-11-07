@@ -130,7 +130,7 @@ ENTRY   __fp64_muldf3x
 3:	ret				; overflow, return already packed result +/-Inf
 
 	/*
-	fp64 __fp64muldf3_pse( fp64_splitted_t A, fp64_splitted_t B )
+	fp64_splitted __fp64muldf3_pse( fp64_splitted_t A, fp64_splitted_t B )
 	Multiplies two 64-bit floating point numbers that are split,
 	and rounds the result to a 64-bit floating point integer.
 	A and B must not be NaN or +/-Inf --> A and B are both finite.
@@ -138,8 +138,10 @@ ENTRY   __fp64_muldf3x
 	Input:	rAE1.rAE0 rA6..rA0	A in internal expanded format
 `			rAB1.rAB0 rB6..rB0	B in internal expanded format
 	Return:
-			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 result = A * B
-			Sign must be handled by caller, T flag is neither read nor modified
+			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 result = A * B  // C = 0
+			      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 packed result   // C = 1
+			Sign must be handled by caller, T flag is neither read nor modified,
+			except in the case when +/-Inf is returned (has sign T then).
 	Modifies (beside registers used for return):
 			rZero, rR8..rR5 (=r5..r9)
 			rB6..rB0
@@ -164,7 +166,7 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 
 	; core algorithm for multiplication
 	; multiplication will be computed with 72 bit precision --> max error +/-1 LSB
-	; rB5.rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5 = rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 * rB7.rA6.rA5.rA4.rA3.rA2.rA1.rA0
+	; rB5.rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5 = rA6.rA5.rA4.rA3.rA2.rA1.rA0 * rB6.rB5.rB4.rB3.rB2.rB1.rB0
 	; all multiplications "below" 72 bit are left out (e.g. rA4*rB0, rA3*rB1, rA2*rB2, rA1*rB3, rA0*rB4)
 	;rR7.rR6.rR5	 = rA5 * rB0
 	mul rA5, rB0
@@ -418,7 +420,7 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	rjmp 10b
 
 	; normalized result is in rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5
-	; exponent -= 1023 subtract exponent base
+	; exponent -= 1023 subtract exponent bias
 11: subi 	rAE0, lo8(1022)	; subtract exponent bias 1023 = 0x3ff
 	sbci 	rAE1, hi8(1022)
 	; rcall __fp64_saveMul
@@ -442,8 +444,12 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	; underflow, cannot even be expressed as denormilzed number --> return +/-0
 12: mov rAE1, r1
 	mov rAE0, r1
-	clc
-	rjmp .L_szero
+	;; FIXME: This clears the expanded mantissa in A0...A6 but also
+	;;        changes A7 --> save / restore A7 to match doc.
+	mov r0, rA7
+	rcall .L_szero
+	mov rA7, r0
+	rjmp .L_clc_ret
 
 131: rcall 16f
 	rjmp 15f
@@ -475,6 +481,7 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	breq 151f
 	sbr rA0, 1 		; yes: set LSB to signal possible rounding
 151:
+.L_clc_ret:
 	clc
 	ret				; return with carry clear
 
