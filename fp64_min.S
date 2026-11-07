@@ -38,14 +38,16 @@ FUNCTION fp64_min
 	For this operation, +0 compares greater than −0.
  */
 ENTRY fp64_maximum
-	subi rA7, 0x80			; max(a,b) = -min(-a,-b), e.g. max(5,3) = -min(-5,-3) = -(-5) = 5
+	subi rA7, 0x80				; max(a,b) = -min(-a,-b), e.g. max(5,3) = -min(-5,-3) = -(-5) = 5
+	push rB7
 	subi rB7, 0x80
 	rcall fp64_minimum
 	subi rA7, 0x80
+	pop rB7
 	ret
 
 .L_nan:	; one of the numbers is a NaN --> return NaN
-	pop rB7					; get original signs
+	XCALL _U(__fp64_popB)		; get original registers and signs
 	pop rA7
 	XJMP _U(__fp64_nan)
 
@@ -56,28 +58,28 @@ ENTRY fp64_maximum
 	For this operation, −0 compares less than +0.
  */
 ENTRY fp64_minimum
-	push rA7				; save the original sign bits
-	push rB7
+	push rA7					; save the original sign bits
 
-ENTRY __fp64_min_intern		; internal entry point for other min/max routines
+ENTRY __fp64_min_intern			; internal entry point for other min/max routines
+	XCALL _U(__fp64_pushB)		; save callee-saved registers
 	push rA7
 	push rB7
 	XCALL _U(__fp64_split3)
-	pop rB7					; retrieve original sign bits
+	pop rB7						; retrieve original sign bits
 	pop rA7
-	brcc 1f					; normal numbers
-	brne .L_nan				; one is Nan --> return NaN
+	brcc 1f						; normal numbers
+	brne .L_nan					; one is Nan --> return NaN
 
-1:	brts .L_sign			; x and y have a different sign
-	or rA7, rA7				; sign(x) = sign(y), are both negative?
+1:	brts .L_sign				; x and y have a different sign
+	or rA7, rA7					; sign(x) = sign(y), are both negative?
 	brmi .L_neg
-							; no, both are positive
-	XCALL _U(__fp64_cpcAB)	; if B > A, i.e. x < y, then C = 1
+								; no, both are positive
+	XCALL _U(__fp64_cpcAB)		; if B > A, i.e. x < y, then C = 1
 	cpc rA7, rB7
 	rjmp .L_common
 
-.L_neg:						; both numbers are negative
-	XCALL _U(__fp64_cpcBA)	; if A <= B, i.e. B is more negative, i.e y < x, then C = 0
+.L_neg:							; both numbers are negative
+	XCALL _U(__fp64_cpcBA)		; if A <= B, i.e. B is more negative, i.e y < x, then C = 0
 
 .L_sign:
 	; x and y have a different sign --> return the negative number,
@@ -86,26 +88,27 @@ ENTRY __fp64_min_intern		; internal entry point for other min/max routines
 
 .L_common:
 
-	brcs .L_retA			; A is the smaller number
+	brcs .L_retA				; A is the smaller number
 
 .L_retB:
-	pop rB7					; retrieve the original signs
-	pop rA7
-	XCALL _U(__fp64_movABx)	; B is the smaller number, move B to A to return it
+	XCALL _U(__fp64_movABx)		; B is the smaller number, move B to A to return it
+	XCALL _U(__fp64_popB)		; retrieve the original signs
+	pop r0
+	mov rA7, rB7
 	rjmp 2f
 
 .L_retA:
-	pop rB7					; retrieve the original signs
+	XCALL _U(__fp64_popB)		; retrieve the original signs
 	pop rA7
 
 2:	; rcall __fp64_saveAB
 	bst rA7, 7
-	cpi rAE1, 0x07			; check for +/-INF, as __fp64_pretA does not handle it
+	cpi rAE1, 0x07				; check for +/-INF, as __fp64_pretA does not handle it
 	brne 3f
 	cpi rAE0, 0xff
 	brne 3f
-	XJMP _U(__fp64_inf)		; return +/-INF
+	XJMP _U(__fp64_inf)			; return +/-INF
 3:
-	XJMP _U(__fp64_pretA)	; pack and return A
+	XJMP _U(__fp64_pretA)		; pack and return A
 
 ENDFUNC
