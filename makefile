@@ -72,13 +72,13 @@ size: size-$(MCU).elf
 size-$(MCU).elf: libfp64-$(MCU).a force
 	$(XCC) -mmcu=$(MCU) -o $@ $(FP64FLAGS) -nostartfiles -Wl,--defsym,main=0 $(SIZE_UNDEFS) -L. -lfp64-$(MCU)
 
-GCCF += __adddf3 __subdf3 __muldf3 __divdf3
-GCCF += __gedf2 __gtdf2 __ledf2 __ltdf2 __nedf2 __eqdf2 __unorddf2
-GCCF += __floatdidf __floatundidf __floatsidf __floatunsidf
-GCCF += __fixdfdi __fixunsdfdi __fixdfsi __fixunsdfsi
-CGGF += __extendsfdf2 __truncdfsf2
+FGCC := $(shell grep GCC_ENTRY *.S | grep '\.S:GCC_ENTRY' | sed 's/.*GCC_ENTRY[ \t]*\([a-z_0-9]*\).*/\1/')
+
+GSYM := $(shell grep GCC_DEFSYM *.S  | grep '\.S:[ 	]*GCC_DEFSYM' | sed 's/.*GCC_DEFSYM[ \t]*\([a-z_0-9]*\).*/\1/')
+
 FUNC = $(shell $(OBJNM) $< | grep ' T fp64_' | cut -d ' ' -f 3)
-LINK_UNDEFS = $(patsubst %,$(wlu)%,$(FUNC) $(GCCF))
+
+LINK_UNDEFS = $(patsubst %,$(wlu)%,$(FUNC) $(FGCC) $(GSYM))
 
 link: link-$(MCU).elf
 
