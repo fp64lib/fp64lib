@@ -324,6 +324,18 @@ class Double {
 		static Double pow (const Double &x, const Double &y) {
 			return x.pow (y);
 		}
+		Double pow (const Double &y) const {
+			return Double (fp64_pow (x, y.x));
+		}
+		static Double pow (const Double &x, const Double &y) {
+			return x.pow (y);
+		}
+		Double powi (int i) const {
+			return Double (fp64_powi (x, i));
+		}
+		static Double powi (const Double &x, int i) {
+			return x.powi (i);
+		}
 
 		// Misc signature
 

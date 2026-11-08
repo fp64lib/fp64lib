@@ -71,8 +71,9 @@
 
 ;;; Create an entry as used / expected by libgcc / GCC.
 .macro  GCC_ENTRY name
-	.global	_U(\name)
-_U(\name):
+	.global	\name
+	.type \name, "function"
+\name:
 .endm
 
 ;;; Define a global symbol SYM for libgcc / GCC.
@@ -122,6 +123,17 @@ _U(\name):
 	X_movw \dst, \reg
 .endm
 
+;;; Negate a 2-byte value held in consecutive registers.
+.macro  NEG2  reg
+	REGNO .regno, \reg
+	.if .regno >= 16
+		com  .regno + 1
+		neg  .regno + 0
+		sbci .regno + 1, -1
+	.else
+		.error "NEG2: todo: support reg < r16"
+	.endif
+.endm
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Loading constants from program memory and RAMPZ
