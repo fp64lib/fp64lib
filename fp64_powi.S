@@ -42,13 +42,13 @@
 
 FUNCTION fp64_powi
 .L_nan:
-	cpi r16, 0					; 0^NaN := 1
+	cpi r16, 0					; NaN^0 := 1
 	cpc r17, r1
 	breq 0f						; expo == 0: proceed with C = 0 to return 1.0
 	XJMP _U(__fp64_nan)
 
 .L_inf:
-	sbiw YL, 0					; 0^±Inf := 1
+	sbiw YL, 0					; (±Inf)^0 := 1
 	breq 10f
 	XCALL _U(__fp64_inf)
 	rjmp .L_finishA				; apply Flags to ±Inf
