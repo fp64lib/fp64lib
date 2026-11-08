@@ -49,8 +49,8 @@ ENTRY fp64_fmod
 ENTRY_DOUBLE fmod fmodl
 	push rC7
 	push rC6
-	mov rC6, r0					; call fmodn with np = NULL
-	mov rC7, r0
+	clr rC6						; call fmodn with np = NULL
+	clr rC7
 	rcall fp64_fmodn
 	pop rC6
 	pop rC7
