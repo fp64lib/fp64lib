@@ -78,7 +78,7 @@ LINK_UNDEFS = $(patsubst %,$(wlu)%,$(FUNC))
 link: link-$(MCU).elf
 
 link-$(MCU).elf: libfp64-$(MCU).a force
-	$(XCC) -xc /dev/null -mmcu=$(MCU) -nostartfiles -o $@ -Wl,-Map,${@:.elf=.map} $(LINK_UNDEFS) -L. -lfp64-$(MCU)
+	$(XCC) -xc /dev/null -mmcu=$(MCU) -nostartfiles -o $@ -Wl,-Map,${@:.elf=.map} $(LINK_UNDEFS) $(CFLAGS) -L. -lfp64-$(MCU)
 	$(OBJDUMP) -d $@ > ${@:.elf=.lst}
 	$(OBJSIZE) $@
 
