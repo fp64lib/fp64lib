@@ -52,7 +52,7 @@ FP64_ASM_SRCS := $(wildcard *.S)
 FP64_ASM_OBJECTS = $(patsubst %.S, %-$(MCU).o, $(FP64_ASM_SRCS))
 
 $(FP64_ASM_OBJECTS) : config.h asmdef.h sectionname.h fp64asm.h fp64def.h
-#$(FP64_ASM_OBJECTS) : $(MAKEFILE_LIST)
+$(FP64_ASM_OBJECTS) : $(MAKEFILE_LIST)
 
 $(FP64_ASM_OBJECTS) : %-$(MCU).o : %.S
 	$(XCC) -mmcu=$(MCU) $(FP64FLAGS) -c $< -o $@
