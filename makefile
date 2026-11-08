@@ -72,8 +72,13 @@ size: size-$(MCU).elf
 size-$(MCU).elf: libfp64-$(MCU).a force
 	$(XCC) -mmcu=$(MCU) -o $@ $(FP64FLAGS) -nostartfiles -Wl,--defsym,main=0 $(SIZE_UNDEFS) -L. -lfp64-$(MCU)
 
+GCCF += __adddf3 __subdf3 __muldf3 __divdf3
+GCCF += __gedf2 __gtdf2 __ledf2 __ltdf2 __nedf2 __eqdf2 __unorddf2
+GCCF += __floatdidf __floatundidf __floatsidf __floatunsidf
+GCCF += __fixdfdi __fixunsdfdi __fixdfsi __fixunsdfsi
+CGGF += __extendsfdf2 __truncdfsf2
 FUNC = $(shell $(OBJNM) $< | grep ' T fp64_' | cut -d ' ' -f 3)
-LINK_UNDEFS = $(patsubst %,$(wlu)%,$(FUNC))
+LINK_UNDEFS = $(patsubst %,$(wlu)%,$(FUNC) $(GCCF))
 
 link: link-$(MCU).elf
 
@@ -81,6 +86,7 @@ link-$(MCU).elf: libfp64-$(MCU).a force
 	$(XCC) -xc /dev/null -mmcu=$(MCU) -nostartfiles -o $@ -Wl,-Map,${@:.elf=.map} $(LINK_UNDEFS) $(CFLAGS) -L. -lfp64-$(MCU)
 	$(OBJDUMP) -d $@ > ${@:.elf=.lst}
 	$(OBJSIZE) $@
+	@(($(OBJNM) $@ | grep __f7_) && echo "error: found LibF7 stuff") || true
 
 
 clean: clean-libfp64
