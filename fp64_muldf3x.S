@@ -155,18 +155,19 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	XCALL _U(__fp64_pscB)
 	breq 	2b				; B = 0 --> A*B = 0
 
-	; exponent(A*B) = exponent(A)+exponent(B)
-	; base adjustment will be done later
-	add		rAE0, rBE0
-	adc 	rAE1, rBE1
-
 	;; Normalizing prior to the multiplication yields better results
 	;; when subnormls are involved.
+	X_movw r0, rBE0				; is retaining rBE required?
 	XCALL _U(__fp64_norm2)		; normalize AX
 	XCALL _U(__fp64_swapAB)
 	XCALL _U(__fp64_norm2)		; normalize BX
 	XCALL _U(__fp64_swapAB)
 	;call __fp64_saveAB
+	; exponent(A*B) = exponent(A)+exponent(B)
+	; base adjustment will be done later
+	add		rAE0, rBE0
+	adc 	rAE1, rBE1
+	X_movw rBE0, r0
 
 	; core algorithm for multiplication
 	; multiplication will be computed with 72 bit precision --> max error +/-1 LSB
