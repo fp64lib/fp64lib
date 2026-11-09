@@ -465,7 +465,7 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 
 	or rR6, rR5					; are there any trailing bits set?
 	; rcall __fp64_saveAB
-	breq L_clc_ret
+	breq .L_clc_ret
 	sbr rA0, 1 					; yes: set LSB to signal possible rounding
 .L_clc_ret:
 	clc
