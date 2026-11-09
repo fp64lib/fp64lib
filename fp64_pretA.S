@@ -43,6 +43,7 @@ FUNCTION __fp64_pretA
 	 T							 - sign of A
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - result in IEEE 754 formaz
+     XL, XH - untouched
  */
 
 ENTRY __fp64_rpretA
