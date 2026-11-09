@@ -75,8 +75,8 @@ FUNCTION __fp64_muldf3x
 	or rBE1, rB2
 	or rBE1, rB1
 	or rBE1, rB0
-	breq 1f					; B = 0, A = +/-Inf --> A*B = NaN
-	or rAE1, rAE0			; B must be Inf, so now check A for 0
+	breq 1f						; B = 0, A = +/-Inf --> A*B = NaN
+	or rAE1, rAE0				; B must be Inf, so now check A for 0
 	or rAE1, rA6
 	or rAE1, rA5
 	or rAE1, rA4
@@ -84,12 +84,12 @@ FUNCTION __fp64_muldf3x
 	or rAE1, rA2
 	or rAE1, rA1
 	or rAE1, rA0
-	breq 1f					; A = 0, B = +/-Inf --> A*B = NaN
-	XJMP	_U(__fp64_infp)	; nonzero * Inf --> Inf (cases 5,6)
-1:	XJMP	_U(__fp64_nanp)	; 0 * Inf --> NaN (cases 3,4)
+	breq 1f						; A = 0, B = +/-Inf --> A*B = NaN
+	XJMP	_U(__fp64_infp)		; nonzero * Inf --> Inf (cases 5,6)
+1:	XJMP	_U(__fp64_nanp)		; 0 * Inf --> NaN (cases 3,4)
 
 	; handle A*B = 0
-2:	clr		r1				; r1 may contain garbage, clear it
+2:	clr		r1					; r1 may contain garbage, clear it
 .L_szero:
 	XJMP	_U(__fp64_szero)
 
@@ -109,7 +109,7 @@ ENTRY   __fp64_muldf3x
 	XCALL	_U(__fp64_split3)	; split A and B into parts for exponent and mantissa
 	brcs	0b					; A or B is NaN and/or InF --> manage special result
 
-	push rR5	; save working registers
+	push rR5					; save working registers
 	push rR6
 	push rR7
 	push rR8
@@ -118,42 +118,45 @@ ENTRY   __fp64_muldf3x
 	rcall __fp64_muldf3_pse0
 
 	pop rZero
-	pop rR8			; restore used registers
+	pop rR8						; restore used registers
 	pop rR7
 	pop rR6
 	pop rR5
 
 	; rcall __fp64_saveAB
 	XCALL _U(__fp64_popB)
-	brcs 3f			; overflow?
-	XJMP _U(__fp64_rpretA)	; no, return with proper rounding, including carry
-3:	ret				; overflow, return already packed result +/-Inf
+	brcs 3f						; overflow/underflow?
+	XJMP _U(__fp64_rpretA)		; no, return with proper rounding, including carry
+3:	ret							; overflow/underflow, return already packed result +/-Inf or +/-0
 
 	/*
-	fp64 __fp64muldf3_pse( fp64_splitted_t A, fp64_splitted_t B )
+	fp64_splitted __fp64muldf3_pse( fp64_splitted_t A, fp64_splitted_t B )
 	Multiplies two 64-bit floating point numbers that are split,
 	and rounds the result to a 64-bit floating point integer.
 	A and B must not be NaN or +/-Inf --> A and B are both finite.
 
-	Input:	rAE1.rAE0 rA6..rA0	A in internal expanded format
-`			rAB1.rAB0 rB6..rB0	B in internal expanded format
+	Input:	rAE1.rAE0 rA7..rA0	A in internal expanded format
+`			rAB1.rAB0 rB7..rB0	B in internal expanded format
 	Return:
-			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 result = A * B
-			Sign must be handled by caller, T flag is neither read nor modified
+			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 	result = A * B if Carry-Flag = 0
+			      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	already packed result if C=1, i.e. INF or 0
+			Sign must be handled by caller if C=0, for C=1 it is already handled here
+			T flag is read for packed results, i.e. for C=1
 	Modifies (beside registers used for return):
 			rZero, rR8..rR5 (=r5..r9)
 			rB6..rB0
 			r0
 			all flags except T
 	*/
-ENTRY   __fp64_muldf3_pse			; post-split entry
+ENTRY   __fp64_muldf3_pse		; post-split entry
 	; check zero (subnormal have exp == 1)
 	XCALL _U(__fp64_pscA)
-ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
+
+ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	; rcall __fp64_saveAB
-	breq	2b				; A = 0 --> A*B = 0
+	breq	2b					; A = 0 --> A*B = 0
 	XCALL _U(__fp64_pscB)
-	breq 	2b				; B = 0 --> A*B = 0
+	breq 	2b					; B = 0 --> A*B = 0
 
 	; exponent(A*B) = exponent(A)+exponent(B)
 	; base adjustment will be done later
@@ -164,13 +167,13 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 
 	; core algorithm for multiplication
 	; multiplication will be computed with 72 bit precision --> max error +/-1 LSB
-	; rB5.rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5 = rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 * rB7.rA6.rA5.rA4.rA3.rA2.rA1.rA0
+	; rB5.rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5 = rA6.rA5.rA4.rA3.rA2.rA1.rA0 * rB6.rB5.rB4.rB3.rB2.rB1.rB0
 	; all multiplications "below" 72 bit are left out (e.g. rA4*rB0, rA3*rB1, rA2*rB2, rA1*rB3, rA0*rB4)
-	;rR7.rR6.rR5	 = rA5 * rB0
+	;rR7.rR6.rR5	= rA5 * rB0
 	mul rA5, rB0
 	mov rR5, r0
 	mov rR6, r1
-	clr rZero			; as r1 is used for multiplication, rZero will be used as "zero" register
+	clr rZero					; as r1 is used for multiplication, rZero will be used as "zero" register
 	clr rR7
 	clr rR8
 
@@ -186,19 +189,19 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	adc rR6, r1
 	adc rR7, rZero
 
-	;rR7.rR6.rR5 += rA2 * rB3
+	;rR7.rR6.rR5 	+= rA2 * rB3
 	mul rA2, rB3
 	add rR5, r0
 	adc rR6, r1
 	adc rR7, rZero
 
-	;rR7.rR6.rR5 += rA1 * rB4
+	;rR7.rR6.rR5 	+= rA1 * rB4
 	mul rA1, rB4
 	add rR5, r0
 	adc rR6, r1
 	adc rR7, rZero
 
-	;rR7.rR6.rR5 += rA0 * rB5	rR5 can be pushed
+	;rR7.rR6.rR5 	+= rA0 * rB5	// rR5 can be pushed
 	mul rA0, rB5
 	add rR5, r0
 	adc rR6, r1
@@ -224,25 +227,25 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	adc rR7, r1
 	adc rR8, rZero
 
-	;rR8.rR7.rR6 += rA3 * rB3
+	;rR8.rR7.rR6 	+= rA3 * rB3
 	mul rA3, rB3
 	add rR6, r0
 	adc rR7, r1
 	adc rR8, rZero
 
-	;rR8.rR7.rR6 += rA2 * rB4
+	;rR8.rR7.rR6 	+= rA2 * rB4
 	mul rA2, rB4
 	add rR6, r0
 	adc rR7, r1
 	adc rR8, rZero
 
-	;rR8.rR7.rR6 += rA1 * rB5
+	;rR8.rR7.rR6 	+= rA1 * rB5
 	mul rA1, rB5
 	add rR6, r0
 	adc rR7, r1
 	adc rR8, rZero
 
-	;rR8.rR7.rR6 += rA0 * rB6	rR6 can be pushed, B0 can be used
+	;rR8.rR7.rR6 	+= rA0 * rB6	// rR6 can be pushed, B0 can be used
 	mul rA0, rB6
 	add rR6, r0
 	adc rR7, r1
@@ -250,131 +253,131 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	clr rB0
 	;call __fp64_saveMul
 
-	;rB0.rR8.rR7 += rA6 * rB1
+	;rB0.rR8.rR7 	+= rA6 * rB1
 	mul rA6, rB1
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
 
-	;rB0.rR8.rR7 += rA5 * rB2
+	;rB0.rR8.rR7 	+= rA5 * rB2
 	mul rA5, rB2
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
 
-	;rB0.rR8.rR7 += rA4 * rB3
+	;rB0.rR8.rR7 	+= rA4 * rB3
 	mul rA4, rB3
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
 
-	;rB0.rR8.rR7 += rA3 * rB4
+	;rB0.rR8.rR7 	+= rA3 * rB4
 	mul rA3, rB4
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
 
-	;rB0.rR8.rR7 += rA2 * rB5
+	;rB0.rR8.rR7 	+= rA2 * rB5
 	mul rA2, rB5
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
 
-	;rB0.rR8.rR7 += rA1 * rB6	rR7 can be pushed, B1 & A0 can be used
+	;rB0.rR8.rR7 	+= rA1 * rB6	// rR7 can be pushed, B1 & A0 can be used
 	mul rA1, rB6
 	add rR7, r0
 	adc rR8, r1
 	adc rB0, rZero
 	clr rB1
 
-	;rB1.rB0.rR8 += rA6 * rB2
+	;rB1.rB0.rR8 	+= rA6 * rB2
 	mul rA6, rB2
 	add rR8, r0
 	adc rB0, r1
 	adc rB1, rZero
 
-	;rB1.rB0.rR8 += rA5 * rB3
+	;rB1.rB0.rR8 	+= rA5 * rB3
 	mul rA5, rB3
 	add rR8, r0
 	adc rB0, r1
 	adc rB1, rZero
 
-	;rB1.rB0.rR8 += rA4 * rB4
+	;rB1.rB0.rR8 	+= rA4 * rB4
 	mul rA4, rB4
 	add rR8, r0
 	adc rB0, r1
 	adc rB1, rZero
 
-	;rB1.rB0.rR8 += rA3 * rB5
+	;rB1.rB0.rR8 	+= rA3 * rB5
 	mul rA3, rB5
 	add rR8, r0
 	adc rB0, r1
 	adc rB1, rZero
 
-	;rB1.rB0.rR8 += rA2 * rB6	rR8 can be pushed, B2 & A1 can be used
+	;rB1.rB0.rR8 	+= rA2 * rB6	// rR8 can be pushed, B2 & A1 can be used
 	mul rA2, rB6
 	add rR8, r0
 	adc rB0, r1
 	adc rB1, rZero
 	clr rB2
 
-	;rB2.rB1.rB0 += rA6 * rB3
+	;rB2.rB1.rB0 	+= rA6 * rB3
 	mul rA6, rB3
 	add rB0, r0
 	adc rB1, r1
 	adc rB2, rZero
 
-	;rB2.rB1.rB0 += rA5 * rB4
+	;rB2.rB1.rB0 	+= rA5 * rB4
 	mul rA5, rB4
 	add rB0, r0
 	adc rB1, r1
 	adc rB2, rZero
 
-	;rB2.rB1.rB0 += rA4 * rB5
+	;rB2.rB1.rB0 	+= rA4 * rB5
 	mul rA4, rB5
 	add rB0, r0
 	adc rB1, r1
 	adc rB2, rZero
 
-	;rB2.rB1.rB0 += rA3 * rB6	rB0 can be pushed, B3 & A2 can be used
+	;rB2.rB1.rB0 	+= rA3 * rB6	// rB0 can be pushed, B3 & A2 can be used
 	mul rA3, rB6
 	add rB0, r0
 	adc rB1, r1
 	adc rB2, rZero
 	clr rB3
 
-	;rB3.rB2.rB1 += rA6 * rB4
+	;rB3.rB2.rB1 	+= rA6 * rB4
 	mul rA6, rB4
 	add rB1, r0
 	adc rB2, r1
 	adc rB3, rZero
 
-	;rB3.rB2.rB1 += rA5 * rB5
+	;rB3.rB2.rB1 	+= rA5 * rB5
 	mul rA5, rB5
 	add rB1, r0
 	adc rB2, r1
 	adc rB3, rZero
 
-	;rB3.rB2.rB1 += rA4 * rB6	rB1 can be pushed, B4 & A3 can be used
+	;rB3.rB2.rB1 	+= rA4 * rB6	// rB1 can be pushed, B4 & A3 can be used
 	mul rA4, rB6
 	add rB1, r0
 	adc rB2, r1
 	adc rB3, rZero
 	clr rB4
 
-	;rB4.rB3.rB2 += rA6 * rB5
+	;rB4.rB3.rB2 	+= rA6 * rB5
 	mul rA6, rB5
 	add rB2, r0
 	adc rB3, r1
 	adc rB4, rZero
 
-	;rB4.rB3.rB2 += rA5 * rB6	rB2 can be pushed, B5 & A4 can be used
+	;rB4.rB3.rB2 	+= rA5 * rB6	// rB2 can be pushed, B5 & A4 can be used
 	mul rA5, rB6
 	add rB2, r0
 	adc rB3, r1
 	adc rB4, rZero
 
-	;rB4.rB3 += rA6 * rB6	rB3 can be pushed, B6 & A6 can be used
+	;rB4.rB3 		+= rA6 * rB6	// rB3 can be pushed, B6 & A6 can be used
 	mul rA6, rB6
 	add rB3, r0
 	adc rB4, r1		; this can never overflow, so rB5 is not needed
@@ -388,7 +391,7 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	; multiplication with subnormal numbers may result in
 	; 72 bits of 0 --> no topmost bit
 	; therefore we have to check whether there are some valid bits
-	tst 	rB4		; in normal cases, test on rB4 will be sufficient
+	tst 	rB4					; in normal cases, test on rB4 will be sufficient
 	;rcall __fp64_saveMul
 	brne	101f
 	mov		rB5, rB3
@@ -399,13 +402,13 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	or		rB5, rR7
 	or		rB5, rR6
 	or		rB5, rR5
-	breq	12f			; all bits in result 0 --> underflow to 0
+	breq	12f					; all bits in result 0 --> underflow to 0
 
 	; at least one bit is set, shift mantissa left until topmost bit is set
 10:	tst rB4
-101: brmi 	11f			; topmost bit is set --> normalized number
+101: brmi 	11f					; topmost bit is set --> normalized number
 
-	lsl	rR5				; mantissa <<= 1
+	lsl	rR5						; mantissa <<= 1
 	rol rR6
 	rol rR7
 	rol rR8
@@ -414,71 +417,71 @@ ENTRY   __fp64_muldf3_pse0			; post-split entry for Z flag already set
 	rol rB2
 	rol rB3
 	rol rB4
-	sbiw rAE0, 1		; exponent--
+	sbiw rAE0, 1				; exponent--
 	rjmp 10b
 
 	; normalized result is in rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5
-	; exponent -= 1023 subtract exponent base
-11: subi 	rAE0, lo8(1022)	; subtract exponent bias 1023 = 0x3ff
+	; exponent -= 1023 subtract exponent bias
+11: subi 	rAE0, lo8(1022)		; subtract exponent bias 1023 = 0x3ff
 	sbci 	rAE1, hi8(1022)
 	; rcall __fp64_saveMul
-	brmi	13f			; exponent negative --> denormal number / underflow
-	breq	15f		    ; exponent = 0 --> denormal number
+	brmi	13f					; exponent negative --> denormal number / underflow
+	breq	15f		    		; exponent = 0 --> denormal number
 
 	; result exponent > min ==> normalization is possible
 	; check for overflow
 	; rcall __fp64_saveMul
-	ldi rA6, hi8(0x7ff)	; check if exponent < 0x7ff
+	ldi rA6, hi8(0x7ff)			; check if exponent < 0x7ff
 	cpi rAE0,lo8(0x7ff)
 	cpc rAE1, rA6
-	brlo 15f			; everything ok, no overflow
+	brlo 15f					; everything ok, no overflow
 	;call __fp64_saveMul
 
 	; exponent >= 0x7ff --> overflow,
 111:
-	sec					; C = 1: error and returning of packed result
+	sec							; C = 1: error and returning of packed result
 	XJMP _U(__fp64_inf)
 
-	; underflow, cannot even be expressed as denormilzed number --> return +/-0
+	; underflow, cannot even be expressed as denormalized number --> return +/-0
 12: mov rAE1, r1
 	mov rAE0, r1
-	clc
+	sec							; set carry to signal already packed result
 	rjmp .L_szero
 
 131: rcall 16f
 	rjmp 15f
 
 	; underflow with exponent < 0, check whether denormalization could work
-13:	cpi rAE0,lo8(-51)	; check if result could fit into remaining 52 bits
+13:	cpi rAE0,lo8(-51)			; check if result could fit into remaining 52 bits
 	;call __fp64_saveMul
-	brlt 12b			; no --> return 0
-	cpi rAE1, 0xFF		; catch cases where exp(a)+exp(b)<-255
+	brlt 12b					; no --> return 0
+	cpi rAE1, 0xFF				; catch cases where exp(a)+exp(b)<-255
 	brne 12b
 
 	; mantissa >> -rAE0
-14:	rcall 16f		; mantissa >>= 1
-	adiw rAE0, 1	; exponent++
-	brmi 14b		; exponent still < 0
+14:	rcall 16f					; mantissa >>= 1
+	adiw rAE0, 1				; exponent++
+	brmi 14b					; exponent still < 0
 	;call __fp64_saveMul
 
 	;; shift mantissa 3 bits to prepare for packing (topmost bit is discarded
 	;; as it is always 1, therefore only 3 shifts needed instead of 4)
 15: ; call __fp64_saveMul
-	mov rA6,rB4		; move result into A
+	mov rA6,rB4					; move result into A
 	X_movw rA4,rB2
 	X_movw rA2,rB0
 	mov rA1,rR8
 	mov rA0,rR7
 
-	or rR6, rR5		; are there any trailing bits set?
+	or rR6, rR5					; are there any trailing bits set?
 	; rcall __fp64_saveAB
-	breq 151f
-	sbr rA0, 1 		; yes: set LSB to signal possible rounding
-151:
+	breq L_clc_ret
+	sbr rA0, 1 					; yes: set LSB to signal possible rounding
+.L_clc_ret:
 	clc
-	ret				; return with carry clear
+	ret							; return with carry clear to signal normal result
 
-16:	lsr rB4			; mantissa >>= 1
+16:	lsr rB4						; mantissa >>= 1
 	ror rB3
 	ror rB2
 	ror rB1
