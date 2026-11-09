@@ -158,12 +158,19 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	XCALL _U(__fp64_pscB)
 	breq 	2b					; B = 0 --> A*B = 0
 
+	;; Normalizing prior to the multiplication yields better results
+	;; when subnormls are involved.
+	X_movw r0, rBE0				; is retaining rBE required?
+	XCALL _U(__fp64_norm2)		; normalize AX
+	XCALL _U(__fp64_swapAB)
+	XCALL _U(__fp64_norm2)		; normalize BX
+	XCALL _U(__fp64_swapAB)
+	;call __fp64_saveAB
 	; exponent(A*B) = exponent(A)+exponent(B)
 	; base adjustment will be done later
 	add		rAE0, rBE0
 	adc 	rAE1, rBE1
-
-	;call __fp64_saveAB
+	X_movw rBE0, r0
 
 	; core algorithm for multiplication
 	; multiplication will be computed with 72 bit precision --> max error +/-1 LSB
@@ -173,7 +180,7 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	mul rA5, rB0
 	mov rR5, r0
 	mov rR6, r1
-	clr rZero					; as r1 is used for multiplication, rZero will be used as "zero" register
+	clr rZero			; as r1 is set by MUL, use rZero = 0 as zero register
 	clr rR7
 	clr rR8
 
@@ -382,31 +389,11 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	add rB3, r0
 	adc rB4, r1		; this can never overflow, so rB5 is not needed
 
-	; __zero_reg__
-	clr	r1
-
-	; temporary result is in rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5
-	; shift mantissa left until topmost bit is set
-	; as multiplication result is only 72 bits instead of 104 bits
-	; multiplication with subnormal numbers may result in
-	; 72 bits of 0 --> no topmost bit
-	; therefore we have to check whether there are some valid bits
-	tst 	rB4					; in normal cases, test on rB4 will be sufficient
-	;rcall __fp64_saveMul
-	brne	101f
-	mov		rB5, rB3
-	or		rB5, rB2
-	or		rB5, rB1
-	or		rB5, rB0
-	or		rB5, rR8
-	or		rB5, rR7
-	or		rB5, rR6
-	or		rB5, rR5
-	breq	12f					; all bits in result 0 --> underflow to 0
-
-	; at least one bit is set, shift mantissa left until topmost bit is set
-10:	tst rB4
-101: brmi 	11f					; topmost bit is set --> normalized number
+	;; rA6 and rB6 are normalized, i.e. >= 0x80.  Hence rA6 * rB6 >= 0x4000
+	;; and in order to normalize, at most one << is needed.
+	;; The temporary result is in rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5
+	;; and a shift left is needed iff rB4.7 = 0.
+	brmi 	11f			; topmost bit is set --> already normalized number
 
 	lsl	rR5						; mantissa <<= 1
 	rol rR6
@@ -417,13 +404,18 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	rol rB2
 	rol rB3
 	rol rB4
-	sbiw rAE0, 1				; exponent--
-	rjmp 10b
+	sbiw rAE0, 1		; exponent--
 
-	; normalized result is in rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5
-	; exponent -= 1023 subtract exponent bias
-11: subi 	rAE0, lo8(1022)		; subtract exponent bias 1023 = 0x3ff
-	sbci 	rAE1, hi8(1022)
+11:	clr __zero_reg__
+
+	;; Normalized result is in rB4.rB3.rB2.rB1.rB0.rR8.rR7.rR6.rR5
+	;; The added exponents were both biased with 1023, so we have to subtract
+	;; one bias again.  The implicit decimal point of the inputs is after
+	;; bit 7 of rA6 resp. rB6, but the implicit decimal point of the product
+	;; is atfer bit 6 of rB4, hence we have to multiply the result with 2.0
+	;; in order to account for that --> subtract only bias - 1.
+	subi rAE0, lo8(1023 - 1)	; subtract bias - 1
+	sbci rAE1, hi8(1023 - 1)
 	; rcall __fp64_saveMul
 	brmi	13f					; exponent negative --> denormal number / underflow
 	breq	15f		    		; exponent = 0 --> denormal number
