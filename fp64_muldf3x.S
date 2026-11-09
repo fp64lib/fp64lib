@@ -144,7 +144,7 @@ ENTRY   __fp64_muldf3x
 			T flag is read for packed results, i.e. for C=1
 	Modifies (beside registers used for return):
 			rZero, rR8..rR5 (=r5..r9)
-			rB6..rB0
+			rB6..rB0, rBE0, rBE1
 			r0
 			all flags except T
 	*/
@@ -160,7 +160,6 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 
 	;; Normalizing prior to the multiplication yields better results
 	;; when subnormls are involved.
-	X_movw r0, rBE0				; is retaining rBE required?
 	XCALL _U(__fp64_norm2)		; normalize AX
 	XCALL _U(__fp64_swapAB)
 	XCALL _U(__fp64_norm2)		; normalize BX
@@ -170,7 +169,6 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	; base adjustment will be done later
 	add		rAE0, rBE0
 	adc 	rAE1, rBE1
-	X_movw rBE0, r0
 
 	; core algorithm for multiplication
 	; multiplication will be computed with 72 bit precision --> max error +/-1 LSB
