@@ -32,7 +32,7 @@
 
 MCU = atmega328p
 
-RM := rm -rf
+RM := rm -f --
 XCC     = avr-gcc
 OBJDUMP = avr-objdump
 OBJCOPY = avr-objcopy
@@ -57,7 +57,9 @@ $(FP64_ASM_OBJECTS) : $(MAKEFILE_LIST)
 $(FP64_ASM_OBJECTS) : %-$(MCU).o : %.S
 	$(XCC) -mmcu=$(MCU) $(FP64FLAGS) -c $< -o $@
 
+libfp64-$(MCU).a: .EXTRA_PREREQS = force
 libfp64-$(MCU).a: $(FP64_ASM_OBJECTS)
+	-$(RM) $(wildcard $@)
 	$(AR) rcs $@ $^
 
 libfp64.a: libfp64-$(MCU).a force
