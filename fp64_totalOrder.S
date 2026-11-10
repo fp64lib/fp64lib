@@ -34,6 +34,7 @@ ENTRY fp64_totalOrderMag
 /* bool fp64_totalOrderMag(float64_t x, float64_t y)
    fp64_totalOrderMag(x, y) is fp64_totalOrder(abs(x), abs(y)).
  */
+	XCALL _U(__fp64_pushB)		; save callee-saved registers
 	andi rA7, 0x7f				; create abs(x)
 	andi rB7, 0x7f				; create abs(y)
 	rjmp .L_pos					; shortcut into fp64_totalOrder, as we only have to handle positive values
@@ -68,6 +69,7 @@ ENTRY fp64_totalOrderMag
 
 ENTRY fp64_totalOrder
 ; GCC_ENTRY __totalOrder
+	XCALL _U(__fp64_pushB)		; save callee-save registers
 	mov r0, rA7					; is sign(x) == sign(y) ?
 	eor r0, rB7
 	brmi 1f						; no --> totalOrder = sign(x)-sign(y)
@@ -94,7 +96,7 @@ ENTRY fp64_totalOrder
 1:	cp rB7, rA7					; different signs, C=0 if A<=B, i.e. A is neg, B is pos, i.e. y < x
 
 .L_common:
-	; call __fp64_saveAB
+	XCALL _U(__fp64_popB)		; restore callee-save registers and create return result
 	brcs 4f
 	brne 4f
 	sec							; if x == y, return true

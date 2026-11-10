@@ -38,23 +38,23 @@ FUNCTION fp64_minNumber
 	If both operands are NaNs, a NaN is returned
  */
 ENTRY fp64_maximumNumber
-	subi rA7, 0x80			; max(a,b) = -min(-a,-b), e.g. max(5,3) = -min(-5,-3) = -(-5) = 5
+	subi rA7, 0x80				; max(a,b) = -min(-a,-b), e.g. max(5,3) = -min(-5,-3) = -(-5) = 5
 	subi rB7, 0x80
 	rcall fp64_minimumNumber
 	subi rA7, 0x80
 	ret
 
 .L_nan:	; one of the numbers is a NaN --> return the one that is a number
-	cpi rAE1, 0x07			; check A for being a NaN
-	brne .L_retA			; it's not A, so return A
+	cpi rAE1, 0x07				; check A for being a NaN
+	brne .L_retA				; it's not A, so return A
 	cpi rAE0, 0xff
-	brne .L_retA			; it's not A, so return A
+	brne .L_retA				; it's not A, so return A
 
 	; now A is either a NaN an B a number incl. INF, or A is INF and B is NaN
 	XCALL _U(__fp64_cpc0A5)
 	cpc r1, rA6
-	brne .L_retB			; A is not INF, return BE
-	rjmp .L_retA			; A is INF, so B must be the NaN, return A
+	brne .L_retB				; A is not INF, return BE
+	rjmp .L_retA				; A is INF, so B must be the NaN, return A
 
 
 /* float64_t fp64_minimumNumber(float64_t x, float64_t y);
@@ -66,29 +66,28 @@ ENTRY fp64_maximumNumber
  */
 
 ENTRY fp64_minimumNumber
-	push rA7				; save the original sign bits
-	push rB7
+	push rA7					; save the original sign bits
 
-ENTRY __fp64_minNum_intern	; entry point for other min/max routines
+ENTRY __fp64_minNum_intern		; entry point for other min/max routines
+	XCALL _U(__fp64_pushB)		; save callee-saved registers
 	push rA7
 	push rB7
 	XCALL _U(__fp64_split3)
-	pop rB7					; retrieve original sign bits
+	pop rB7						; retrieve original sign bits
 	pop rA7
-	; rcall __fp64_saveAB
-	brcc 1f					; normal numbers
-	brne .L_nan				; one is Nan --> return NaN
+	brcc 1f						; normal numbers
+	brne .L_nan					; one is Nan --> return NaN
 
-1:	brts .L_sign			; x and y have a different sign
-	or rA7, rA7				; sign(x) = sign(y), are both negative?
+1:	brts .L_sign				; x and y have a different sign
+	or rA7, rA7					; sign(x) = sign(y), are both negative?
 	brmi .L_neg
-							; no, both are positive
-	XCALL _U(__fp64_cpcAB)	; if B > A, i.e. x < y, then C = 1
+								; no, both are positive
+	XCALL _U(__fp64_cpcAB)		; if B > A, i.e. x < y, then C = 1
 	cpc rA7, rB7
 	rjmp .L_common
 
-.L_neg:						; both numbers are negative
-	XCALL _U(__fp64_cpcBA)	; if A <= B, i.e. B is more negative, i.e y < x, then C = 0
+.L_neg:							; both numbers are negative
+	XCALL _U(__fp64_cpcBA)		; if A <= B, i.e. B is more negative, i.e y < x, then C = 0
 
 .L_sign:
 	; x and y have a different sign --> return the negative number,
@@ -96,32 +95,32 @@ ENTRY __fp64_minNum_intern	; entry point for other min/max routines
 	cpc rB7, rA7
 
 .L_common:
-	brcs .L_retA			; A is the smaller number
+	brcs .L_retA				; A is the smaller number
 
 .L_retB:
-	pop rB7					; retrieve the original signs
-	pop rA7
-	XCALL _U(__fp64_movABx)	; B is the smaller number, move B to A to return it
+	XCALL _U(__fp64_movABx)		; B is the smaller number, move B to A to return it
+	XCALL _U(__fp64_popB)		; retrieve the original signs
+	pop r0						; sign of A no longer needed
+	mov rA7, rB7
 	rjmp 2f
 
 .L_retA:
-	pop rB7					; retrieve the original signs
+	XCALL _U(__fp64_popB)		; retrieve the original signs
 	pop rA7
 2:
-	; rcall __fp64_saveAB
 	bst rA7, 7
-	cpi rAE1, 0x07			; check for +/-INF or NaN, as __fp64_pretA does not handle it
+	cpi rAE1, 0x07				; check for +/-INF or NaN, as __fp64_pretA does not handle it
 	brne 3f
 	cpi rAE0, 0xff
 	brne 3f
 	XCALL _U(__fp64_cpc0A5)
-	cpc r1, rA6				; is A INF?
-	breq .L_inf				; yes, return INF
-	XJMP _U(__fp64_nan)		; no, return NaN
+	cpc r1, rA6					; is A INF?
+	breq .L_inf					; yes, return INF
+	XJMP _U(__fp64_nan)			; no, return NaN
 
 .L_inf:
-	XJMP _U(__fp64_inf)		; return +/-INF
+	XJMP _U(__fp64_inf)			; return +/-INF
 3:
-	XJMP _U(__fp64_pretA)	; pack and return A
+	XJMP _U(__fp64_pretA)		; pack and return A
 
 ENDFUNC
