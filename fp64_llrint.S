@@ -72,6 +72,12 @@
 #include "fp64def.h"
 
 FUNCTION fp64_llrint
+.L_err:
+	;; handle NaN, +/-Inf and rounding overflows
+	set							; cases 1 & 2: force return of LONG_LONG_MIN
+.L_szero:
+	XJMP _U(__fp64_szero)
+
 .L_zr:
 	XJMP _U(__fp64_zero)		; case 3: return 0LL
 
@@ -91,12 +97,6 @@ FUNCTION fp64_llrint
 	clr rA7						; create 1LL
 	inc rA0
 	rjmp .L_sign
-
-.L_err:
-	;; handle NaN, +/-Inf and rounding overflows
-	set							; cases 1 & 2: force return of LONG_LONG_MIN
-.L_szero:
-	XJMP _U(__fp64_szero)
 
 ENTRY fp64_llrint
 ENTRY_DOUBLE llrint llrintl

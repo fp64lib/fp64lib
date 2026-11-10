@@ -1,5 +1,3 @@
 libfp64*.a
 fp64*.[iso]
-*.elf
-*.lst
-*.map
+size*.elf

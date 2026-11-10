@@ -41,11 +41,7 @@
 #include "asmdef.h"
 
 
-/* Our asmdef.h is including <avr/common.h>, which isn't part of fp64lib.
-   So redo the SFR definitions to fix problems that arise when <avr/common.h>
-   doesn't match asmdef.h's expectations.  Notice that macros from our
-   asmdef.h	that are using SFRs may not work properly, so don't use them!  */
-
+/* Arduino is spoiling SFR definitions, so build them from scratch.  */
 #undef SREG
 #undef SREG_IO_ADDR
 #define SREG_IO_ADDR 0x3f
@@ -58,16 +54,10 @@
 #define RAMPZ RAMPZ_IO_ADDR
 #endif
 
-#undef SPL
-#undef SPL_IO_ADDR
-#define SPL_IO_ADDR 0x3d
-#define SPL SPL_IO_ADDR
-
-#undef SPH
-#undef SPH_IO_ADDR
-#define SPH_IO_ADDR (1 + SPL_IO_ADDR)
-#define SPH SPH_IO_ADDR
-
+.macro  ALIAS_ENTRY name
+    .global _U(\name)
+_U(\name):
+.endm
 
 ;;; Create an entry as used / expected by libgcc / GCC.
 .macro  GCC_ENTRY name

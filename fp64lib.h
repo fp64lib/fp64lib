@@ -102,7 +102,7 @@ float64_t fp64_sub( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_mul( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_div( float64_t a, float64_t b ) __ATTR_CONST__;
 float64_t fp64_fmod( float64_t a, float64_t b ) __ATTR_CONST__;
-float64_t fp64_fmodn( float64_t a, float64_t b, long long *np );
+float64_t fp64_fmodn( float64_t a, float64_t b, unsigned long *np );
 // float64_t fp64_remquo( float64_t a, float64_t b, unsigned long *np );
 
 // isXXX  & compare functions

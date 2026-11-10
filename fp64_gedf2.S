@@ -66,5 +66,5 @@ ENTRY __gedf2.bool
 ENDFUNC
 
 #ifdef DOUBLE_COMPARE_BOOL
-	GCC_DEFSYM __gedf2, __gedf2.bool
+	GCC_DEFSYM __gtdf2, __gtdf2.bool
 #endif
