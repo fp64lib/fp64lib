@@ -208,6 +208,7 @@ float64_t fp64_scalbn(float64_t x, int ex) __ATTR_CONST__; 		// [all added with 
 float64_t fp64_frexp( float64_t x, int *pexp );
 float64_t fp64_fdim( float64_t A, float64_t B ) __ATTR_CONST__;
 float64_t fp64_pow( float64_t x, float64_t y ) __ATTR_CONST__;
+float64_t fp64_powi( float64_t x, int y ) __ATTR_CONST__; // __builtin_powil
 float64_t fp64_hypot( float64_t x, float64_t y ) __ATTR_CONST__;
 float64_t fp64_atan2( float64_t y, float64_t x ) __ATTR_CONST__;
 float64_t fp64_modf (float64_t x, float64_t *iptr);
