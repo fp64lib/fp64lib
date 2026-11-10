@@ -89,8 +89,8 @@ FUNCTION __fp64_muldf3x
 1:	XJMP	_U(__fp64_nanp)		; 0 * Inf --> NaN (cases 3,4)
 
 	; handle A*B = 0
-2:	clr		r1					; r1 may contain garbage, clear it
 .L_szero:
+	clr		r1					; r1 may contain garbage, clear it and set Z=1 to indicate zero-result
 	XJMP	_U(__fp64_szero)
 
 	/*
@@ -138,8 +138,9 @@ ENTRY   __fp64_muldf3x
 	Input:	rAE1.rAE0 rA7..rA0	A in internal expanded format
 `			rAB1.rAB0 rB7..rB0	B in internal expanded format
 	Return:
-			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 	result = A * B if Carry-Flag = 0
-			      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	already packed result if C=1, i.e. INF or 0
+			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 	result = A * B 		  	// C = 0, Z=0
+			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 	result = +/-0		 	// C = 0, Z=1
+			      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	overflow, i.e. +/- INF 	// C = 1
 			Sign must be handled by caller if C=0, for C=1 it is already handled here
 			T flag is read for packed results, i.e. for C=1
 	Modifies (beside registers used for return):
@@ -154,19 +155,20 @@ ENTRY   __fp64_muldf3_pse		; post-split entry
 
 ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	; rcall __fp64_saveAB
-	breq	2b					; A = 0 --> A*B = 0
+	breq	.L_szero			; A = 0 --> A*B = 0
 	XCALL _U(__fp64_pscB)
-	breq 	2b					; B = 0 --> A*B = 0
+	breq 	.L_szero			; B = 0 --> A*B = 0
 
 	;; Normalizing prior to the multiplication yields better results
-	;; when subnormls are involved.
+	;; when subnormals are involved.
 	XCALL _U(__fp64_norm2)		; normalize AX
 	XCALL _U(__fp64_swapAB)
 	XCALL _U(__fp64_norm2)		; normalize BX
 	XCALL _U(__fp64_swapAB)
 	;call __fp64_saveAB
+
 	; exponent(A*B) = exponent(A)+exponent(B)
-	; base adjustment will be done later
+	; bias adjustment will be done later
 	add		rAE0, rBE0
 	adc 	rAE1, rBE1
 
@@ -261,7 +263,7 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	adc MM2, r1
 	adc MM3, rZero
 
-	;MM3.MM2.MM1 	+= rA0 * rB6	// MM1 can be pushed, B0 can be used
+	;MM3.MM2.MM1 	+= rA0 * rB6	// MM1 can be pushed, B0(=MM4) can be used
 	mul rA0, rB6
 	add MM1, r0
 	adc MM2, r1
@@ -413,7 +415,7 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	rol MM6
 	rol MM7
 	rol MM8
-	sbiw rAE0, 1		; exponent--
+	sbiw rAE0, 1				; exponent--
 
 11:	clr __zero_reg__
 
@@ -479,7 +481,8 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	sbr rA0, 1 					; yes: set LSB to signal possible rounding
 .L_clc_ret:
 	clc
-	ret							; return with carry clear to signal normal result
+	clz
+	ret							; return with C=0 and Z=0 to signal normal result != 0
 
 16:	lsr MM8						; mantissa >>= 1
 	ror MM7
