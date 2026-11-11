@@ -75,7 +75,7 @@ ENTRY_DOUBLE scalbn scalbnl
 	brcs .L_NaN					; handle cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0
 
-	XCALL _U(__fp64_norm2)		; non-zero: normalize subnormal number
+	XCALL _U(__fp64_norm2_non0)	; normalize in case of subnormal number
 
 	; now "multiply" by 2^exp
 	; this is done by adding exp to exponent of A

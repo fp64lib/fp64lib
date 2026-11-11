@@ -79,7 +79,7 @@ ENTRY_DOUBLE frexp frexpl
 	subi rAE0, lo8(1022)	; remove bias 1023 - 1 from exponent
 	sbci rAE1, hi8(1022)	; (-1 as result is in [0.5;1) )
 
-	XCALL _U(__fp64_norm2)	; non-zero: normalize if subnormal
+	XCALL _U(__fp64_norm2_non0) ; non-zero: normalize if subnormal
 
 	adiw	XL, 0			; skip if pointer is == NULL
 	breq	2f

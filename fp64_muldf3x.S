@@ -106,8 +106,8 @@ ENTRY fp64_mul
 GCC_ENTRY __muldf3
 ENTRY   __fp64_muldf3x
 	XCALL _U(__fp64_pushB)
-	XCALL	_U(__fp64_split3)	; split A and B into parts for exponent and mantissa
-	brcs	0b					; A or B is NaN and/or InF --> manage special result
+	XCALL	_U(__fp64_split3)	; split A and B into exponent and mantissa
+	brcs	0b					; A or B is NaN and/or InF --> special result
 
 	push rR5					; save working registers
 	push rR6
@@ -115,7 +115,7 @@ ENTRY   __fp64_muldf3x
 	push rR8
 	push rZero
 
-	rcall __fp64_muldf3_pse0
+	rcall __fp64_muldf3_pse
 
 	pop rZero
 	pop rR8						; restore used registers
@@ -125,11 +125,11 @@ ENTRY   __fp64_muldf3x
 
 	; rcall __fp64_saveAB
 	XCALL _U(__fp64_popB)
-	brcs 3f						; overflow/underflow?
+	brcs 3f						; overflow? result is already packed
 	XJMP _U(__fp64_rpretA)		; no, return with proper rounding, including carry
-3:	ret							; overflow/underflow, return already packed result +/-Inf or +/-0
+3:	ret							; overflow, return already packed result +/-Inf
 
-	/*
+/*
 	fp64_splitted __fp64muldf3_pse( fp64_splitted_t A, fp64_splitted_t B )
 	Multiplies two 64-bit floating point numbers that are split,
 	and rounds the result to a 64-bit floating point integer.
@@ -138,34 +138,33 @@ ENTRY   __fp64_muldf3x
 	Input:	rAE1.rAE0 rA7..rA0	A in internal expanded format
 `			rAB1.rAB0 rB7..rB0	B in internal expanded format
 	Return:
-			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 	result = A * B 		  	// C = 0, Z=0
-			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 	result = +/-0		 	// C = 0, Z=1
-			      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	overflow, i.e. +/- INF 	// C = 1
-			Sign must be handled by caller if C=0, for C=1 it is already handled here
-			T flag is read for packed results, i.e. for C=1
+			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 	result = A * B	// C=0, Z=0
+			rAE1.rAE0 rA6.rA5.rA4.rA3.rA2.rA1.rA0 	result = +/-0	// C=0, Z=1
+			      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	overflow: ±INF	// C=1
+			C=0: sign must be handled by caller
+			C=1: sign of the Inf result is set to T
+
 	Modifies (beside registers used for return):
 			rZero, rR8..rR5 (=r5..r9)
 			rB6..rB0, rBE0, rBE1
 			r0
 			all flags except T
-	*/
-ENTRY   __fp64_muldf3_pse		; post-split entry
-	; check zero (subnormal have exp == 1)
-	XCALL _U(__fp64_pscA)
+*/
 
-ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
-	; rcall __fp64_saveAB
-	breq	.L_szero			; A = 0 --> A*B = 0
-	XCALL _U(__fp64_pscB)
-	breq 	.L_szero			; B = 0 --> A*B = 0
+.L_go_clc_ret:
+	rjmp .L_clc_ret
+
+ENTRY   __fp64_muldf3_pse		; post-split entry
 
 	;; Normalizing prior to the multiplication yields better results
 	;; when subnormals are involved.
 	XCALL _U(__fp64_norm2)		; normalize AX
+	breq  .L_go_clc_ret			; A = 0 --> A*B = 0
+
 	XCALL _U(__fp64_swapAB)
+	mov rB7, rA7				; restore rB7 after swapAB
 	XCALL _U(__fp64_norm2)		; normalize BX
-	XCALL _U(__fp64_swapAB)
-	;call __fp64_saveAB
+	breq  .L_go_clc_ret			; B = 0 --> A*B = 0
 
 	; exponent(A*B) = exponent(A)+exponent(B)
 	; bias adjustment will be done later
@@ -446,10 +445,10 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 	XJMP _U(__fp64_inf)
 
 	; underflow, cannot even be expressed as denormalized number --> return +/-0
-12: mov rAE1, r1
-	mov rAE0, r1
-	sec							; set carry to signal already packed result
-	rjmp .L_szero
+12: rcall .L_szero
+	clr rAE1					; does SEZ
+	clr rAE0
+	rjmp .L_clc_ret				; C=0, Z=1: return 0.0
 
 131: rcall 16f
 	rjmp 15f
@@ -477,12 +476,13 @@ ENTRY   __fp64_muldf3_pse0		; post-split entry for Z flag already set
 
 	or MM1, MM0					; are there any trailing bits set?
 	; rcall __fp64_saveAB
-	breq .L_clc_ret
+	breq .L_clz_clc_ret
 	sbr rA0, 1 					; yes: set LSB to signal possible rounding
+.L_clz_clc_ret:
+	clz							; return result != 0
 .L_clc_ret:
-	clc
-	clz
-	ret							; return with C=0 and Z=0 to signal normal result != 0
+	clc							; C=0: return finite number
+	ret
 
 16:	lsr MM8						; mantissa >>= 1
 	ror MM7

@@ -62,10 +62,7 @@ ENTRY_DOUBLE sqrt sqrtl
 	breq	.L_zr	; return 0 with original sign
 	brts	.L_NaN	; sqrt(negative) --> NaN
 
-	;call __fp64_saveA
-	; normalize, if A is subnormal
-	XCALL	_U(__fp64_norm2)
-	;call __fp64_saveA
+	XCALL	_U(__fp64_norm2_non0) ; normalize in case A is subnormal
 
 	rcall __fp64_sqrt_pse		; call the internal worker routine
 
