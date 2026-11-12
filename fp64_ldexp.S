@@ -98,7 +98,7 @@ ENTRY_DOUBLE scalbn scalbnl
 
 	subi rAE0, lo8(-1023)		; add exponent bias
 	sbci rAE1, hi8(-1023)
-	breq 2f
+	breq 2f						; normal or subnormal depends on rounding
 	brpl .L_pretA				; normal? (neither subnormal nor zero)
 
 	;; Below normal (subnormal or underflow)
@@ -107,9 +107,6 @@ ENTRY_DOUBLE scalbn scalbnl
 	cpi rAE0, lo8(-52)
 	cpc rAE1, XL
 	brlt .L_zr					; case 5: exponent < -1023 - 52 --> underflow
-
-	sbiw rAE0, 0
-	breq 2f
 
 1:	;; Case 6: exponent in [-1024, -1075]: create subnormal number.
 	XCALL _U(__fp64_lsrA)		; A >>= 1
