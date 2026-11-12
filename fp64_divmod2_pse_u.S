@@ -153,7 +153,7 @@ ENTRY __fp64_divmod2_pse.popXBret
 
 .L_big:
 	;; Value x is big such that x mod 2^P = 0.
-	XCALL _U(__fp64_zero)
+	XCALL _U(__fp64_szero)		; clear A[7] without touching T
 	X_movw 	rAE0, rA0			; AX.expo = 0
 	ldi	XL, lo8(0x7fff)			; saturate quot
 	ldi	XH, hi8(0x7fff)
