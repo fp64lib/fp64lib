@@ -261,6 +261,7 @@ class Double {
 		FP64LIB_IMPL (ceil)
 		FP64LIB_IMPL (cos)
 		FP64LIB_IMPL (cosh)
+		FP64LIB_IMPL (cospi)
 		FP64LIB_IMPL (cotan)
 		FP64LIB_IMPL (exp)
 		FP64LIB_IMPL (exp2)
@@ -274,9 +275,11 @@ class Double {
 		FP64LIB_IMPL (round)
 		FP64LIB_IMPL (sin)
 		FP64LIB_IMPL (sinh)
+		FP64LIB_IMPL (sinpi)
 		FP64LIB_IMPL (sqrt)
 		FP64LIB_IMPL (tan)
 		FP64LIB_IMPL (tanh)
+		FP64LIB_IMPL (tanpi)
 		FP64LIB_IMPL (trunc)
 #undef FP64LIB_IMPL
 
