@@ -32,11 +32,15 @@
 #include "fp64asm.h"
 #include "fp64def.h"
 
-FUNCTION __fp64_norm2
+ENTRY __fp64_norm2
+	XCALL _U(__fp64_cpc0A5)	; don't hang if mant = 0, return SEZ in that case.
+	cpc r1, rA6
+	breq 9f
+ENTRY __fp64_norm2_non0		; A[7] is known to be non-zero
+	tst rA6
+	rjmp 2f
 1:	sbiw rAE0, 1			; exponent--
 	XCALL _U(__fp64_lslA)	; mantissa <<= 1
-ENTRY __fp64_norm2
-	sbrs rA6, 7				; normalized?
-	rjmp	1b				; no: loop until mantissa starts with a leading 1
-	ret
+2:	brpl	1b				; no: loop until mantissa starts with a leading 1
+9:	ret						; Z = mant == 0
 ENDFUNC
