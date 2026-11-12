@@ -154,6 +154,10 @@ ENTRY_DOUBLE asin asinl
 	push rAE0
 
 	XCALL _U(__fp64_muldf3_pse)
+	;; Increasing the exponent by 1 doesn't work for 0 and subnormals.
+	;; In these cases, x2 will be a very small, almost subnormal number.
+	;; Since x2 is tiny, the rational function maps x2 to 1.0 + x2 = 1.0,
+	;; and hence the algorithm works fine even though the ADIW doesn't.
 	adiw rAE0, 1				; x2 = 2*x1*x1
 	rjmp 12f
 
@@ -178,9 +182,11 @@ ENTRY_DOUBLE asin asinl
 	push rAE1
 	push rAE0
 
+	;; We have x2 != 0 since the case acos(1.0) got extra treatment.
+	;; And due to x2 = 1 - x1 it can never be subnormal.  Hence adding
+	;; 1 to x2's exponent in order to multiply it by 2 works in all cases.
 	adiw rAE0, 1				; 2*x2
 	XCALL _U(__fp64_sqrt_pse)	; factor = sqrt(2*x2)
-
 
 	pop rBE0					; retrieve x2
 	pop rBE1

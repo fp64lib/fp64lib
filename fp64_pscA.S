@@ -42,13 +42,13 @@
 
 FUNCTION __fp64_pscA
 ENTRY   __fp64_pscA
-	cpi rAE1,0x07	; is exponent = 0x7ff? --> Inf/NaN
+	cpi rAE1, 0x07	; is exponent = 0x7ff? --> Inf/NaN
 	brne 1f
 	cpi rAE0, 0xff
 	brne 1f
-	cpi rA6, 0x00
+	cp  r1, rA6		; C = 1 iff rA6 != 0
 	ret
-1:	; it's a number, Z is not 0, C may be set
+1:	;; it's a number, Z is not 0, C is set
 	clz
 	clc
 	ret

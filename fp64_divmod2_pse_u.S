@@ -135,15 +135,9 @@ ENTRY __fp64_divmod2_pse.unsigned
 4:	dec XL
 	brpl .Loop_lsl1
 
-	XCALL _U(__fp64_cpc0A5)		; remainder == 0?
-	cpc  r1, rA6
-	brne .L_normalize
+	XCALL _U(__fp64_norm2)		; normalize A[7] keeping AX.expo in sync
+	brne .L_popXBret			; remainder == 0?
 	X_movw rAE0, rA0			; yes: clear the exponent for 0.0
-	rjmp .L_popXBret			;      and return
-
-.L_normalize:					; no: normalize
-	.sbrs_callj rA6, 7			;     already normalized?
-	XCALL _U(__fp64_norm2)		;     no: normalize A[7] keeping AX.expo in sync
 
 ENTRY __fp64_divmod2_pse.popXBret
 .L_popXBret:
