@@ -53,9 +53,12 @@
 
 FUNCTION fp64_ldexp
 	; handle NaN and +/-Inf
-.L_NaN:
+.L_nf:
 	breq .L_Inf					; handle Inf differently
 	XJMP _U(__fp64_nan)			; case 1: return NaN
+
+.L_Inf_or_0:
+	.sbrs_callj rB7, 7			; V=1 is an underflow when addend was < 0
 
 .L_Inf:
 	XJMP _U(__fp64_inf)			; case 2: return +/-Inf
@@ -72,45 +75,60 @@ ENTRY fp64_scalbn
 ENTRY_DOUBLE ldexp ldexpl
 ENTRY_DOUBLE scalbn scalbnl
 	XCALL _U(__fp64_splitA)
-	brcs .L_NaN					; handle cases 1&2: NaN and +/-INF
+	brcs .L_nf					; handle non-finite cases 1&2: NaN and +/-INF
 	breq .L_zr					; case 3: return 0 for 0
 
-	XCALL _U(__fp64_norm2_non0)	; normalize in case of subnormal number
+	subi rAE0, lo8(1023)		; un-bias exponent
+	sbci rAE1, hi8(1023)
+
+	;; Normalize in case of a subnormal.  Exponent won't overflow / underflow.
+	XCALL _U(__fp64_norm2_non0)
 
 	; now "multiply" by 2^exp
 	; this is done by adding exp to exponent of A
 	add rAE0, rB6
 	adc rAE1, rB7
-	; rcall __fp64_saveAB
-	brvs .L_Inf					; case 4: abs(exponent) > 0x7fff
+	brvs .L_Inf_or_0			; cases 4, 5: signed overflow of 16-bit addition
 
-	; check for overflow
-	cpi rAE1, 0x07
-	; rcall __fp64_saveAB
-	brlt 0f
-	brne .L_Inf					; case 4: exponent >= 0x0800
-	cpi rAE0, 0xff
-	brge .L_Inf					; case 4: exponent >= 0x07ff
-0:	; check for underflow
-	adiw rAE0, 0
-	brpl .L_norm				; exponent >= 0 --> go ahead
+	;; check for overflow
+	ldi XL,   hi8(0x7ff - 1023)	; compare against unbiased Inf's expo
+	cpi	rAE0, lo8(0x7ff - 1023)
+	cpc rAE1, XL
+	brge .L_Inf
 
-	cpi rAE1, 0xff
-	brlo .L_zr					; case 5: exponent < -1023-255 --> underflow
-	cpi rAE0, -51
-	brlo .L_zr					; case 5: exponent < -1023-51 --> underflow
+	subi rAE0, lo8(-1023)		; add exponent bias
+	sbci rAE1, hi8(-1023)
+	breq 2f
+	brpl .L_pretA				; normal? (neither subnormal nor zero)
 
-	; case 6: exponent between -1024 and -1074
-	; create subnormal number
-1:	XCALL _U(__fp64_lsrA)		; A >>= 1
-	inc rAE0
+	;; Below normal (subnormal or underflow)
+
+	ldi XL,   hi8(-52)
+	cpi rAE0, lo8(-52)
+	cpc rAE1, XL
+	brlt .L_zr					; case 5: exponent < -1023 - 52 --> underflow
+
+	sbiw rAE0, 0
+	breq 2f
+
+1:	;; Case 6: exponent in [-1024, -1075]: create subnormal number.
+	XCALL _U(__fp64_lsrA)		; A >>= 1
+	adiw rAE0, 1
 	brmi 1b
 
-	mov rAE0, r1
-	mov rAE1, r1
-	XJMP _U(__fp64_rcpretA)		; round, pack and return x
+2:	subi rA0, lo8(-8)			; round
+	sbci rA1, hi8(-8)
+	sbci rA2, hi8(-8)
+	sbci rA3, hi8(-8)
+	sbci rA4, hi8(-8)
+	sbci rA5, hi8(-8)
+	sbci rA6, hi8(-8)
 
-	; case 7: return x
-.L_norm:
+	brcs .L_pretA
+	ldi rA6, 0x80				; rounding overflowed to a normal number
+	adiw rAE0, 1
+
+.L_pretA:
+	;; case 7: return x
 	XJMP _U(__fp64_pretA)		; pack and return x
 ENDFUNC
