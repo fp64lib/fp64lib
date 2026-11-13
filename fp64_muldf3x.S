@@ -427,7 +427,7 @@ ENTRY   __fp64_muldf3_pse		; post-split entry
 	subi rAE0, lo8(1023 - 1)	; subtract bias - 1
 	sbci rAE1, hi8(1023 - 1)
 	; rcall __fp64_saveMul
-	brmi	13f					; exponent negative --> denormal number / underflow
+	brmi	13f					; exponent negative --> denormal number
 	breq	15f		    		; exponent = 0 --> denormal number
 
 	; result exponent > min ==> normalization is possible
@@ -437,34 +437,39 @@ ENTRY   __fp64_muldf3_pse		; post-split entry
 	cpi rAE0,lo8(0x7ff)
 	cpc rAE1, rA6
 	brlo 15f					; everything ok, no overflow
-	;call __fp64_saveMul
 
-	; exponent >= 0x7ff --> overflow,
-111:
+	;; exponent >= 0x7ff --> overflow
 	sec							; C = 1: error and returning of packed result
 	XJMP _U(__fp64_inf)
 
-	; underflow, cannot even be expressed as denormalized number --> return +/-0
-12: rcall .L_szero
-	clr rAE1					; does SEZ
-	clr rAE0
-	rjmp .L_clc_ret				; C=0, Z=1: return 0.0
+12: ;; underflow, only the Sticky bit remains
+	rcall .L_szero
+	X_movw rAE0, rA0
+	ldi rA0, 0x1				; inputs were non-0, so the Sticky bit survives
+	rjmp .L_clz_clc_ret			; C=0, Z=0: return non-0
 
-131: rcall 16f
-	rjmp 15f
+13:	;; underflow with exponent < 0
+	ldi rA7,  hi8(-52)
+	cpi rAE0, lo8(-52)			; check if result could fit into 52 bits
+	cpc rAE1, rA7
+	brlt 12b					; no --> return with only the Sticky bit left
 
-	; underflow with exponent < 0, check whether denormalization could work
-13:	cpi rAE0,lo8(-51)			; check if result could fit into remaining 52 bits
-	;call __fp64_saveMul
-	brlt 12b					; no --> return 0
-	cpi rAE1, 0xFF				; catch cases where exp(a)+exp(b)<-255
-	brne 12b
-
-	; mantissa >> -rAE0
-14:	rcall 16f					; mantissa >>= 1
-	adiw rAE0, 1				; exponent++
-	brmi 14b					; exponent still < 0
-	;call __fp64_saveMul
+.Lsr_MM:						; mantissa >> -rAE0
+	lsr MM8						; mantissa >>= 1
+	ror MM7
+	ror MM6
+	ror MM5
+	ror MM4
+	ror MM3
+	ror MM2
+	ror MM1
+	ror MM0
+	brcc 14f
+	;; Shifted out a 1, thus set the Sticky bit.
+	sbrs MM0, 0					; MM0.0 already set?
+	inc MM0						; no: set it (can't use ORI with MM0)
+14:	adiw rAE0, 1				; exponent++
+	brmi .Lsr_MM				; exponent still < 0
 
 	;; shift mantissa 3 bits to prepare for packing (topmost bit is discarded
 	;; as it is always 1, therefore only 3 shifts needed instead of 4)
@@ -475,23 +480,11 @@ ENTRY   __fp64_muldf3_pse		; post-split entry
 	X_movw rA0,MM2
 
 	or MM1, MM0					; are there any trailing bits set?
-	; rcall __fp64_saveAB
 	breq .L_clz_clc_ret
-	sbr rA0, 1 					; yes: set LSB to signal possible rounding
+	sbr rA0, 1 					; yes: set LSB as the Sticky bit for rounding
 .L_clz_clc_ret:
 	clz							; return result != 0
 .L_clc_ret:
 	clc							; C=0: return finite number
-	ret
-
-16:	lsr MM8						; mantissa >>= 1
-	ror MM7
-	ror MM6
-	ror MM5
-	ror MM4
-	ror MM3
-	ror MM2
-	ror MM1
-	ror MM0
 	ret
 ENDFUNC
