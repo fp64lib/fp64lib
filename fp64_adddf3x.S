@@ -33,8 +33,8 @@
      Internal function to add 64-bit floating point numbers.
 
    Input:
-     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0.rAE  - arg. A
-     rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0.rBE  - arg. B
+     rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - arg. A
+     rB7.rB6.rB5.rB4.rB3.rB2.rB1.rB0 - arg. B
    Output:
      rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 - result A - B
  */
@@ -70,11 +70,12 @@ FUNCTION __fp64addsf3x
 	brne	.L_infB				; A is not Inf --> B has to be Inf (case 5)
 	XCALL	_U(__fp64_pscB)		; A is +/-Inf, so check whether B is also +/-Inf
 	brcc	.L_inf				; B is finite --> return A Inf (case 4)
-	brtc	.L_inf				; Both are inf, check Inf + Inf with the same sign (cases 3b/3c)
-	tst r0						; both are inf, with different sign, check for sub (case 3a)
-	brmi .L_inf					; +Inf - -Inf or -Inf - +Inf --> return Inf with sign of A
+	eor r0, rA7					; split3 put sign(A^B) in rA7.7; r0.7: do sub?
+	brpl .L_inf					; +Inf ± ±Inf, -Inf ∓ ±Inf
+	;; -Inf ± ±Inf, +Inf ∓ ±Inf
 	; case 3a/3d: Inf + Inf with different sign, return NaN
 .L_nan:
+	sec							; C=1: signal packed result
 	XJMP	_U(__fp64_nanp)
 
 	; recover sign(a)
@@ -91,12 +92,14 @@ FUNCTION __fp64addsf3x
 	; case 4: Inf + Any -> return Inf with sign of A
 .L_inf:
 	rcall .L_sign				; recover sign(a)
-	XJMP	_U(__fp64_infp)		; return Inf with sign(a)
+	rjmp  .L_infp				; return Inf with sign(a)
 
 	; case 5: Any + Inf -> return Inf with sign of B
 .L_infB:
 	sub		rB7, r0				; if mode is sub, reverse sign of B
 	bst		rB7, 7				; determine sign based on B
+.L_infp:
+	sec							; C=1: signal packed result
 	XJMP	_U(__fp64_infp)		; return Inf
 
 	/*
@@ -138,6 +141,7 @@ ENTRY __fp64_adddf3x
 
 2:	rcall __fp64_add_pse_r0
 	XCALL _U(__fp64_popB)
+	brcs .L_sign				; C=1: result already packed
 	XJMP _U(__fp64_rpretA)		; round, pack result and return
 
 11:	XCALL _U(__fp64_isBzero)
@@ -171,7 +175,7 @@ ENTRY __fp64_adddf3x
 		rB7								sign of B
 		T								sign(a^b)
 	Return:
-		C								indicates over- or underflow --> output is already in float64_t format
+		C								flags overflow --> output is packed
 		rA6.rA5.rA4.rA3.rA2.rA1.rA0		significand of A+B, if C=0
 		rAE1.rAE0						exponent of A+B, if C=0
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result of A+B, if C=1
@@ -293,21 +297,21 @@ __fp64_add_pse_r0:
 	; 	significand is already in correct position
 	; so everything is fine, just return
 	XCALL _U(__fp64_lslA)
-	ret
+	rjmp .L_clc_ret
 
 	; result is in T (sign), AE1.rAE0 (exp) and rA6.rA5.rA4.rA3.rA2.rA1.rA0 --> return it
 .L_ret:
 	tst rA6						; is topmost bit set?
 	brpl 8b						; no, subnormal number --> adjust result
-	clc							; clear carry --> no error, caller has to pack result
+.L_clc_ret:
+	clc							; C=0 --> no error, caller has to pack result
 	ret
 
 .L_zr:	; exponent is zero, but topmost bit is still not set --> subnormal number
 	; or A+(-A)
 	XCALL _U(__fp64_zero)		; return 0
 	X_movw rAE0, rA0			; also in internal format
-	sec							; set carry to indicate overflow and for already packed result
-	ret
+	rjmp .L_clc_ret
 
 .L_add:
 	XCALL _U(__fp64_addAB)		; add B to A
@@ -322,8 +326,6 @@ __fp64_add_pse_r0:
 	brne .L_ret					; no -> return A
 
 	rcall .L_sign				; yes, return inf with recovered sign(a)
-	XCALL _U(__fp64_inf)
-	sec							; set carry to indicate overflow and for already packed result
-	ret
-
+	sec							; C=1: already packed result
+	XJMP _U(__fp64_inf)
 ENDFUNC
