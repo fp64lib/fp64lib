@@ -40,10 +40,35 @@
 FUNCTION fp64_isnan
 ENTRY fp64_isnan
 GCC_ENTRY __unorddf2
-	XCALL	_U(__fp64_splitA)
+	rcall __fp64_AisNaN
 	ldi	r24, 0
 	ldi	r25, 0
-	breq	1f		; Z = 1 for Normal or Inf
-	adc	r24, r24	; C = 1 for NaN
+	adc	r24, r24				; C = 1 for NaN
 1:	ret
+
+/* __fp64_AisNaN: internal entry to fp64_isnan( float64_t x )
+	Input:	rA7..rA0	x in packed IEEE format
+	Output:	C = 1		iff x is a NaN
+			C = 0		iff x is not a NaN
+	Modifies: nothing except flags
+ */
+ENTRY __fp64_AisNaN
+	push rA7
+	andi rA7, 0x7f				; ignore sign
+	
+	cpi rA7, hi8(0x7ff0)
+	brlo 0f
+	cpi rA6, lo8(0x7ff0)
+	brlo 0f
+	brne 1f
+	XCALL _U(__fp64_cpc0A5)		; is it NaN or Inf, check rA0-rA5 against 0
+	breq 0f						; it's INF, return C=0
+1:
+	sec							; it's a NaN, return C=1
+	rjmp 2f
+0:
+	clc							; not a NaN, return C=0
+2:
+	pop rA7
+	ret
 ENDFUNC
