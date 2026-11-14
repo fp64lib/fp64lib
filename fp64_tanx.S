@@ -29,34 +29,41 @@
 #include "fp64asm.h"
 #include "fp64def.h"
 
+FUNCTION fp64_tan
+
+/* float64_t fp64_cotan (float64_t x);
+     The fp64_cotan() function returns the cotangent of x, which is
+     defined mathematically as cos(x) / sin(x).
+ */
+
+ENTRY fp64_cotan
+;; ENTRY_DOUBLE cotan cotanl	; cotan / cotanl are not in math.h.
+	com r1						; do cotan
+
 /* float64_t fp64_tan (float64_t x);
      The fp64_tan() function returns the tangent of x, which is
      defined mathematically as sin(x) / cos(x).
  */
 
-FUNCTION fp64_tan
 ENTRY fp64_tan
 ENTRY_DOUBLE tan tanl
+
+.L_tan_common:
 	XCALL _U(__fp64_pushB)		; preserve registers
 
-	XCALL _U(__fp64_pushA)		; save x
+	push r1
+	clr  r1
 
-	XCALL _U(fp64_cos)			; calculate cos(x)
+	XCALL _U(__fp64_movBA)		; copy x to B
+	XCALL _U(fp64_cos)			; calculate A = cos(x)
+	XCALL _U(__fp64_swapAB)		; AX <-> BX:  A = x, B = cos(x)
+	XCALL _U(fp64_sin)			; calculate A = sin(x)
 
-	XCALL _U(__fp64_popB)		; restore x
-	XCALL _U(__fp64_pushA)		; save cos(x)
-	XCALL _U(__fp64_movAB)		; move x into A
+	pop r0
+	.sbrc_callj r0,0			; tan:   sin(x) / cos(x)
+	XCALL _U(__fp64_swapAB)		; cotan: cos(x) / sin(x)
 
-	XCALL _U(fp64_sin)			; calculate sin(x)
+	XCALL _U(fp64_div)			; calculate tan ? sin(x)/cos(x) : cos(x)/sin(x)
 
-	XCALL _U(__fp64_popB)		; restore cos(x)
-	XCALL _U(__fp64_isBzero)	; is cos(x) == 0?
-	sec
-	breq 1f						; yes, no need to calculate sin(x)/cos(x), return +/-Inf.
-
-	XCALL _U(fp64_div)			; calculate sin(x)/cos(x)
-
-1:
 	XJMP _U(__fp64_popBret)		; restore registers and return
-
 ENDFUNC
