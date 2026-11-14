@@ -52,7 +52,7 @@ FUNCTION __fp64_divdf3x
 	;-----+-------+------+------
 	; 1	  | NaN	  | any	 |	NaN
 	; 2	  | any	  | NaN	 |	NaN
-	; 3	  | Inf	  | 0	 |	NaN
+	; 3	  | Inf	  | 0	 |	Inf
 	; 4	  | Inf	  | Inf	 |	NaN
 	; 5	  | 0	  | Inf	 |	 0
 	; 6	  | Inf	  | != 0 |	Inf
@@ -66,9 +66,8 @@ FUNCTION __fp64_divdf3x
 	; check if B is 0
 	XCALL	_U(__fp64_pscB)
 	brcs	1f					; B is +/-Inf, cases 4,5,7
-	breq	.L_nan				; B = 0, A = +/-Inf --> A/B = NaN, case 3
 
-	; now A is +/-Inf, B != 0, case 6 --> return +/- Inf
+	;; now A is +/-Inf, B finite, case 3, 6 --> return +/-Inf
 .L_inf:
 	XJMP	_U(__fp64_infp)
 
