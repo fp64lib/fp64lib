@@ -64,7 +64,7 @@
 	;  3b | +finite	 |	  -Inf	 | +PI
 	;  3c | -finite	 |	  +Inf	 | -0
 	;  3d | -finite	 |	  -Inf	 | -PI
-	;  3e | +/- Inf	 |	 +/-Inf	 | NaN
+	;  3e | +/- Inf	 |	 +/-Inf	 | ±PI/4 or ±3PI/4 depending on sector
 	;  3f | +/- Inf	 |	  any	 | +/- PI/2
 	;  4  | |y|<=|x| |	  >= 0	 | see sector I & VIII: atan(y/x)+0
 	;  5  | |y|<=|x| |	   < 0	 | see sector IV & V:	atan(y/x)+/-PI
@@ -77,6 +77,14 @@
 #include "fp64def.h"
 
 FUNCTION fp64_atan2
+.L_inf_inf:
+	;; Both A and B are ±Inf: Turn them into ±1 and proceed as if finite.
+	ldi rAE1, hi8(0x3ff)		; turn expo A from 7ff (Inf) to 3ff (1.0)
+	ldi rBE1, hi8(0x3ff)		; turn expo B from 7ff (Inf) to 3ff (1.0)
+	ldi rA6, 0x80				; mantissa A gets a leading 1
+	ldi rB6, 0x80				; mantissa B gets a leading 1
+	rjmp .L_finite				; proceed as if they were finite
+
 .L_nf:
 	; handle special cases:
 	;	B  / A |   NaN	  | +/-Inf	 |	   0	|	finite
@@ -96,7 +104,7 @@ FUNCTION fp64_atan2
 	; case 3b&3c: A is +/-Inf, B is any != NaN
 	; is B also +/- Inf?
 	XCALL _U(__fp64_pscB)
-	brcs .L_nan					; yes, case 3b: A = +/-Inf, B = +/-Inf --> atan2(A,B) = NaN
+	brcs .L_inf_inf				; yes, case 3e: A = +/-Inf, B = +/-Inf
 
 	; no: case 3c: A= +/- Inf, B is finite --> atan2(A,B) will be handled via atan(A/B)
 	sbrc rB7, 7					; is B negative?
@@ -145,7 +153,7 @@ ENTRY_DOUBLE atan2 atan2l
 	XCALL	_U(__fp64_split3)
 	brcs .L_nf				; handle special cases A or B being non-finite
 	breq .L_0orPI			; check for case 2a-2d: A == 0
-
+.L_finite:
 	sbrc rB7, 7				; is B negative?
 	subi rA7, 0x80			; yes: restore original sign of A
 
