@@ -46,32 +46,50 @@ FUNCTION __fp64_pretA
      XL, XH - untouched
  */
 
+.L_round_subnormal:
+	;; Subnormals are shifted >>= 4 down the line, hence the positions
+	;; of the L, G, R, S bits is one position higher than for normals.
+	sbrs rA0, 3				; Guard bit?
+	rjmp __fp64_pretA 		; no, pack result
+	mov rA7, rA0
+	andi rA7, 0b10111		; any of R, S, L set? S are actually 2 bits here
+	breq __fp64_pretA		; no: pack result
+	ldi rA7, 1 << 4
+	rjmp .L_add_A7
+
+;;; rA0.0 = Sticky bit
+;;; rA0.1 = Round bit
+;;; rA0.2 = Guard bit
+;;; rA0.3 = Low bit of packed mantissa
+;;; The condition for rounding is:
+;;; round_up := G & (R | S | L)
+
 ENTRY __fp64_rpretA
-	clc					; default: do not take carry into account
+	clc						; default: do not take carry into account
 ENTRY __fp64_rcpretA
-	sbrs rA0, 2			; does rounding occur?
-	rjmp __fp64_pretA 	; no, pack result
-	;rjmp 0f
+	sbiw rAE0, 0
+	breq .L_round_subnormal
 
-	sbrc rA1, 1
-	rjmp 1f				; guard bit 1 set --> round up
-	brcs 1f				; carry as guard bit -1 is set --> round up
-	sbrs rA0, 0			; guard bit 1 is clear. what about guard bit 0
-	rjmp 0f				; guard bit 0 is also clear --> round to even
-	; at least one of the lower bits is set -> we have to round up
-1:	subi rA0, (-0x08)	; increase first bit of 53-bit significand
-	brcs __fp64_pretA	; if no everflow, pack & return
-	sec					; handle overflow
-	adc rA1,r1
-	adc rA2,r1
-	adc rA3,r1
-	adc rA4,r1
-	adc rA5,r1
-	adc rA6,r1
-	brcc __fp64_pretA	; no overflow, everything fine
+	sbrs rA0, 2				; Guard bit: does rounding occur?
+	rjmp __fp64_pretA 		; no, pack result
+	mov rA7, rA0
+	andi rA7, 0b1011		; any of R, S, L set?
+	breq __fp64_pretA		; no: pack result
+	;; at least one of R, S, L is set -> we have to round up
+	ldi rA7, 1 << 3
 
-	ror  rA6
-	XCALL _U(__fp64_rorA5) 	; overflow --> shift mantissa of result with 1st bit set (could be discarded)
+.L_add_A7:
+	add rA0, rA7			; increase first bit of 53-bit significand
+	adc rA1, r1
+	adc rA2, r1
+	adc rA3, r1
+	adc rA4, r1
+	adc rA5, r1
+	adc rA6, r1
+	brcc __fp64_pretA		; no overflow, everything fine
+
+	ror  rA6				; result is always normal: set mantissa MSB
+	XCALL _U(__fp64_rorA5) 	; overflow --> shift mantissa to set MSB of result
 
 	adiw rAE0, 1			; increase exponent by 1
 	cpi	rAE0, 0xff			; did we get overflow (exp == 0x7ff) ?
@@ -79,9 +97,6 @@ ENTRY __fp64_rcpretA
 	cpi rAE1, 0x7
 	brne __fp64_pretA		; no -> return A
 	XJMP _U(__fp64_inf)		; yes -> return infinity
-
-0:	sbrs rA0, 3			; round to even
-	ori rA0, 0x08
 
 /* float_64 __fp64_pretA(non-standard A );
      Internal function to pack a 64-bit float point number
@@ -98,7 +113,6 @@ ENTRY __fp64_rcpretA
  */
 
 ENTRY __fp64_pretA
-	; rcall __fp64_saveAB
 	adiw rAE0, 0	; test 1 for subnormal number: exponent == 0?
 	breq 2f			; yes, handle it
 	tst rA6			; test 2: do we have a leading 1 bit ?
