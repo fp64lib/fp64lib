@@ -59,7 +59,7 @@ ENTRY fp64_cos
 	;; .1 = flip x prior to sin
 	;; .7 = sign(input)
 	bld	XL, 7					; flags.7 = sign(x)
-	cbr rA7, 0x80
+	cbr rA7, 0x80				; x := |x|
 	push XL						; store flags
 
 	XCALL _U(__fp64_movCA)		; keep |x| in CX
