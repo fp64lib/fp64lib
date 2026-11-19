@@ -268,15 +268,28 @@ __fp64_add_pse_r0:
 
 	; shift B >>= exp(a) - exp(b)
 	; align mantissa of B with A
-5:	lsr rB6			; mantissa B >>= 1
+	neg rBE0
+5:	subi rBE0, 8
+	brcs 51f
+	mov rB0, rB1	; mantissa B >>= 8
+	mov rB1, rB2
+	mov rB2, rB3
+	mov rB3, rB4
+	mov rB4, rB5
+	mov rB5, rB6
+	clr rB6
+	rjmp 5b
+51:	subi rBE0, -8
+	breq 6f
+52:	lsr rB6			; mantissa B >>= 1
 	ror rB5
 	ror rB4
 	ror rB3
 	ror rB2
 	ror rB1
 	ror rB0
-	subi rBE0, -1
-	brne 5b
+	dec rBE0
+	brne 52b
 
 6:	; B is now properly shifted for addition --> start real add or sub action
 	sbrs r0, 7	  				; operation = sub?
