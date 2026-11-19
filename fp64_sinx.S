@@ -36,6 +36,7 @@
 */
 
 ENTRY fp64_sin
+ENTRY_DOUBLE sin sinl
 	ldi XL, 0
 	rjmp .L_sincos
 
@@ -44,6 +45,7 @@ ENTRY fp64_sin
 */
 
 ENTRY fp64_cos
+ENTRY_DOUBLE cos cosl
 	ldi XL, 1
 .L_sincos:
 	XCALL _U(__fp64_splitA)
