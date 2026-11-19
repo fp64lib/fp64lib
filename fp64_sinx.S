@@ -151,17 +151,7 @@ ENTRY fp64_cos
 
 ;;; AX := CX := CX - AX * BX
 .L_sub_C_AB:
-	push rR5
-	push rR6
-	push rR7
-	push rR8
-	push rZero
-	XCALL _U(__fp64_muldf3_pse)
-	pop rZero
-	pop rR8
-	pop rR7
-	pop rR6
-	pop rR5
+	XCALL _U(__fp64_muldf3_pse_pushpop5)
 
 	XCALL _U(__fp64_movBC)
 	X_movw rBE0, YL
