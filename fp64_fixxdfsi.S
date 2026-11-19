@@ -284,6 +284,7 @@ __fp64_fixxdfxi:
 	XCALL _U(__fp64_splitA)
 	brcs .L_err					; return 0 for NaN and +/-INF
 	breq .L_zr					; return 0 for 0, C = 0
+ENTRY __fp64_fixxdfxi_pse
 	tst rAE1
 	brmi .L_zr					; return 0 if exponent is < 0, C = 0
 
