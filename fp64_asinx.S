@@ -135,6 +135,7 @@ ENTRY_DOUBLE asin asinl
 	breq .L_x_zero				; x == 0 --> result of asin(0) / acos(0)
 
 	clt
+	cbr rA7, 0x80				; x := |x| again
 
 	XCALL _U(__fp64_pushCB)		; save the used callee-saved registers
 	push YH
