@@ -132,8 +132,9 @@ ENTRY __fp64_powser
 .L_ret:
 	ret
 
-	; load an unpacked 10 byte number from program memory
-	; location will be retrieved from .L_saveZ, .L_saveZ+1
+	;; Load an unpacked 10-byte number from program memory.
+	;; Location (Z) will be retrieved from .L_saveZ, .L_saveZ+1 prior
+	;; to the load and restored to there afterwards.
 .Load10:
 
 	push ZL
@@ -150,8 +151,14 @@ ENTRY __fp64_powser
 	LPMX	rB2, Z+
 	LPMX	rB1, Z+
 	LPMX	rB0, Z+
-	LPMX	rBE1, Z+
-	LPMX	rBE0, Z+
+	;; The exponent is stored as int8_t with a bias of -1.  The fp64lib
+	;; expanded format uses an exponent bias of 1023, so the high byte
+	;; of the expanded exponent is 3 or 4 depending on whether the
+	;; loaded int8_t expo is negative or non-negative.
+	LPMX	rBE0, Z+			; expo.lo
+	ldi		rBE1, 4				; expo.hi
+	sbrc	rBE0, 7
+	ldi		rBE1, 3
 
 	sts .L_saveZ+0, ZL			; save post-incremented table pointer
 	sts .L_saveZ+1, ZH
