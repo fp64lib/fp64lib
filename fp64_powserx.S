@@ -96,19 +96,11 @@ ENTRY __fp64_powser
 	eor r0, rA7
 	bst r0,7
 
-	; rcall __fp64_saveABC
-
-	push rR5	; save working registers
-	push rR6
-	push rR7
-	push rR8
-	push rZero
-	XCALL	_U(__fp64_muldf3_pse)	; create x*Cn (1st run: x*C3, 2nd: (x*C3+C2)*x, 3rd: ((x*C3+C2)*x+C1)*x )
-	pop rZero
-	pop rR8				; restore used registers and return
-	pop rR7
-	pop rR6
-	pop rR5
+	;; create x*Cn
+	;; 1st run: x*C3
+	;; 2nd run: (x*C3 + C2)*x
+	;; 3rd run: ((x*C3 + C2)*x + C1)*x
+	XCALL	_U(__fp64_muldf3_pse_pushpop5)
 
 	bld rA7, 7					; save sign of result
 	brcs .L_pop_ret				; C is set on overflow and result is already packed
