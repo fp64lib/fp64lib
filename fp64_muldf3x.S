@@ -109,6 +109,19 @@ ENTRY   __fp64_muldf3x
 	XCALL	_U(__fp64_split3)	; split A and B into exponent and mantissa
 	brcs	0b					; A or B is NaN and/or InF --> special result
 
+	rcall __fp64_muldf3_pse_pushpop5
+
+	XCALL _U(__fp64_popB)
+	brcs 3f						; overflow? result is already packed
+	XJMP _U(__fp64_rpretA)		; no, return with proper rounding, including carry
+3:	ret							; overflow, return already packed result +/-Inf
+
+
+/* Like __fp64_muldf3_pse from below, except that it saves / restores
+   rR5..rR8 and rZero (r5..r9) around __fp64_muldf3_pse.
+*/
+
+ENTRY __fp64_muldf3_pse_pushpop5 ; post-split entry
 	push rR5					; save working registers
 	push rR6
 	push rR7
@@ -122,12 +135,7 @@ ENTRY   __fp64_muldf3x
 	pop rR7
 	pop rR6
 	pop rR5
-
-	; rcall __fp64_saveAB
-	XCALL _U(__fp64_popB)
-	brcs 3f						; overflow? result is already packed
-	XJMP _U(__fp64_rpretA)		; no, return with proper rounding, including carry
-3:	ret							; overflow, return already packed result +/-Inf
+	ret
 
 /*
 	fp64_splitted __fp64muldf3_pse( fp64_splitted_t A, fp64_splitted_t B )

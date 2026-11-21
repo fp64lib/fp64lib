@@ -176,6 +176,7 @@ ENTRY __fp64_adddf3x
 		T								sign(a^b)
 	Return:
 		C								flags overflow --> output is packed
+		T								sign of result if C=0
 		rA6.rA5.rA4.rA3.rA2.rA1.rA0		significand of A+B, if C=0
 		rAE1.rAE0						exponent of A+B, if C=0
 		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0	result of A+B, if C=1

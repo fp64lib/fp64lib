@@ -121,9 +121,11 @@ ENTRY	__fp64_divdf3
 		T								sign(a^b)
 	Return:
 		C								indicates overflow or underflow, result is already in packed format
-		rA6.rA5.rA4.rA3.rA2.rA1.rA0		significand of A+B, if C=0
-		rAE1.rAE0						exponent of A+B, if C=0
-		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 result of A+B, if C=1
+		rA6.rA5.rA4.rA3.rA2.rA1.rA0		significand of A/B, if C=0
+		rAE1.rAE0						exponent of A/B, if C=0
+		rA7.rA6.rA5.rA4.rA3.rA2.rA1.rA0 result of A/B, if C=1
+	Clobbers:
+		rB0...rB7, r0
 */
 
 
