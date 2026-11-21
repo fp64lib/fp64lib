@@ -74,7 +74,7 @@ ENTRY __fp64_powser
 
 	rcall	.Load10				; load first factor into B (in our example C3)
 
-	sbrs rB7, 0					; monic?
+	sbrs rB0, 0					; monic?
 	rjmp 1f						; no: vanilla horner expansion
 
 	;; This is a monic polynomial:  Instead of
@@ -142,16 +142,23 @@ ENTRY __fp64_powser
 	lds ZL, .L_saveZ+0			; load table pointer
 	lds ZH, .L_saveZ+1
 
-	LPMX	rB7, Z+				; load next constant from program memory
-	LPMX	rB6, Z+
+	LPMX	rB6, Z+				; load next constant from program memory
 	LPMX	rB5, Z+
 	LPMX	rB4, Z+
 	LPMX	rB3, Z+
 	LPMX	rB2, Z+
 	LPMX	rB1, Z+
 	LPMX	rB0, Z+
-	LPMX	rBE1, Z+
-	LPMX	rBE0, Z+
+	;; The exponent is stored as int7_t with a bias of -1.  The fp64lib
+	;; expanded format uses an exponent bias of 1023, so the high byte
+	;; of the expanded exponent is 3 or 4 depending on whether the
+	;; loaded expo is negative or non-negative.
+	LPMX	rBE0, Z+			; expo.lo | sign
+	asr		rBE0				; shift exponent into place, C = sign
+	sbc		rB7, rB7			; install sign
+	ldi		rBE1, 4				; expo.hi: bias -1 --> bias 1023
+	sbrc	rBE0, 7
+	ldi		rBE1, 3
 
 	sts .L_saveZ+0, ZL			; save post-incremented table pointer
 	sts .L_saveZ+1, ZH
