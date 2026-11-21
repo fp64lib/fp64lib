@@ -128,7 +128,8 @@ ENTRY_DOUBLE cos cosl
 	push rAE0
 	push rAE1
 
-	rcall .Ldb_pi2_hi
+	XCALL _U(__fp64_ldb_pi2)	; load hi48(pi/2)
+	clr rB0
 	rcall .L_sub_C_AB			; AX := CX := CX - AX * BX = X - quot * pi2_hi
 
 	pop	rAE1					; restore quotient to AX
@@ -210,18 +211,12 @@ ENTRY_DOUBLE cos cosl
 	;; Vanilla division by pi/2 and quotient truncation to uint32_t A[4..7].
 	LPMX_FINI r1				; finalize LPMX
 	XCALL _U(__fp64_movABx)		; restore dividend
-	rcall .Ldb_pi2_hi			; divisor is pi/2
+	XCALL _U(__fp64_ldb_pi2)	; divisor is pi/2
 	XCALL _U(__fp64_divdf3_pse)	; overflow (C = 1) doesn't occur
 
 	push rBE0					; convert to uint32_t
 	ldi rBE0, 32
 	XJMP _U(__fp64_fixxdfxi_pse) ; A[4..7] = (uint32_t) AX
-
-.Ldb_pi2_hi:
-	push ZL
-	push ZH
-	LPMX_INIT ZL, .L_pi2_hi
-	XJMP _U(__fp64_ldb_const)
 
 .Ldb_pi2_lo:
 	push ZL
@@ -265,12 +260,7 @@ OBJECT .L_n_pi2
 	.byte 0 ; end of table
 ENDOBJ .L_n_pi2
 
-OBJECT .L_pi2_hi
-	;; π/2 truncated to 48 MSBs
-	.byte 0x00, 0xc9,0x0f,0xda,0xa2,0x21,0x68,0x00, 0x03,0xff ; +1.57079632679489122893e+00 = +0x1.921fb54442d000p+0
-ENDOBJ .L_pi2_hi
-
 OBJECT .L_pi2_lo
-	;; π/2 - pi2_hi
+	;; π/2 - pi2_hi48
 	.byte 0x00, 0xc2,0x34,0xc4,0xc6,0x62,0x8b,0x81, 0x03,0xcf ; +5.39030285815811906672e-15 = +0x1.8469898cc51702p-48
 ENDOBJ .L_pi2_lo
