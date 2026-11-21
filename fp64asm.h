@@ -241,6 +241,21 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Polynomial coefficients
+;;; are stored in a "compressed" 8-byte format and expanded by powser
+;;; on the fly to the 10-byte format used by the arithmetic.
+;;; * The exponent is biased with -1 and stored as int7_t in
+;;;   bits 7...1 of the last byte.
+;;; * The sign is stored in bit 0 of the last byte.
+;;; * The LSBit of the mantissa of the highest coefficient flags
+;;;   whether the polynomial is monic.  In that case, the highest
+;;;   coefficient is 1.0 and not stored.
+
+#define C(s, m6, m5, m4, m3, m2, m1, m0, ex) \
+	m6, m5, m4, m3, m2, m1, m0, ((ex - 1) << 1) | ((1 - s##1) >> 1)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Deal with ISA quirks.
 
 .macro .sbrs_callj reg, bit
