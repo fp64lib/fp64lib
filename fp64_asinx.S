@@ -105,9 +105,11 @@ ENTRY_DOUBLE asin asinl
 
 	cbr rA7, 0x80				; x := |x|
 	;; Compare 1.0 <=> |x|.
+	ldi	ZL, lo8(0x3ff0)			; Z := hi16(1.0)
+	ldi	ZH, hi8(0x3ff0)
 	XCALL _U(__fp64_cpc0A5)
-	ldi	ZL, lo8(0x3ff0)  $  cpc ZL, rA6
-	ldi	ZH, hi8(0x3ff0)  $  cpc ZH, rA7
+	cpc ZL, rA6
+	cpc ZH, rA7
 	brlt .L_nan					; 1.0 < |x| --> NaN
 	brne 1f						; 1.0 > |x| --> do the math
 
@@ -124,10 +126,9 @@ ENTRY_DOUBLE asin asinl
 	;; |x| < 1.0
 	;; Compare 0.5 <=> |x|.
 	sbiw ZL, 0x10				; Z := 0x3fe0 = hi16(0.5)
-	XCALL _U(__fp64_cpc0A5)
-	cpc ZL, rA6
-	cpc ZH, rA7
-	adc XH, r1					; XH.0 := |x| > 0.5
+	cp  rA6, ZL
+	cpc rA7, ZH
+	sbci XH, -1					; XH.0 := |x| ≥ 0.5
 	sts __sinFlags, XH
 	bld	rA7, 7					; Restore sign of x, only needed for -0.0
 
