@@ -221,8 +221,6 @@ ENTRY   fp64_strtod
 	; we got another digit
 	; do we still have space for this digit?
 	cpi rExp2L, 64-4			; a digit consumes 4 bits
-	; rcall __fp64_saveAB
-
 	brge .L_skipDigit			; no more space, ignore this digit
 
 	; sub rExp10L, rPoint			; if( point )
@@ -254,7 +252,7 @@ ENTRY   fp64_strtod
 	cpc rC0, r1
 
 	breq 21f					; if( C )
-	adiw rExp2L, 4				; 	rExp2 += 4;	// increase position for new digit
+	adiw rExp2L, 4				; 	rExp2 += 4: increase position for new digit
 
 21:	; add digit to the correct position 63 - exp2
 	andi rCh, 0x0f
@@ -265,7 +263,7 @@ ENTRY   fp64_strtod
 	ldi rExp2H, 63
 	sub rExp2H, rExp2L			; rExp2H = 63 - exp2 , counter for shifting B
 
-22: cpi rExp2H, 8
+22: subi rExp2H, 8
 	brlo 23f
 	mov rB7, rB6				; speed shift by 8 bits = 1 register
 	mov rB6, rB5
@@ -275,15 +273,12 @@ ENTRY   fp64_strtod
 	mov rB2, rB1
 	mov rB1, rB0
 	clr rB0
-	subi rExp2H, 8
 	rjmp 22b
 
-23:
-	; rcall __fp64_saveAB
-
-	tst rExp2H
+23:	subi rExp2H, -8
 	breq 25f
-24:	lsl rB0						; now shift bitwise if less than 8 shifts are needed
+
+24:	lsl rB0						; shift bitwise if 1..7 shifts are left
 	rol rB1
 	rol rB2
 	rol rB3
@@ -321,7 +316,6 @@ ENTRY   fp64_strtod
 
 26:
 	XCALL _U(__fp64_movAC)		; 	move result back to A for next iteration
-	; rcall __fp64_saveA
 
 	rjmp .L_nextDigit
 
@@ -405,10 +399,9 @@ ENTRY   fp64_strtod
 	bld rAE1, 7			; including the correct exponent sign
 	rjmp .L_cleanup		; cleanup and return +/-INF or +/-0
 
-36:
-	clr rExp2H			; for 1- and 2-digit exponents, clear high byte
-37:
-	; stop parsing, sign adjust exponent
+36:	clr rExp2H			; for 1- and 2-digit exponents, clear high byte
+
+37:	; stop parsing, sign adjust exponent
 	brtc 38f			; if( expSign )
 	neg rExp2H			;	exp = -exp;
 	neg rExp2L
@@ -423,8 +416,7 @@ ENTRY   fp64_strtod
 	adc r0, rExp2H
 	sts .L_exp10H, r0
 
-39:
-	pop rExp2L			; and restore exp2
+39:	pop rExp2L			; and restore exp2
 	pop rExp2H
 
 .L_noExp:
@@ -437,20 +429,15 @@ ENTRY   fp64_strtod
 	push rExp2H
 	lds XL, .L_exp10L
 	lds XH, .L_exp10H
-	;rcall __fp64_saveAB
 	XCALL _U(__fp64_10pown)	; create 10^exp10, overwriting rBx and rCx!
 	pop rB7
 	pop rB6					; restore exponent of A
-
-	; rcall __fp64_saveAB
 
 	add rExp2L, rB6
 	adc rExp2H, rB7			; exponent2 += 1 + exponent2 of 10^exp10
 	adiw rExp2L, 1
 
 	XCALL _U(__fp64_popB)	; restore significand of A into B
-
-	; rcall __fp64_saveAB
 
 	XCALL _U(__fp64_mul64AB)	; C = significand (in B) * 10^exp10 (still in A)
 	XCALL _U(__fp64_lshift64)	; shift result to the left
@@ -461,23 +448,17 @@ ENTRY   fp64_strtod
 	sbc rExp2H, r1
 
 	; now combine everything
-	; first round to 56 bits
-	; rcall __fp64_saveAB
-	sbrs rA0, 7
-	rjmp .L_noround
-	subi rA1, -1		; add 1 to lowest relevant byte
-	brcs .L_noround		; as we have to use subi, C is always set except for rA1 = 0xff
-	sec					; in this case we have to handle overflow
+	lsl rA0						; first round to 56 bits
+	adc rA1, r1
 	adc rA2, r1
 	adc rA3, r1
 	adc rA4, r1
 	adc rA5, r1
 	adc rA6, r1
 	adc rA7, r1
-	; check if we got a 64 bit overflow
-	; rcall __fp64_saveAB
-	brcc .L_noround
-	; 64bit overflow due to rounding --> rA7..rA1 are all 0
+	brcc .L_noround				; check if we got a 64-bit overflow
+
+	; yes: 64-bit overflow due to rounding --> rA7..rA1 are all 0
 	ldi rA7, 0x80
 	adiw rExp2L, 1		; goto next higher number
 
@@ -493,17 +474,13 @@ ENTRY   fp64_strtod
 	X_movw rAE0, rExp2L
 
 .L_cleanup:
-	; rcall __fp64_saveAB
-
 	XCALL _U(__fp64_popBC)	; restore saved registers
 
 	; check whether exponent is in range
 	subi rAE0, lo8(-1023)	; exp += 1023 (exponent bias)
 	sbci rAE1, hi8(-1023)
-	adiw rAE0,0
-	; rcall __fp64_saveAB
-	brmi .L_subn			; exponent < 0 --> handle subnormal number / underflow
-	breq 40f				; exponent = 0 --> handle subnormal number
+	brmi .L_subn			; exponent < 0 --> handle subnormal / underflow
+	breq .L_ret				; exponent = 0 --> subnormal needs no shift
 	cpi rAE1, 0x07			; exponent < 0x700 --> normal number
 	brlo .L_ret
 	brne .L_RetInf			; exponent > 0x700 --> overflow
@@ -526,13 +503,11 @@ ENTRY   fp64_strtod
 
 .L_subn:	; handle subnormal number / underflow
 	cpi rAE0, lo8(-51)
-	brlt .L_RetZero			; result will not fit into 52 bits --> round down to 0
-	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
+	brlt .L_RetZero			; result doesn't fit in 52 bits --> round down to 0
 
 40:	; shift subnormal number right until exponent is 0
 	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
 	adiw rAE0, 1			; exponent++
-	; rcall __fp64_saveAB
 	brmi 40b				; exponent still < 0
 	rjmp .L_ret				; and return normally
 
@@ -541,11 +516,10 @@ ENTRY   fp64_strtod
 	lds XH, .L_endpH
 	lds XL, .L_endpL
 	adiw XL, 0				; if( endPtr )
-	; rcall __fp64_saveAB
 	breq 99f
 	adiw YL, 0
 	breq 98f
-	sbiw YL, 1				; we got one character to far
+	sbiw YL, 1				; we got one character too far
 98:	st X+, YL				;	*endPtr = s;
 	st X, YH
 99:	lds r0, .L_sign			; set T flag based on sign of significand

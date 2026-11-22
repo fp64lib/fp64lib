@@ -248,7 +248,7 @@ char *fp64_to_decimalExp( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_
 char *fp64_etoa( float64_t x, uint8_t maxDigits, uint8_t expSep, int16_t *exp10 );
 char *fp64_to_string( float64_t x, uint8_t max_nr_chars, uint8_t max_leading_mantisse_zeros );
 float64_t fp64_atof( const char *str );
-float64_t fp64_strtod( char *str, char **endptr );
+float64_t fp64_strtod( const char *str, char **endptr );
 
 #ifdef __cplusplus
 } // extern "C"
