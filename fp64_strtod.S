@@ -503,7 +503,7 @@ ENTRY   fp64_strtod
 	adiw rAE0,0
 	; rcall __fp64_saveAB
 	brmi .L_subn			; exponent < 0 --> handle subnormal number / underflow
-	breq 40f				; exponent = 0 --> handle subnormal number
+	breq .L_ret				; exponent = 0 --> subnormal needs no shift
 	cpi rAE1, 0x07			; exponent < 0x700 --> normal number
 	brlo .L_ret
 	brne .L_RetInf			; exponent > 0x700 --> overflow
@@ -527,7 +527,6 @@ ENTRY   fp64_strtod
 .L_subn:	; handle subnormal number / underflow
 	cpi rAE0, lo8(-51)
 	brlt .L_RetZero			; result will not fit into 52 bits --> round down to 0
-	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
 
 40:	; shift subnormal number right until exponent is 0
 	XCALL _U(__fp64_lsrA)	; mantissa >>= 1
